@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   mongodb:
     image: mongo:7.0
@@ -40,7 +38,7 @@ services:
       retries: 3
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    image: elasticsearch:8.11.0
     container_name: assistant-aggregator-elasticsearch
     restart: unless-stopped
     environment:
@@ -103,3 +101,5 @@ volumes:
 networks:
   assistant-aggregator-network:
     driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1450
