@@ -1,0 +1,1 @@
+{"version":3,"file":"change-role.dto.js","sourceRoot":"","sources":["../../src/dto/change-role.dto.ts"],"names":[],"mappings":";;;;;;;;;;;;AAAA,6CAA8C;AAC9C,wDAAkD;AAElD,MAAa,aAAa;IAMf,IAAI,CAAW;CACzB;AAPD,sCAOC;AADU;IALR,IAAA,qBAAW,EAAC;QACX,WAAW,EAAE,uBAAuB;QACpC,IAAI,EAAE,sBAAQ;QACd,OAAO,EAAE,sBAAQ,CAAC,OAAO;KAC1B,CAAC;;2CACsB"}
