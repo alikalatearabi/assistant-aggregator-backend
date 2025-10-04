@@ -1,0 +1,1 @@
+{"version":3,"file":"add-message-to-chat.dto.js","sourceRoot":"","sources":["../../src/dto/add-message-to-chat.dto.ts"],"names":[],"mappings":";;;;;;;;;;;;AAAA,6CAA8C;AAC9C,qDAA4C;AAE5C,MAAa,mBAAmB;IAMrB,SAAS,CAAS;CAC5B;AAPD,kDAOC;AADU;IALR,IAAA,qBAAW,EAAC;QACX,WAAW,EAAE,mCAAmC;QAChD,OAAO,EAAE,0BAA0B;KACpC,CAAC;IACD,IAAA,2BAAS,GAAE;;sDACe"}

@@ -5,8 +5,14 @@ import { AppController, UserController } from './app.controller';
 import { AppService } from './app.service';
 import { User, UserSchema } from './schemas/user.schema';
 import { Document, DocumentSchema } from './schemas/document.schema';
+import { Message, MessageSchema } from './schemas/message.schema';
+import { Chat, ChatSchema } from './schemas/chat.schema';
 import { DocumentController } from './controllers/document.controller';
+import { MessageController } from './controllers/message.controller';
+import { ChatController } from './controllers/chat.controller';
 import { DocumentService } from './services/document.service';
+import { MessageService } from './services/message.service';
+import { ChatService } from './services/chat.service';
 
 @Module({
   imports: [
@@ -24,9 +30,11 @@ import { DocumentService } from './services/document.service';
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
       { name: Document.name, schema: DocumentSchema },
+      { name: Message.name, schema: MessageSchema },
+      { name: Chat.name, schema: ChatSchema },
     ]),
   ],
-  controllers: [AppController, UserController, DocumentController],
-  providers: [AppService, DocumentService],
+  controllers: [AppController, UserController, DocumentController, MessageController, ChatController],
+  providers: [AppService, DocumentService, MessageService, ChatService],
 })
 export class AppModule {}

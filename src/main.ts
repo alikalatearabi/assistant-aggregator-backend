@@ -1,9 +1,17 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Enable validation
+  app.useGlobalPipes(new ValidationPipe({
+    whitelist: true,
+    forbidNonWhitelisted: true,
+    transform: true,
+  }));
 
   // Swagger configuration
   const config = new DocumentBuilder()
@@ -12,6 +20,8 @@ async function bootstrap() {
     .setVersion('1.0')
     .addTag('users', 'User management operations')
     .addTag('documents', 'Document management operations')
+    .addTag('messages', 'Message management operations')
+    .addTag('chats', 'Chat session management operations')
     .addTag('auth', 'Authentication operations')
     .addBearerAuth()
     .build();

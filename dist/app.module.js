@@ -14,8 +14,14 @@ const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
 const user_schema_1 = require("./schemas/user.schema");
 const document_schema_1 = require("./schemas/document.schema");
+const message_schema_1 = require("./schemas/message.schema");
+const chat_schema_1 = require("./schemas/chat.schema");
 const document_controller_1 = require("./controllers/document.controller");
+const message_controller_1 = require("./controllers/message.controller");
+const chat_controller_1 = require("./controllers/chat.controller");
 const document_service_1 = require("./services/document.service");
+const message_service_1 = require("./services/message.service");
+const chat_service_1 = require("./services/chat.service");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -36,10 +42,12 @@ exports.AppModule = AppModule = __decorate([
             mongoose_1.MongooseModule.forFeature([
                 { name: user_schema_1.User.name, schema: user_schema_1.UserSchema },
                 { name: document_schema_1.Document.name, schema: document_schema_1.DocumentSchema },
+                { name: message_schema_1.Message.name, schema: message_schema_1.MessageSchema },
+                { name: chat_schema_1.Chat.name, schema: chat_schema_1.ChatSchema },
             ]),
         ],
-        controllers: [app_controller_1.AppController, app_controller_1.UserController, document_controller_1.DocumentController],
-        providers: [app_service_1.AppService, document_service_1.DocumentService],
+        controllers: [app_controller_1.AppController, app_controller_1.UserController, document_controller_1.DocumentController, message_controller_1.MessageController, chat_controller_1.ChatController],
+        providers: [app_service_1.AppService, document_service_1.DocumentService, message_service_1.MessageService, chat_service_1.ChatService],
     })
 ], AppModule);
 //# sourceMappingURL=app.module.js.map
