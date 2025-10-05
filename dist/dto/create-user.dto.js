@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateUserDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
+const class_validator_1 = require("class-validator");
 const user_schema_1 = require("../schemas/user.schema");
 class CreateUserDto {
     firstname;
@@ -31,6 +32,9 @@ __decorate([
         minLength: 1,
         maxLength: 50,
     }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(1),
+    (0, class_validator_1.MaxLength)(50),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "firstname", void 0);
 __decorate([
@@ -40,6 +44,9 @@ __decorate([
         minLength: 1,
         maxLength: 50,
     }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(1),
+    (0, class_validator_1.MaxLength)(50),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "lastname", void 0);
 __decorate([
@@ -49,6 +56,9 @@ __decorate([
         minLength: 10,
         maxLength: 10,
     }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(10),
+    (0, class_validator_1.MaxLength)(10),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "nationalcode", void 0);
 __decorate([
@@ -58,6 +68,9 @@ __decorate([
         minLength: 1,
         maxLength: 20,
     }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(1),
+    (0, class_validator_1.MaxLength)(20),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "personalcode", void 0);
 __decorate([
@@ -66,6 +79,7 @@ __decorate([
         example: 'john.doe@company.com',
         format: 'email',
     }),
+    (0, class_validator_1.IsEmail)(),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "email", void 0);
 __decorate([
@@ -74,6 +88,7 @@ __decorate([
         enum: user_schema_1.OrganizationLevel,
         example: user_schema_1.OrganizationLevel.SENIOR,
     }),
+    (0, class_validator_1.IsEnum)(user_schema_1.OrganizationLevel),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "organizationLevel", void 0);
 __decorate([
@@ -83,6 +98,9 @@ __decorate([
         minLength: 8,
         maxLength: 100,
     }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(8),
+    (0, class_validator_1.MaxLength)(100),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "password", void 0);
 __decorate([
@@ -91,6 +109,8 @@ __decorate([
         example: true,
         default: true,
     }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], CreateUserDto.prototype, "isActive", void 0);
 __decorate([
@@ -100,6 +120,8 @@ __decorate([
         example: user_schema_1.UserRole.USER,
         default: user_schema_1.UserRole.USER,
     }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(user_schema_1.UserRole),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "role", void 0);
 //# sourceMappingURL=create-user.dto.js.map

@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsString, IsEmail, IsEnum, IsOptional, IsBoolean, MinLength, MaxLength } from 'class-validator';
 import { UserRole, OrganizationLevel } from '../schemas/user.schema';
 
 export class CreateUserDto {
@@ -8,6 +9,9 @@ export class CreateUserDto {
     minLength: 1,
     maxLength: 50,
   })
+  @IsString()
+  @MinLength(1)
+  @MaxLength(50)
   readonly firstname: string;
 
   @ApiProperty({
@@ -16,6 +20,9 @@ export class CreateUserDto {
     minLength: 1,
     maxLength: 50,
   })
+  @IsString()
+  @MinLength(1)
+  @MaxLength(50)
   readonly lastname: string;
 
   @ApiProperty({
@@ -24,6 +31,9 @@ export class CreateUserDto {
     minLength: 10,
     maxLength: 10,
   })
+  @IsString()
+  @MinLength(10)
+  @MaxLength(10)
   readonly nationalcode: string;
 
   @ApiProperty({
@@ -32,6 +42,9 @@ export class CreateUserDto {
     minLength: 1,
     maxLength: 20,
   })
+  @IsString()
+  @MinLength(1)
+  @MaxLength(20)
   readonly personalcode: string;
 
   @ApiProperty({
@@ -39,6 +52,7 @@ export class CreateUserDto {
     example: 'john.doe@company.com',
     format: 'email',
   })
+  @IsEmail()
   readonly email: string;
 
   @ApiProperty({
@@ -46,6 +60,7 @@ export class CreateUserDto {
     enum: OrganizationLevel,
     example: OrganizationLevel.SENIOR,
   })
+  @IsEnum(OrganizationLevel)
   readonly organizationLevel: OrganizationLevel;
 
   @ApiProperty({
@@ -54,6 +69,9 @@ export class CreateUserDto {
     minLength: 8,
     maxLength: 100,
   })
+  @IsString()
+  @MinLength(8)
+  @MaxLength(100)
   readonly password: string;
 
   @ApiPropertyOptional({
@@ -61,6 +79,8 @@ export class CreateUserDto {
     example: true,
     default: true,
   })
+  @IsOptional()
+  @IsBoolean()
   readonly isActive?: boolean;
 
   @ApiPropertyOptional({
@@ -69,5 +89,7 @@ export class CreateUserDto {
     example: UserRole.USER,
     default: UserRole.USER,
   })
+  @IsOptional()
+  @IsEnum(UserRole)
   readonly role?: UserRole;
 }

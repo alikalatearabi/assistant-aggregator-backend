@@ -79,7 +79,7 @@ export class User {
     example: 'securePassword123',
     writeOnly: true,
   })
-  @Prop({ required: true })
+  @Prop({ required: true, select: false })
   password: string;
 
   @ApiProperty({

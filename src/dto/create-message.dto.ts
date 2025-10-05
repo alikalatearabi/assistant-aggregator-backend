@@ -1,13 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsDateString, IsNumber, Min, Max } from 'class-validator';
+import { IsString, IsNotEmpty, IsDateString, IsNumber, Min, Max, IsIn } from 'class-validator';
 
 export class CreateMessageDto {
   @ApiProperty({
     description: 'Message category',
-    example: 'support',
+    example: 'user_input',
+    enum: ['user_input', 'assistant_response', 'system_error', 'system_info'],
   })
   @IsString()
   @IsNotEmpty()
+  @IsIn(['user_input', 'assistant_response', 'system_error', 'system_info'])
   readonly category: string;
 
   @ApiProperty({

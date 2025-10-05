@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateDocumentDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
+const class_validator_1 = require("class-validator");
 class CreateDocumentDto {
     filename;
     fileUrl;
@@ -25,6 +26,8 @@ __decorate([
         description: 'Original filename of the uploaded document',
         example: 'report.pdf',
     }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreateDocumentDto.prototype, "filename", void 0);
 __decorate([
@@ -32,6 +35,8 @@ __decorate([
         description: 'MinIO URL where the file is stored',
         example: 'http://localhost:9000/assistant-aggregator/documents/507f1f77bcf86cd799439011_report.pdf',
     }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreateDocumentDto.prototype, "fileUrl", void 0);
 __decorate([
@@ -39,6 +44,8 @@ __decorate([
         description: 'File extension/format',
         example: 'pdf',
     }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreateDocumentDto.prototype, "extension", void 0);
 __decorate([
@@ -46,6 +53,7 @@ __decorate([
         description: 'User ID who uploaded the document',
         example: '507f1f77bcf86cd799439012',
     }),
+    (0, class_validator_1.IsMongoId)(),
     __metadata("design:type", Object)
 ], CreateDocumentDto.prototype, "fileUploader", void 0);
 __decorate([
@@ -53,6 +61,8 @@ __decorate([
         description: 'Elasticsearch document ID or address for raw text content',
         example: 'assistant_aggregator_documents_507f1f77bcf86cd799439011',
     }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateDocumentDto.prototype, "rawTextFileId", void 0);
 __decorate([
@@ -66,6 +76,8 @@ __decorate([
             tags: ['report', 'quarterly']
         },
     }),
+    (0, class_validator_1.IsObject)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Object)
 ], CreateDocumentDto.prototype, "metadata", void 0);
 //# sourceMappingURL=create-document.dto.js.map

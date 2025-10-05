@@ -28,7 +28,8 @@ export class AppService {
     }
 
     const createdUser = new this.userModel(createUserDto);
-    return createdUser.save();
+    const savedUser = await createdUser.save();
+    return this.userModel.findById(savedUser._id).select('-password').exec();
   }
 
   async findAllUsers(): Promise<User[]> {

@@ -22,10 +22,12 @@ exports.CreateMessageDto = CreateMessageDto;
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: 'Message category',
-        example: 'support',
+        example: 'user_input',
+        enum: ['user_input', 'assistant_response', 'system_error', 'system_info'],
     }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsIn)(['user_input', 'assistant_response', 'system_error', 'system_info']),
     __metadata("design:type", String)
 ], CreateMessageDto.prototype, "category", void 0);
 __decorate([

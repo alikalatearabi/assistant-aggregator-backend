@@ -37,7 +37,8 @@ let AppService = class AppService {
             throw new common_1.ConflictException('User with this email, national code, or personal code already exists');
         }
         const createdUser = new this.userModel(createUserDto);
-        return createdUser.save();
+        const savedUser = await createdUser.save();
+        return this.userModel.findById(savedUser._id).select('-password').exec();
     }
     async findAllUsers() {
         return this.userModel.find().select('-password').exec();
