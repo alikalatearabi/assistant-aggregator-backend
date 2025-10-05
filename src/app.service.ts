@@ -29,7 +29,13 @@ export class AppService {
 
     const createdUser = new this.userModel(createUserDto);
     const savedUser = await createdUser.save();
-    return this.userModel.findById(savedUser._id).select('-password').exec();
+    const userWithoutPassword = await this.userModel.findById(savedUser._id).select('-password').exec();
+    
+    if (!userWithoutPassword) {
+      throw new NotFoundException('Failed to retrieve created user');
+    }
+    
+    return userWithoutPassword;
   }
 
   async findAllUsers(): Promise<User[]> {
