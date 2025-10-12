@@ -13,7 +13,7 @@ exports.DocumentQueryDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 class DocumentQueryDto {
     extension;
-    fileUploader;
+    metadataUserId;
     filename;
     dateFrom;
     dateTo;
@@ -30,11 +30,11 @@ __decorate([
 ], DocumentQueryDto.prototype, "extension", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({
-        description: 'Filter by uploader user ID',
+        description: 'Filter by metadata.user_id (uploader)',
         example: '507f1f77bcf86cd799439012',
     }),
     __metadata("design:type", String)
-], DocumentQueryDto.prototype, "fileUploader", void 0);
+], DocumentQueryDto.prototype, "metadataUserId", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({
         description: 'Search in filename',

@@ -19,8 +19,8 @@ export class ChatService {
     }
 
     // Validate message IDs if provided
-    if (createChatDto.messageHistory) {
-      for (const messageId of createChatDto.messageHistory) {
+    if (createChatDto.conversationHistory) {
+      for (const messageId of createChatDto.conversationHistory) {
         if (!Types.ObjectId.isValid(messageId.toString())) {
           throw new BadRequestException(`Invalid message ID: ${messageId}`);
         }
@@ -30,7 +30,7 @@ export class ChatService {
     const createdChat = new this.chatModel({
       ...createChatDto,
       user: new Types.ObjectId(createChatDto.user.toString()),
-      messageHistory: createChatDto.messageHistory?.map(id => new Types.ObjectId(id.toString())) || [],
+      conversationHistory: createChatDto.conversationHistory?.map(id => new Types.ObjectId(id.toString())) || [],
     });
     
     return createdChat.save();
@@ -44,7 +44,6 @@ export class ChatService {
     totalPages: number;
   }> {
     const {
-      session,
       user,
       dateFrom,
       dateTo,
@@ -54,10 +53,6 @@ export class ChatService {
 
     // Build filter object
     const filter: any = {};
-    
-    if (session) {
-      filter.session = { $regex: session, $options: 'i' };
-    }
     
     if (user && Types.ObjectId.isValid(user)) {
       filter.user = new Types.ObjectId(user);
@@ -82,7 +77,7 @@ export class ChatService {
       .find(filter)
       .populate('user', 'firstname lastname email')
       .populate({
-        path: 'messageHistory',
+        path: 'conversationHistory',
         select: 'category text date score',
         options: { sort: { date: 1 } }
       })
@@ -109,7 +104,7 @@ export class ChatService {
       .findById(id)
       .populate('user', 'firstname lastname email')
       .populate({
-        path: 'messageHistory',
+        path: 'conversationHistory',
         select: 'category text date score',
         options: { sort: { date: 1 } }
       })
@@ -131,7 +126,7 @@ export class ChatService {
       .find({ user: new Types.ObjectId(userId) })
       .populate('user', 'firstname lastname email')
       .populate({
-        path: 'messageHistory',
+        path: 'conversationHistory',
         select: 'category text date score',
         options: { sort: { date: 1 } }
       })
@@ -139,17 +134,6 @@ export class ChatService {
       .exec();
   }
 
-  async findChatBySession(session: string): Promise<Chat | null> {
-    return this.chatModel
-      .findOne({ session })
-      .populate('user', 'firstname lastname email')
-      .populate({
-        path: 'messageHistory',
-        select: 'category text date score',
-        options: { sort: { date: 1 } }
-      })
-      .exec();
-  }
 
   async updateChat(id: string, updateChatDto: UpdateChatDto): Promise<Chat> {
     if (!Types.ObjectId.isValid(id)) {
@@ -162,8 +146,8 @@ export class ChatService {
     }
 
     // Validate message IDs if provided
-    if (updateChatDto.messageHistory) {
-      for (const messageId of updateChatDto.messageHistory) {
+    if (updateChatDto.conversationHistory) {
+      for (const messageId of updateChatDto.conversationHistory) {
         if (!Types.ObjectId.isValid(messageId.toString())) {
           throw new BadRequestException(`Invalid message ID: ${messageId}`);
         }
@@ -174,15 +158,15 @@ export class ChatService {
     if (updateChatDto.user) {
       updateData.user = new Types.ObjectId(updateChatDto.user.toString());
     }
-    if (updateChatDto.messageHistory) {
-      updateData.messageHistory = updateChatDto.messageHistory.map(id => new Types.ObjectId(id.toString()));
+    if (updateChatDto.conversationHistory) {
+      updateData.conversationHistory = updateChatDto.conversationHistory.map(id => new Types.ObjectId(id.toString()));
     }
 
     const chat = await this.chatModel
       .findByIdAndUpdate(id, updateData, { new: true })
       .populate('user', 'firstname lastname email')
       .populate({
-        path: 'messageHistory',
+        path: 'conversationHistory',
         select: 'category text date score',
         options: { sort: { date: 1 } }
       })
@@ -204,7 +188,7 @@ export class ChatService {
       .findByIdAndDelete(id)
       .populate('user', 'firstname lastname email')
       .populate({
-        path: 'messageHistory',
+        path: 'conversationHistory',
         select: 'category text date score',
         options: { sort: { date: 1 } }
       })
@@ -229,12 +213,12 @@ export class ChatService {
     const chat = await this.chatModel
       .findByIdAndUpdate(
         chatId,
-        { $addToSet: { messageHistory: new Types.ObjectId(messageId) } },
+        { $addToSet: { conversationHistory: new Types.ObjectId(messageId) } },
         { new: true }
       )
       .populate('user', 'firstname lastname email')
       .populate({
-        path: 'messageHistory',
+        path: 'conversationHistory',
         select: 'category text date score',
         options: { sort: { date: 1 } }
       })
@@ -259,12 +243,12 @@ export class ChatService {
     const chat = await this.chatModel
       .findByIdAndUpdate(
         chatId,
-        { $pull: { messageHistory: new Types.ObjectId(messageId) } },
+        { $pull: { conversationHistory: new Types.ObjectId(messageId) } },
         { new: true }
       )
       .populate('user', 'firstname lastname email')
       .populate({
-        path: 'messageHistory',
+        path: 'conversationHistory',
         select: 'category text date score',
         options: { sort: { date: 1 } }
       })
@@ -280,13 +264,12 @@ export class ChatService {
   async searchChats(searchTerm: string): Promise<Chat[]> {
     const searchRegex = { $regex: searchTerm, $options: 'i' };
     
+    // Session is no longer searchable; return recent chats instead when asked to search
     return this.chatModel
-      .find({
-        session: searchRegex
-      })
+      .find({})
       .populate('user', 'firstname lastname email')
       .populate({
-        path: 'messageHistory',
+        path: 'conversationHistory',
         select: 'category text date score',
         options: { sort: { date: 1 } }
       })
@@ -310,7 +293,7 @@ export class ChatService {
     ]);
 
     const averageMessagesResult = await this.chatModel.aggregate([
-      { $project: { messageCount: { $size: '$messageHistory' } } },
+      { $project: { messageCount: { $size: '$conversationHistory' } } },
       { $group: { _id: null, averageMessages: { $avg: '$messageCount' } } }
     ]);
     const averageMessagesPerChat = averageMessagesResult[0]?.averageMessages || 0;
@@ -324,7 +307,7 @@ export class ChatService {
 
     // Active sessions (chats with at least one message)
     const activeSessions = await this.chatModel.countDocuments({
-      messageHistory: { $exists: true, $not: { $size: 0 } }
+      conversationHistory: { $exists: true, $not: { $size: 0 } }
     });
 
     return {
@@ -344,7 +327,7 @@ export class ChatService {
     const chat = await this.chatModel
       .findById(chatId)
       .populate({
-        path: 'messageHistory',
+        path: 'conversationHistory',
         select: 'category text date score createdAt',
         options: { sort: { date: 1 } }
       })
@@ -354,6 +337,6 @@ export class ChatService {
       throw new NotFoundException('Chat not found');
     }
     
-    return chat.messageHistory as any[];
+    return chat.conversationHistory as any[];
   }
 }

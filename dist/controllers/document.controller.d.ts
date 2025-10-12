@@ -3,6 +3,7 @@ import { CreateDocumentDto } from '../dto/create-document.dto';
 import { UpdateDocumentDto } from '../dto/update-document.dto';
 import { SubmitOcrResultDto } from '../dto/submit-ocr-result.dto';
 import { DocumentQueryDto } from '../dto/document-query.dto';
+import { DocumentMetadataDto } from '../dto/document-metadata.dto';
 import { Document } from '../schemas/document.schema';
 export declare class DocumentController {
     private readonly documentService;
@@ -32,7 +33,7 @@ export declare class DocumentController {
     findDocumentsByExtension(extension: string): Promise<Document[]>;
     findDocumentById(id: string): Promise<Document>;
     updateDocument(id: string, updateDocumentDto: UpdateDocumentDto): Promise<Document>;
-    updateDocumentMetadata(id: string, metadata: Record<string, any>): Promise<Document>;
+    updateDocumentMetadata(id: string, metadata: DocumentMetadataDto): Promise<Document>;
     updateRawTextFileId(id: string, rawTextFileId: string): Promise<Document>;
     deleteDocument(id: string): Promise<Document>;
     submitOcrResult(submitOcrResultDto: SubmitOcrResultDto): Promise<Document>;

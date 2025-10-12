@@ -1,6 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsMongoId, IsOptional, IsObject } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, ValidateNested } from 'class-validator';
 import { Types } from 'mongoose';
+import { Type } from 'class-transformer';
+import { DocumentMetadataDto } from './document-metadata.dto';
 
 export class CreateDocumentDto {
   @ApiProperty({
@@ -27,12 +29,7 @@ export class CreateDocumentDto {
   @IsNotEmpty()
   readonly extension: string;
 
-  @ApiProperty({
-    description: 'User ID who uploaded the document',
-    example: '507f1f77bcf86cd799439012',
-  })
-  @IsMongoId()
-  readonly fileUploader: string | Types.ObjectId;
+  // user id moved into metadata.user_id
 
   @ApiPropertyOptional({
     description: 'Elasticsearch document ID or address for raw text content',
@@ -45,14 +42,19 @@ export class CreateDocumentDto {
   @ApiPropertyOptional({
     description: 'Document metadata as JSON object',
     example: {
-      size: 1024000,
-      mimeType: 'application/pdf',
-      pages: 10,
-      language: 'en',
-      tags: ['report', 'quarterly']
+      user_id: '507f1f77bcf86cd799439012',
+      document_id: 'string2',
+      page_id: 'string111',
+      title: 'string1',
+      approved_date: 'string1',
+      effective_date: 'string1',
+      owner: 'string1',
+      username: 'string1',
+      access_level: 'string1'
     },
   })
-  @IsObject()
+  @ValidateNested()
+  @Type(() => DocumentMetadataDto)
   @IsOptional()
-  readonly metadata?: Record<string, any>;
+  readonly metadata?: DocumentMetadataDto;
 }

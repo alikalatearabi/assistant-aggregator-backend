@@ -22,11 +22,16 @@ import { UpdateChatDto } from '../dto/update-chat.dto';
 import { ChatQueryDto } from '../dto/chat-query.dto';
 import { AddMessageToChatDto } from '../dto/add-message-to-chat.dto';
 import { Chat } from '../schemas/chat.schema';
+import { ChatMessagesRequestDto, ChatMessagesResponseDto, ChatMessagesResponseMode } from '../dto/chat-messages.dto';
+import { ChatMessagesService } from '../services/chat-messages.service';
 
 @ApiTags('chats')
 @Controller('chats')
 export class ChatController {
-  constructor(private readonly chatService: ChatService) {}
+  constructor(
+    private readonly chatService: ChatService,
+    private readonly chatMessagesService: ChatMessagesService,
+  ) {}
 
   @Post()
   @ApiOperation({
@@ -49,9 +54,8 @@ export class ChatController {
   @Get()
   @ApiOperation({
     summary: 'Get all chats with pagination and filtering',
-    description: 'Retrieves chats with optional filtering by session, user, and date range',
+    description: 'Retrieves chats with optional filtering by user and date range',
   })
-  @ApiQuery({ name: 'session', required: false, description: 'Filter by session identifier' })
   @ApiQuery({ name: 'user', required: false, description: 'Filter by user ID' })
   @ApiQuery({ name: 'dateFrom', required: false, description: 'Filter from date (ISO string)' })
   @ApiQuery({ name: 'dateTo', required: false, description: 'Filter to date (ISO string)' })
@@ -107,20 +111,7 @@ export class ChatController {
     return this.chatService.getChatStats();
   }
 
-  @Get('search')
-  @ApiOperation({
-    summary: 'Search chats',
-    description: 'Search chats by session identifier',
-  })
-  @ApiQuery({ name: 'q', required: true, description: 'Search term' })
-  @ApiResponse({
-    status: 200,
-    description: 'Search results retrieved successfully',
-    type: [Chat],
-  })
-  async searchChats(@Query('q') searchTerm: string): Promise<Chat[]> {
-    return this.chatService.searchChats(searchTerm);
-  }
+  // Session-based search endpoint removed as session is no longer part of the schema
 
   @Get('user/:userId')
   @ApiOperation({
@@ -145,28 +136,7 @@ export class ChatController {
     return this.chatService.findChatsByUser(userId);
   }
 
-  @Get('session/:session')
-  @ApiOperation({
-    summary: 'Get chat by session',
-    description: 'Retrieves a specific chat by session identifier',
-  })
-  @ApiParam({
-    name: 'session',
-    description: 'Session identifier',
-    example: 'session_2023_12_01_user_123',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Chat found successfully',
-    type: Chat,
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Chat not found',
-  })
-  async findChatBySession(@Param('session') session: string): Promise<Chat | null> {
-    return this.chatService.findChatBySession(session);
-  }
+  // Session-based retrieval endpoint removed
 
   @Get(':id')
   @ApiOperation({
@@ -197,8 +167,8 @@ export class ChatController {
 
   @Get(':id/messages')
   @ApiOperation({
-    summary: 'Get chat message history',
-    description: 'Retrieves the complete message history for a specific chat',
+    summary: 'Get chat conversation history',
+    description: 'Retrieves the complete conversation history (messages) for a specific chat',
   })
   @ApiParam({
     name: 'id',
@@ -207,7 +177,7 @@ export class ChatController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Message history retrieved successfully',
+    description: 'Conversation history retrieved successfully',
     schema: {
       type: 'array',
       items: {
@@ -264,7 +234,7 @@ export class ChatController {
   @Patch(':id/add-message')
   @ApiOperation({
     summary: 'Add message to chat',
-    description: 'Adds a message to the chat message history',
+    description: 'Adds a message to the chat conversation history',
   })
   @ApiParam({
     name: 'id',
@@ -295,7 +265,7 @@ export class ChatController {
   @Patch(':id/remove-message/:messageId')
   @ApiOperation({
     summary: 'Remove message from chat',
-    description: 'Removes a message from the chat message history',
+    description: 'Removes a message from the chat conversation history',
   })
   @ApiParam({
     name: 'id',
@@ -352,5 +322,20 @@ export class ChatController {
   })
   async deleteChat(@Param('id') id: string): Promise<Chat> {
     return this.chatService.deleteChat(id);
+  }
+
+  @Post('chat-messages')
+  @ApiOperation({
+    summary: 'Generate chat messages',
+    description: 'Generates a chat response. If responseMode is streaming, emits WS events; if blocking, returns a REST payload',
+  })
+  @ApiResponse({ status: 200, description: 'Blocking response', type: 'object' })
+  async chatMessages(
+    @Body() body: ChatMessagesRequestDto,
+  ): Promise<ChatMessagesResponseDto | { taskId: string }> {
+    if (body.responseMode === ChatMessagesResponseMode.STREAMING) {
+      return this.chatMessagesService.processStreaming(body);
+    }
+    return this.chatMessagesService.processBlocking(body);
   }
 }

@@ -5,6 +5,49 @@ import { User } from './user.schema';
 
 export type DocumentDocument = Document & MongoDocument;
 
+@Schema({ _id: false })
+export class DocumentMetadata {
+  @ApiProperty({ description: 'Reference to User entity', example: '507f1f77bcf86cd799439012', type: String, required: false })
+  @Prop({ type: Types.ObjectId, ref: 'User', required: false })
+  user_id?: Types.ObjectId | User;
+
+  @ApiProperty({ description: 'Document external identifier', example: 'string2', required: false })
+  @Prop()
+  document_id?: string;
+
+  @ApiProperty({ description: 'Page identifier', example: 'string111', required: false })
+  @Prop()
+  page_id?: string;
+
+  @ApiProperty({ description: 'Title', example: 'string1', required: false })
+  @Prop()
+  title?: string;
+
+  @ApiProperty({ description: 'Approved date', example: 'string1', required: false })
+  @Prop()
+  approved_date?: string;
+
+  @ApiProperty({ description: 'Effective date', example: 'string1', required: false })
+  @Prop()
+  effective_date?: string;
+
+  @ApiProperty({ description: 'Owner', example: 'string1', required: false })
+  @Prop()
+  owner?: string;
+
+  @ApiProperty({ description: 'Username', example: 'string1', required: false })
+  @Prop()
+  username?: string;
+
+  @ApiProperty({ description: 'Access level', example: 'string1', required: false })
+  @Prop()
+  access_level?: string;
+
+  @ApiProperty({ description: 'OCR processing metadata', required: false, example: { processingStartedAt: '2024-01-01T00:00:00.000Z', processedAt: '2024-01-01T00:05:00.000Z', textLength: 1234 } })
+  @Prop({ type: Object })
+  ocr?: Record<string, any>;
+}
+
 @Schema({
   timestamps: true,
 })
@@ -37,14 +80,6 @@ export class Document {
   extension: string;
 
   @ApiProperty({
-    description: 'User who uploaded the document',
-    type: String,
-    example: '507f1f77bcf86cd799439012',
-  })
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
-  fileUploader: Types.ObjectId | User;
-
-  @ApiProperty({
     description: 'Elasticsearch document ID or address for raw text content',
     example: 'assistant_aggregator_documents_507f1f77bcf86cd799439011',
   })
@@ -56,54 +91,36 @@ export class Document {
     example: 'This is the extracted text content from the document...',
   })
   @Prop({ required: false })
-  extractedText: string;
-
-  @ApiProperty({
-    description: 'OCR confidence score (0-1)',
-    example: 0.95,
-    minimum: 0,
-    maximum: 1,
-  })
-  @Prop({ type: Number, min: 0, max: 1, required: false })
-  ocrConfidence: number;
+  raw_text: string;
 
   @ApiProperty({
     description: 'OCR processing status',
     enum: ['pending', 'processing', 'completed', 'failed'],
     example: 'completed',
   })
-  @Prop({ 
-    type: String, 
-    enum: ['pending', 'processing', 'completed', 'failed'], 
-    default: 'pending' 
+  @Prop({
+    type: String,
+    enum: ['pending', 'processing', 'completed', 'failed'],
+    default: 'pending'
   })
   ocrStatus: string;
 
   @ApiProperty({
-    description: 'OCR processing metadata',
-    example: {
-      processingTime: 1500,
-      pagesProcessed: 3,
-      language: 'en',
-      ocrEngine: 'tesseract-v5',
-      processedAt: '2023-12-01T10:00:00.000Z'
-    },
-  })
-  @Prop({ type: Object, default: {} })
-  ocrMetadata: Record<string, any>;
-
-  @ApiProperty({
     description: 'Document metadata as JSON object',
     example: {
-      size: 1024000,
-      mimeType: 'application/pdf',
-      pages: 10,
-      language: 'en',
-      tags: ['report', 'quarterly']
+      user_id: '507f1f77bcf86cd799439012',
+      document_id: 'string2',
+      page_id: 'string111',
+      title: 'string1',
+      approved_date: 'string1',
+      effective_date: 'string1',
+      owner: 'string1',
+      username: 'string1',
+      access_level: 'string1'
     },
   })
-  @Prop({ type: Object, default: {} })
-  metadata: Record<string, any>;
+  @Prop({ type: SchemaFactory.createForClass(DocumentMetadata), default: {} })
+  metadata: DocumentMetadata;
 
   @ApiProperty({
     description: 'Document creation timestamp',

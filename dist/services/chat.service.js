@@ -26,8 +26,8 @@ let ChatService = class ChatService {
         if (!mongoose_2.Types.ObjectId.isValid(createChatDto.user.toString())) {
             throw new common_1.BadRequestException('Invalid user ID');
         }
-        if (createChatDto.messageHistory) {
-            for (const messageId of createChatDto.messageHistory) {
+        if (createChatDto.conversationHistory) {
+            for (const messageId of createChatDto.conversationHistory) {
                 if (!mongoose_2.Types.ObjectId.isValid(messageId.toString())) {
                     throw new common_1.BadRequestException(`Invalid message ID: ${messageId}`);
                 }
@@ -36,16 +36,13 @@ let ChatService = class ChatService {
         const createdChat = new this.chatModel({
             ...createChatDto,
             user: new mongoose_2.Types.ObjectId(createChatDto.user.toString()),
-            messageHistory: createChatDto.messageHistory?.map(id => new mongoose_2.Types.ObjectId(id.toString())) || [],
+            conversationHistory: createChatDto.conversationHistory?.map(id => new mongoose_2.Types.ObjectId(id.toString())) || [],
         });
         return createdChat.save();
     }
     async findAllChats(query = {}) {
-        const { session, user, dateFrom, dateTo, page = 1, limit = 10, } = query;
+        const { user, dateFrom, dateTo, page = 1, limit = 10, } = query;
         const filter = {};
-        if (session) {
-            filter.session = { $regex: session, $options: 'i' };
-        }
         if (user && mongoose_2.Types.ObjectId.isValid(user)) {
             filter.user = new mongoose_2.Types.ObjectId(user);
         }
@@ -65,7 +62,7 @@ let ChatService = class ChatService {
             .find(filter)
             .populate('user', 'firstname lastname email')
             .populate({
-            path: 'messageHistory',
+            path: 'conversationHistory',
             select: 'category text date score',
             options: { sort: { date: 1 } }
         })
@@ -89,7 +86,7 @@ let ChatService = class ChatService {
             .findById(id)
             .populate('user', 'firstname lastname email')
             .populate({
-            path: 'messageHistory',
+            path: 'conversationHistory',
             select: 'category text date score',
             options: { sort: { date: 1 } }
         })
@@ -107,22 +104,11 @@ let ChatService = class ChatService {
             .find({ user: new mongoose_2.Types.ObjectId(userId) })
             .populate('user', 'firstname lastname email')
             .populate({
-            path: 'messageHistory',
+            path: 'conversationHistory',
             select: 'category text date score',
             options: { sort: { date: 1 } }
         })
             .sort({ createdAt: -1 })
-            .exec();
-    }
-    async findChatBySession(session) {
-        return this.chatModel
-            .findOne({ session })
-            .populate('user', 'firstname lastname email')
-            .populate({
-            path: 'messageHistory',
-            select: 'category text date score',
-            options: { sort: { date: 1 } }
-        })
             .exec();
     }
     async updateChat(id, updateChatDto) {
@@ -132,8 +118,8 @@ let ChatService = class ChatService {
         if (updateChatDto.user && !mongoose_2.Types.ObjectId.isValid(updateChatDto.user.toString())) {
             throw new common_1.BadRequestException('Invalid user ID');
         }
-        if (updateChatDto.messageHistory) {
-            for (const messageId of updateChatDto.messageHistory) {
+        if (updateChatDto.conversationHistory) {
+            for (const messageId of updateChatDto.conversationHistory) {
                 if (!mongoose_2.Types.ObjectId.isValid(messageId.toString())) {
                     throw new common_1.BadRequestException(`Invalid message ID: ${messageId}`);
                 }
@@ -143,14 +129,14 @@ let ChatService = class ChatService {
         if (updateChatDto.user) {
             updateData.user = new mongoose_2.Types.ObjectId(updateChatDto.user.toString());
         }
-        if (updateChatDto.messageHistory) {
-            updateData.messageHistory = updateChatDto.messageHistory.map(id => new mongoose_2.Types.ObjectId(id.toString()));
+        if (updateChatDto.conversationHistory) {
+            updateData.conversationHistory = updateChatDto.conversationHistory.map(id => new mongoose_2.Types.ObjectId(id.toString()));
         }
         const chat = await this.chatModel
             .findByIdAndUpdate(id, updateData, { new: true })
             .populate('user', 'firstname lastname email')
             .populate({
-            path: 'messageHistory',
+            path: 'conversationHistory',
             select: 'category text date score',
             options: { sort: { date: 1 } }
         })
@@ -168,7 +154,7 @@ let ChatService = class ChatService {
             .findByIdAndDelete(id)
             .populate('user', 'firstname lastname email')
             .populate({
-            path: 'messageHistory',
+            path: 'conversationHistory',
             select: 'category text date score',
             options: { sort: { date: 1 } }
         })
@@ -186,10 +172,10 @@ let ChatService = class ChatService {
             throw new common_1.BadRequestException('Invalid message ID');
         }
         const chat = await this.chatModel
-            .findByIdAndUpdate(chatId, { $addToSet: { messageHistory: new mongoose_2.Types.ObjectId(messageId) } }, { new: true })
+            .findByIdAndUpdate(chatId, { $addToSet: { conversationHistory: new mongoose_2.Types.ObjectId(messageId) } }, { new: true })
             .populate('user', 'firstname lastname email')
             .populate({
-            path: 'messageHistory',
+            path: 'conversationHistory',
             select: 'category text date score',
             options: { sort: { date: 1 } }
         })
@@ -207,10 +193,10 @@ let ChatService = class ChatService {
             throw new common_1.BadRequestException('Invalid message ID');
         }
         const chat = await this.chatModel
-            .findByIdAndUpdate(chatId, { $pull: { messageHistory: new mongoose_2.Types.ObjectId(messageId) } }, { new: true })
+            .findByIdAndUpdate(chatId, { $pull: { conversationHistory: new mongoose_2.Types.ObjectId(messageId) } }, { new: true })
             .populate('user', 'firstname lastname email')
             .populate({
-            path: 'messageHistory',
+            path: 'conversationHistory',
             select: 'category text date score',
             options: { sort: { date: 1 } }
         })
@@ -223,12 +209,10 @@ let ChatService = class ChatService {
     async searchChats(searchTerm) {
         const searchRegex = { $regex: searchTerm, $options: 'i' };
         return this.chatModel
-            .find({
-            session: searchRegex
-        })
+            .find({})
             .populate('user', 'firstname lastname email')
             .populate({
-            path: 'messageHistory',
+            path: 'conversationHistory',
             select: 'category text date score',
             options: { sort: { date: 1 } }
         })
@@ -243,7 +227,7 @@ let ChatService = class ChatService {
             { $limit: 10 }
         ]);
         const averageMessagesResult = await this.chatModel.aggregate([
-            { $project: { messageCount: { $size: '$messageHistory' } } },
+            { $project: { messageCount: { $size: '$conversationHistory' } } },
             { $group: { _id: null, averageMessages: { $avg: '$messageCount' } } }
         ]);
         const averageMessagesPerChat = averageMessagesResult[0]?.averageMessages || 0;
@@ -253,7 +237,7 @@ let ChatService = class ChatService {
             createdAt: { $gte: sevenDaysAgo }
         });
         const activeSessions = await this.chatModel.countDocuments({
-            messageHistory: { $exists: true, $not: { $size: 0 } }
+            conversationHistory: { $exists: true, $not: { $size: 0 } }
         });
         return {
             totalChats,
@@ -270,7 +254,7 @@ let ChatService = class ChatService {
         const chat = await this.chatModel
             .findById(chatId)
             .populate({
-            path: 'messageHistory',
+            path: 'conversationHistory',
             select: 'category text date score createdAt',
             options: { sort: { date: 1 } }
         })
@@ -278,7 +262,7 @@ let ChatService = class ChatService {
         if (!chat) {
             throw new common_1.NotFoundException('Chat not found');
         }
-        return chat.messageHistory;
+        return chat.conversationHistory;
     }
 };
 exports.ChatService = ChatService;

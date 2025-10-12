@@ -24,7 +24,7 @@ export declare class DocumentService {
     deleteDocument(id: string): Promise<Document>;
     updateDocumentMetadata(id: string, metadata: Record<string, any>): Promise<Document>;
     updateRawTextFileId(id: string, rawTextFileId: string): Promise<Document>;
-    submitOcrResult(documentId: string, extractedText: string): Promise<Document>;
+    submitOcrResult(documentId: string, extractedText: string, page?: number): Promise<Document>;
     markOcrProcessing(documentId: string): Promise<Document>;
     markOcrFailed(documentId: string, error: string): Promise<Document>;
     findDocumentsByOcrStatus(status: string): Promise<Document[]>;

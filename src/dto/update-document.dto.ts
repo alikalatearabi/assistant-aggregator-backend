@@ -1,5 +1,8 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Types } from 'mongoose';
+import { ValidateNested, IsOptional } from 'class-validator';
+import { Type } from 'class-transformer';
+import { DocumentMetadataDto } from './document-metadata.dto';
 
 export class UpdateDocumentDto {
   @ApiPropertyOptional({
@@ -20,11 +23,7 @@ export class UpdateDocumentDto {
   })
   readonly extension?: string;
 
-  @ApiPropertyOptional({
-    description: 'User ID who uploaded the document',
-    example: '507f1f77bcf86cd799439012',
-  })
-  readonly fileUploader?: string | Types.ObjectId;
+  // user id moved into metadata.user_id
 
   @ApiPropertyOptional({
     description: 'Elasticsearch document ID or address for raw text content',
@@ -35,12 +34,19 @@ export class UpdateDocumentDto {
   @ApiPropertyOptional({
     description: 'Document metadata as JSON object',
     example: {
-      size: 1024000,
-      mimeType: 'application/pdf',
-      pages: 10,
-      language: 'en',
-      tags: ['report', 'quarterly', 'updated']
+      user_id: '507f1f77bcf86cd799439012',
+      document_id: 'string2',
+      page_id: 'string111',
+      title: 'string1',
+      approved_date: 'string1',
+      effective_date: 'string1',
+      owner: 'string1',
+      username: 'string1',
+      access_level: 'string1'
     },
   })
-  readonly metadata?: Record<string, any>;
+  @ValidateNested()
+  @Type(() => DocumentMetadataDto)
+  @IsOptional()
+  readonly metadata?: DocumentMetadataDto;
 }

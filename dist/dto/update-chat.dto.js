@@ -13,20 +13,10 @@ exports.UpdateChatDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
 class UpdateChatDto {
-    session;
     user;
-    messageHistory;
+    conversationHistory;
 }
 exports.UpdateChatDto = UpdateChatDto;
-__decorate([
-    (0, swagger_1.ApiPropertyOptional)({
-        description: 'Chat session identifier',
-        example: 'session_2023_12_01_user_123_updated',
-    }),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", String)
-], UpdateChatDto.prototype, "session", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({
         description: 'User ID who owns this chat session',
@@ -38,7 +28,7 @@ __decorate([
 ], UpdateChatDto.prototype, "user", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({
-        description: 'Array of message IDs for message history',
+        description: 'Array of message IDs for conversation history',
         type: [String],
         example: ['507f1f77bcf86cd799439013', '507f1f77bcf86cd799439014', '507f1f77bcf86cd799439015'],
     }),
@@ -46,5 +36,5 @@ __decorate([
     (0, class_validator_1.IsMongoId)({ each: true }),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Array)
-], UpdateChatDto.prototype, "messageHistory", void 0);
+], UpdateChatDto.prototype, "conversationHistory", void 0);
 //# sourceMappingURL=update-chat.dto.js.map

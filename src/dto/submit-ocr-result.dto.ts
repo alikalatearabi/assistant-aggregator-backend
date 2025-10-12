@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsMongoId } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsString, IsNotEmpty, IsMongoId, IsInt, Min, IsOptional } from 'class-validator';
 import { Types } from 'mongoose';
 
 export class SubmitOcrResultDto {
@@ -16,5 +16,14 @@ export class SubmitOcrResultDto {
   })
   @IsString()
   @IsNotEmpty()
-  readonly extractedText: string;
+  readonly raw_text: string;
+
+  @ApiPropertyOptional({
+    description: 'Page number within the document for this OCR payload',
+    example: 1,
+  })
+  @IsInt()
+  @Min(1)
+  @IsOptional()
+  readonly page?: number;
 }

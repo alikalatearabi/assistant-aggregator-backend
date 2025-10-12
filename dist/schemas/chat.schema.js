@@ -15,28 +15,19 @@ const mongoose_2 = require("mongoose");
 const swagger_1 = require("@nestjs/swagger");
 let Chat = class Chat {
     _id;
-    session;
     user;
-    messageHistory;
+    conversationHistory;
     createdAt;
     updatedAt;
 };
 exports.Chat = Chat;
 __decorate([
     (0, swagger_1.ApiProperty)({
-        description: 'Chat ID',
+        description: 'Conversation ID',
         example: '507f1f77bcf86cd799439011',
     }),
     __metadata("design:type", mongoose_2.Types.ObjectId)
 ], Chat.prototype, "_id", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({
-        description: 'Chat session identifier',
-        example: 'session_2023_12_01_user_123',
-    }),
-    (0, mongoose_1.Prop)({ required: true }),
-    __metadata("design:type", String)
-], Chat.prototype, "session", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: 'User who owns this chat session',
@@ -54,7 +45,7 @@ __decorate([
     }),
     (0, mongoose_1.Prop)({ type: [{ type: mongoose_2.Types.ObjectId, ref: 'Message' }], default: [] }),
     __metadata("design:type", Array)
-], Chat.prototype, "messageHistory", void 0);
+], Chat.prototype, "conversationHistory", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: 'Chat creation timestamp',

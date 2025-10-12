@@ -1,18 +1,27 @@
 import { Document as MongoDocument, Types } from 'mongoose';
 import { User } from './user.schema';
 export type DocumentDocument = Document & MongoDocument;
+export declare class DocumentMetadata {
+    user_id?: Types.ObjectId | User;
+    document_id?: string;
+    page_id?: string;
+    title?: string;
+    approved_date?: string;
+    effective_date?: string;
+    owner?: string;
+    username?: string;
+    access_level?: string;
+    ocr?: Record<string, any>;
+}
 export declare class Document {
     _id: Types.ObjectId;
     filename: string;
     fileUrl: string;
     extension: string;
-    fileUploader: Types.ObjectId | User;
     rawTextFileId: string;
-    extractedText: string;
-    ocrConfidence: number;
+    raw_text: string;
     ocrStatus: string;
-    ocrMetadata: Record<string, any>;
-    metadata: Record<string, any>;
+    metadata: DocumentMetadata;
     createdAt: Date;
     updatedAt: Date;
 }

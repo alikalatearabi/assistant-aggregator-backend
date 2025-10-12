@@ -6,12 +6,15 @@ import { firstValueFrom } from 'rxjs';
 export interface OcrRequest {
   documentId: string;
   minioUrl: string;
+  userId?: string;
 }
 
 export interface OcrResponse {
   success: boolean;
   message: string;
   requestId?: string;
+  accessToken?: string;
+  refreshToken?: string;
 }
 
 @Injectable()
@@ -24,29 +27,53 @@ export class OcrService {
   ) {}
 
   async sendDocumentForOcr(ocrRequest: OcrRequest): Promise<OcrResponse> {
-    const ocrApiUrl = this.configService.get<string>('OCR_API_URL') || 'https://api.example.com/ocr/process';
+    const baseUrl = this.configService.get<string>('OCR_API_URL_BASE') || 'http://78.39.182.216:8005';
+    const authUrl = `${baseUrl}/authorize`;
+    const filesUrl = `${baseUrl}/files`;
     
     try {
       this.logger.log(`Sending document for OCR processing: ${ocrRequest.documentId}`);
       
-      const requestPayload = {
-        document_id: ocrRequest.documentId,
-        file_url: ocrRequest.minioUrl,
+      const authPayload = {
+        api_key: this.configService.get<string>('OCR_API_KEY') || 'mock-api-key',
       };
 
-      this.logger.debug(`OCR API Request payload:`, requestPayload);
+      this.logger.debug(`OCR Auth Request payload:`, authPayload);
+
+      const authResponse = await firstValueFrom(
+        this.httpService.post(authUrl, authPayload, {
+          headers: { 'Content-Type': 'application/json' },
+          timeout: 10000,
+        })
+      );
+
+      const accessToken = authResponse.data?.access_token || authResponse.data?.accessToken;
+      const refreshToken = authResponse.data?.refresh_token || authResponse.data?.refreshToken;
+
+      if (!accessToken) {
+        throw new Error('OCR authorization failed: access_token not present in response');
+      }
+
+      // 2) Submit file with bearer token
+      const requestPayload = {
+        user_id: ocrRequest.userId,
+        job_id: ocrRequest.documentId,
+        url: ocrRequest.minioUrl,
+      };
+
+      this.logger.debug(`OCR Files Request payload:`, requestPayload);
 
       const response = await firstValueFrom(
-        this.httpService.post(ocrApiUrl, requestPayload, {
+        this.httpService.post(filesUrl, requestPayload, {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${this.configService.get<string>('OCR_API_KEY') || 'mock-api-key'}`,
+            'Authorization': `Bearer ${accessToken}`,
           },
           timeout: 10000, // 10 seconds timeout
         })
       );
 
-      this.logger.log(`OCR API Response for document ${ocrRequest.documentId}:`, {
+      this.logger.log(`OCR Files Response for document ${ocrRequest.documentId}:`, {
         status: response.status,
         data: response.data,
       });
@@ -55,6 +82,8 @@ export class OcrService {
         success: true,
         message: 'Document sent for OCR processing successfully',
         requestId: response.data?.requestId || response.data?.id,
+        accessToken,
+        refreshToken,
       };
 
     } catch (error) {

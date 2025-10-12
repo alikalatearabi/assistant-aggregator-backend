@@ -12,11 +12,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateDocumentDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
+const document_metadata_dto_1 = require("./document-metadata.dto");
 class CreateDocumentDto {
     filename;
     fileUrl;
     extension;
-    fileUploader;
     rawTextFileId;
     metadata;
 }
@@ -49,14 +50,6 @@ __decorate([
     __metadata("design:type", String)
 ], CreateDocumentDto.prototype, "extension", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({
-        description: 'User ID who uploaded the document',
-        example: '507f1f77bcf86cd799439012',
-    }),
-    (0, class_validator_1.IsMongoId)(),
-    __metadata("design:type", Object)
-], CreateDocumentDto.prototype, "fileUploader", void 0);
-__decorate([
     (0, swagger_1.ApiPropertyOptional)({
         description: 'Elasticsearch document ID or address for raw text content',
         example: 'assistant_aggregator_documents_507f1f77bcf86cd799439011',
@@ -69,15 +62,20 @@ __decorate([
     (0, swagger_1.ApiPropertyOptional)({
         description: 'Document metadata as JSON object',
         example: {
-            size: 1024000,
-            mimeType: 'application/pdf',
-            pages: 10,
-            language: 'en',
-            tags: ['report', 'quarterly']
+            user_id: '507f1f77bcf86cd799439012',
+            document_id: 'string2',
+            page_id: 'string111',
+            title: 'string1',
+            approved_date: 'string1',
+            effective_date: 'string1',
+            owner: 'string1',
+            username: 'string1',
+            access_level: 'string1'
         },
     }),
-    (0, class_validator_1.IsObject)(),
+    (0, class_validator_1.ValidateNested)(),
+    (0, class_transformer_1.Type)(() => document_metadata_dto_1.DocumentMetadataDto),
     (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", Object)
+    __metadata("design:type", document_metadata_dto_1.DocumentMetadataDto)
 ], CreateDocumentDto.prototype, "metadata", void 0);
 //# sourceMappingURL=create-document.dto.js.map

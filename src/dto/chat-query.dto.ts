@@ -1,14 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsOptional, IsMongoId, IsDateString, IsNumber, Min } from 'class-validator';
+import { IsOptional, IsMongoId, IsDateString, IsNumber, Min } from 'class-validator';
 
 export class ChatQueryDto {
-  @ApiPropertyOptional({
-    description: 'Filter by session identifier',
-    example: 'session_2023_12_01',
-  })
-  @IsString()
-  @IsOptional()
-  readonly session?: string;
 
   @ApiPropertyOptional({
     description: 'Filter by user ID',

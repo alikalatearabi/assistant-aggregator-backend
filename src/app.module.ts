@@ -15,6 +15,8 @@ import { DocumentService } from './services/document.service';
 import { MessageService } from './services/message.service';
 import { ChatService } from './services/chat.service';
 import { OcrService } from './services/ocr.service';
+import { ChatMessagesGateway } from './gateways/chat-messages.gateway';
+import { ChatMessagesService } from './services/chat-messages.service';
 import { AuthModule } from './auth/auth.module';
 
 @Module({
@@ -40,6 +42,6 @@ import { AuthModule } from './auth/auth.module';
     AuthModule,
   ],
   controllers: [AppController, UserController, DocumentController, MessageController, ChatController],
-  providers: [AppService, DocumentService, MessageService, ChatService, OcrService],
+  providers: [AppService, DocumentService, MessageService, ChatService, OcrService, ChatMessagesGateway, ChatMessagesService],
 })
 export class AppModule {}

@@ -8,10 +8,10 @@ export class DocumentQueryDto {
   readonly extension?: string;
 
   @ApiPropertyOptional({
-    description: 'Filter by uploader user ID',
+    description: 'Filter by metadata.user_id (uploader)',
     example: '507f1f77bcf86cd799439012',
   })
-  readonly fileUploader?: string;
+  readonly metadataUserId?: string;
 
   @ApiPropertyOptional({
     description: 'Search in filename',

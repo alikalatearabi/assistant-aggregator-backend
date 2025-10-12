@@ -20,6 +20,7 @@ const create_document_dto_1 = require("../dto/create-document.dto");
 const update_document_dto_1 = require("../dto/update-document.dto");
 const submit_ocr_result_dto_1 = require("../dto/submit-ocr-result.dto");
 const document_query_dto_1 = require("../dto/document-query.dto");
+const document_metadata_dto_1 = require("../dto/document-metadata.dto");
 const document_schema_1 = require("../schemas/document.schema");
 let DocumentController = class DocumentController {
     documentService;
@@ -60,7 +61,7 @@ let DocumentController = class DocumentController {
         return this.documentService.deleteDocument(id);
     }
     async submitOcrResult(submitOcrResultDto) {
-        return this.documentService.submitOcrResult(submitOcrResultDto.documentId.toString(), submitOcrResultDto.extractedText);
+        return this.documentService.submitOcrResult(submitOcrResultDto.documentId.toString(), submitOcrResultDto.raw_text, submitOcrResultDto.page);
     }
     async markOcrProcessing(id) {
         return this.documentService.markOcrProcessing(id);
@@ -100,7 +101,7 @@ __decorate([
         description: 'Retrieves documents with optional filtering and pagination',
     }),
     (0, swagger_1.ApiQuery)({ name: 'extension', required: false, description: 'Filter by file extension' }),
-    (0, swagger_1.ApiQuery)({ name: 'fileUploader', required: false, description: 'Filter by uploader user ID' }),
+    (0, swagger_1.ApiQuery)({ name: 'metadataUserId', required: false, description: 'Filter by metadata.user_id (uploader)' }),
     (0, swagger_1.ApiQuery)({ name: 'filename', required: false, description: 'Search in filename' }),
     (0, swagger_1.ApiQuery)({ name: 'dateFrom', required: false, description: 'Filter from date (ISO string)' }),
     (0, swagger_1.ApiQuery)({ name: 'dateTo', required: false, description: 'Filter to date (ISO string)' }),
@@ -306,11 +307,15 @@ __decorate([
                 metadata: {
                     type: 'object',
                     example: {
-                        size: 1024000,
-                        mimeType: 'application/pdf',
-                        pages: 10,
-                        language: 'en',
-                        tags: ['report', 'quarterly', 'updated'],
+                        user_id: '507f1f77bcf86cd799439012',
+                        document_id: 'string2',
+                        page_id: 'string111',
+                        title: 'string1',
+                        approved_date: 'string1',
+                        effective_date: 'string1',
+                        owner: 'string1',
+                        username: 'string1',
+                        access_level: 'string1'
                     },
                 },
             },
@@ -328,7 +333,7 @@ __decorate([
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)('metadata')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [String, document_metadata_dto_1.DocumentMetadataDto]),
     __metadata("design:returntype", Promise)
 ], DocumentController.prototype, "updateDocumentMetadata", null);
 __decorate([

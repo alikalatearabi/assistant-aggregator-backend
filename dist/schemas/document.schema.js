@@ -9,21 +9,84 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DocumentSchema = exports.Document = void 0;
+exports.DocumentSchema = exports.Document = exports.DocumentMetadata = void 0;
 const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
 const swagger_1 = require("@nestjs/swagger");
+let DocumentMetadata = class DocumentMetadata {
+    user_id;
+    document_id;
+    page_id;
+    title;
+    approved_date;
+    effective_date;
+    owner;
+    username;
+    access_level;
+    ocr;
+};
+exports.DocumentMetadata = DocumentMetadata;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Reference to User entity', example: '507f1f77bcf86cd799439012', type: String, required: false }),
+    (0, mongoose_1.Prop)({ type: mongoose_2.Types.ObjectId, ref: 'User', required: false }),
+    __metadata("design:type", Object)
+], DocumentMetadata.prototype, "user_id", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Document external identifier', example: 'string2', required: false }),
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], DocumentMetadata.prototype, "document_id", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Page identifier', example: 'string111', required: false }),
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], DocumentMetadata.prototype, "page_id", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Title', example: 'string1', required: false }),
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], DocumentMetadata.prototype, "title", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Approved date', example: 'string1', required: false }),
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], DocumentMetadata.prototype, "approved_date", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Effective date', example: 'string1', required: false }),
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], DocumentMetadata.prototype, "effective_date", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Owner', example: 'string1', required: false }),
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], DocumentMetadata.prototype, "owner", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Username', example: 'string1', required: false }),
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], DocumentMetadata.prototype, "username", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Access level', example: 'string1', required: false }),
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], DocumentMetadata.prototype, "access_level", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'OCR processing metadata', required: false, example: { processingStartedAt: '2024-01-01T00:00:00.000Z', processedAt: '2024-01-01T00:05:00.000Z', textLength: 1234 } }),
+    (0, mongoose_1.Prop)({ type: Object }),
+    __metadata("design:type", Object)
+], DocumentMetadata.prototype, "ocr", void 0);
+exports.DocumentMetadata = DocumentMetadata = __decorate([
+    (0, mongoose_1.Schema)({ _id: false })
+], DocumentMetadata);
 let Document = class Document {
     _id;
     filename;
     fileUrl;
     extension;
-    fileUploader;
     rawTextFileId;
-    extractedText;
-    ocrConfidence;
+    raw_text;
     ocrStatus;
-    ocrMetadata;
     metadata;
     createdAt;
     updatedAt;
@@ -62,15 +125,6 @@ __decorate([
 ], Document.prototype, "extension", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
-        description: 'User who uploaded the document',
-        type: String,
-        example: '507f1f77bcf86cd799439012',
-    }),
-    (0, mongoose_1.Prop)({ type: mongoose_2.Types.ObjectId, ref: 'User', required: true }),
-    __metadata("design:type", Object)
-], Document.prototype, "fileUploader", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({
         description: 'Elasticsearch document ID or address for raw text content',
         example: 'assistant_aggregator_documents_507f1f77bcf86cd799439011',
     }),
@@ -84,17 +138,7 @@ __decorate([
     }),
     (0, mongoose_1.Prop)({ required: false }),
     __metadata("design:type", String)
-], Document.prototype, "extractedText", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({
-        description: 'OCR confidence score (0-1)',
-        example: 0.95,
-        minimum: 0,
-        maximum: 1,
-    }),
-    (0, mongoose_1.Prop)({ type: Number, min: 0, max: 1, required: false }),
-    __metadata("design:type", Number)
-], Document.prototype, "ocrConfidence", void 0);
+], Document.prototype, "raw_text", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: 'OCR processing status',
@@ -110,31 +154,21 @@ __decorate([
 ], Document.prototype, "ocrStatus", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
-        description: 'OCR processing metadata',
-        example: {
-            processingTime: 1500,
-            pagesProcessed: 3,
-            language: 'en',
-            ocrEngine: 'tesseract-v5',
-            processedAt: '2023-12-01T10:00:00.000Z'
-        },
-    }),
-    (0, mongoose_1.Prop)({ type: Object, default: {} }),
-    __metadata("design:type", Object)
-], Document.prototype, "ocrMetadata", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({
         description: 'Document metadata as JSON object',
         example: {
-            size: 1024000,
-            mimeType: 'application/pdf',
-            pages: 10,
-            language: 'en',
-            tags: ['report', 'quarterly']
+            user_id: '507f1f77bcf86cd799439012',
+            document_id: 'string2',
+            page_id: 'string111',
+            title: 'string1',
+            approved_date: 'string1',
+            effective_date: 'string1',
+            owner: 'string1',
+            username: 'string1',
+            access_level: 'string1'
         },
     }),
-    (0, mongoose_1.Prop)({ type: Object, default: {} }),
-    __metadata("design:type", Object)
+    (0, mongoose_1.Prop)({ type: mongoose_1.SchemaFactory.createForClass(DocumentMetadata), default: {} }),
+    __metadata("design:type", DocumentMetadata)
 ], Document.prototype, "metadata", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({

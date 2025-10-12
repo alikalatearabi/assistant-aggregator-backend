@@ -1,9 +1,8 @@
-import { Types } from 'mongoose';
+import { DocumentMetadataDto } from './document-metadata.dto';
 export declare class UpdateDocumentDto {
     readonly filename?: string;
     readonly fileUrl?: string;
     readonly extension?: string;
-    readonly fileUploader?: string | Types.ObjectId;
     readonly rawTextFileId?: string;
-    readonly metadata?: Record<string, any>;
+    readonly metadata?: DocumentMetadataDto;
 }

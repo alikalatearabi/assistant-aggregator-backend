@@ -16,7 +16,6 @@ export declare class ChatService {
     }>;
     findChatById(id: string): Promise<Chat>;
     findChatsByUser(userId: string): Promise<Chat[]>;
-    findChatBySession(session: string): Promise<Chat | null>;
     updateChat(id: string, updateChatDto: UpdateChatDto): Promise<Chat>;
     deleteChat(id: string): Promise<Chat>;
     addMessageToChat(chatId: string, messageId: string): Promise<Chat>;

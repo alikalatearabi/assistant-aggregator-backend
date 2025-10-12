@@ -13,7 +13,6 @@ exports.ChatQueryDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
 class ChatQueryDto {
-    session;
     user;
     dateFrom;
     dateTo;
@@ -21,15 +20,6 @@ class ChatQueryDto {
     limit;
 }
 exports.ChatQueryDto = ChatQueryDto;
-__decorate([
-    (0, swagger_1.ApiPropertyOptional)({
-        description: 'Filter by session identifier',
-        example: 'session_2023_12_01',
-    }),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", String)
-], ChatQueryDto.prototype, "session", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({
         description: 'Filter by user ID',

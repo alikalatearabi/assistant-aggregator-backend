@@ -21,10 +21,14 @@ const update_chat_dto_1 = require("../dto/update-chat.dto");
 const chat_query_dto_1 = require("../dto/chat-query.dto");
 const add_message_to_chat_dto_1 = require("../dto/add-message-to-chat.dto");
 const chat_schema_1 = require("../schemas/chat.schema");
+const chat_messages_dto_1 = require("../dto/chat-messages.dto");
+const chat_messages_service_1 = require("../services/chat-messages.service");
 let ChatController = class ChatController {
     chatService;
-    constructor(chatService) {
+    chatMessagesService;
+    constructor(chatService, chatMessagesService) {
         this.chatService = chatService;
+        this.chatMessagesService = chatMessagesService;
     }
     async createChat(createChatDto) {
         return this.chatService.createChat(createChatDto);
@@ -35,14 +39,8 @@ let ChatController = class ChatController {
     async getChatStats() {
         return this.chatService.getChatStats();
     }
-    async searchChats(searchTerm) {
-        return this.chatService.searchChats(searchTerm);
-    }
     async findChatsByUser(userId) {
         return this.chatService.findChatsByUser(userId);
-    }
-    async findChatBySession(session) {
-        return this.chatService.findChatBySession(session);
     }
     async findChatById(id) {
         return this.chatService.findChatById(id);
@@ -61,6 +59,12 @@ let ChatController = class ChatController {
     }
     async deleteChat(id) {
         return this.chatService.deleteChat(id);
+    }
+    async chatMessages(body) {
+        if (body.responseMode === chat_messages_dto_1.ChatMessagesResponseMode.STREAMING) {
+            return this.chatMessagesService.processStreaming(body);
+        }
+        return this.chatMessagesService.processBlocking(body);
     }
 };
 exports.ChatController = ChatController;
@@ -88,9 +92,8 @@ __decorate([
     (0, common_1.Get)(),
     (0, swagger_1.ApiOperation)({
         summary: 'Get all chats with pagination and filtering',
-        description: 'Retrieves chats with optional filtering by session, user, and date range',
+        description: 'Retrieves chats with optional filtering by user and date range',
     }),
-    (0, swagger_1.ApiQuery)({ name: 'session', required: false, description: 'Filter by session identifier' }),
     (0, swagger_1.ApiQuery)({ name: 'user', required: false, description: 'Filter by user ID' }),
     (0, swagger_1.ApiQuery)({ name: 'dateFrom', required: false, description: 'Filter from date (ISO string)' }),
     (0, swagger_1.ApiQuery)({ name: 'dateTo', required: false, description: 'Filter to date (ISO string)' }),
@@ -149,23 +152,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], ChatController.prototype, "getChatStats", null);
 __decorate([
-    (0, common_1.Get)('search'),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Search chats',
-        description: 'Search chats by session identifier',
-    }),
-    (0, swagger_1.ApiQuery)({ name: 'q', required: true, description: 'Search term' }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Search results retrieved successfully',
-        type: [chat_schema_1.Chat],
-    }),
-    __param(0, (0, common_1.Query)('q')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], ChatController.prototype, "searchChats", null);
-__decorate([
     (0, common_1.Get)('user/:userId'),
     (0, swagger_1.ApiOperation)({
         summary: 'Get chats by user',
@@ -190,31 +176,6 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], ChatController.prototype, "findChatsByUser", null);
-__decorate([
-    (0, common_1.Get)('session/:session'),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Get chat by session',
-        description: 'Retrieves a specific chat by session identifier',
-    }),
-    (0, swagger_1.ApiParam)({
-        name: 'session',
-        description: 'Session identifier',
-        example: 'session_2023_12_01_user_123',
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Chat found successfully',
-        type: chat_schema_1.Chat,
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 404,
-        description: 'Chat not found',
-    }),
-    __param(0, (0, common_1.Param)('session')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], ChatController.prototype, "findChatBySession", null);
 __decorate([
     (0, common_1.Get)(':id'),
     (0, swagger_1.ApiOperation)({
@@ -247,8 +208,8 @@ __decorate([
 __decorate([
     (0, common_1.Get)(':id/messages'),
     (0, swagger_1.ApiOperation)({
-        summary: 'Get chat message history',
-        description: 'Retrieves the complete message history for a specific chat',
+        summary: 'Get chat conversation history',
+        description: 'Retrieves the complete conversation history (messages) for a specific chat',
     }),
     (0, swagger_1.ApiParam)({
         name: 'id',
@@ -257,7 +218,7 @@ __decorate([
     }),
     (0, swagger_1.ApiResponse)({
         status: 200,
-        description: 'Message history retrieved successfully',
+        description: 'Conversation history retrieved successfully',
         schema: {
             type: 'array',
             items: {
@@ -316,7 +277,7 @@ __decorate([
     (0, common_1.Patch)(':id/add-message'),
     (0, swagger_1.ApiOperation)({
         summary: 'Add message to chat',
-        description: 'Adds a message to the chat message history',
+        description: 'Adds a message to the chat conversation history',
     }),
     (0, swagger_1.ApiParam)({
         name: 'id',
@@ -347,7 +308,7 @@ __decorate([
     (0, common_1.Patch)(':id/remove-message/:messageId'),
     (0, swagger_1.ApiOperation)({
         summary: 'Remove message from chat',
-        description: 'Removes a message from the chat message history',
+        description: 'Removes a message from the chat conversation history',
     }),
     (0, swagger_1.ApiParam)({
         name: 'id',
@@ -407,9 +368,22 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], ChatController.prototype, "deleteChat", null);
+__decorate([
+    (0, common_1.Post)('chat-messages'),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Generate chat messages',
+        description: 'Generates a chat response. If responseMode is streaming, emits WS events; if blocking, returns a REST payload',
+    }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Blocking response', type: 'object' }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [chat_messages_dto_1.ChatMessagesRequestDto]),
+    __metadata("design:returntype", Promise)
+], ChatController.prototype, "chatMessages", null);
 exports.ChatController = ChatController = __decorate([
     (0, swagger_1.ApiTags)('chats'),
     (0, common_1.Controller)('chats'),
-    __metadata("design:paramtypes", [chat_service_1.ChatService])
+    __metadata("design:paramtypes", [chat_service_1.ChatService,
+        chat_messages_service_1.ChatMessagesService])
 ], ChatController);
 //# sourceMappingURL=chat.controller.js.map

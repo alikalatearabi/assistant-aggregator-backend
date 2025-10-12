@@ -28,19 +28,18 @@ let DocumentService = DocumentService_1 = class DocumentService {
         this.ocrService = ocrService;
     }
     async createDocument(createDocumentDto) {
-        if (!mongoose_2.Types.ObjectId.isValid(createDocumentDto.fileUploader.toString())) {
-            throw new common_1.BadRequestException('Invalid file uploader ID');
-        }
         const createdDocument = new this.documentModel({
             ...createDocumentDto,
-            fileUploader: new mongoose_2.Types.ObjectId(createDocumentDto.fileUploader.toString()),
         });
         const savedDocument = await createdDocument.save();
         this.logger.log(`Document created successfully: ${savedDocument._id}, sending to OCR service`);
         try {
+            const metaUserId = savedDocument?.metadata?.user_id;
+            const userId = metaUserId ? (typeof metaUserId === 'string' ? metaUserId : metaUserId.toString()) : undefined;
             await this.ocrService.sendDocumentForOcrAsync({
                 documentId: savedDocument._id.toString(),
                 minioUrl: savedDocument.fileUrl,
+                userId,
             });
             this.logger.log(`Document ${savedDocument._id} sent to OCR service successfully`);
         }
@@ -50,13 +49,13 @@ let DocumentService = DocumentService_1 = class DocumentService {
         return savedDocument;
     }
     async findAllDocuments(query = {}) {
-        const { extension, fileUploader, filename, dateFrom, dateTo, page = 1, limit = 10, } = query;
+        const { extension, metadataUserId, filename, dateFrom, dateTo, page = 1, limit = 10, } = query;
         const filter = {};
         if (extension) {
             filter.extension = { $regex: extension, $options: 'i' };
         }
-        if (fileUploader && mongoose_2.Types.ObjectId.isValid(fileUploader)) {
-            filter.fileUploader = new mongoose_2.Types.ObjectId(fileUploader);
+        if (metadataUserId) {
+            filter['metadata.user_id'] = metadataUserId;
         }
         if (filename) {
             filter.filename = { $regex: filename, $options: 'i' };
@@ -73,9 +72,12 @@ let DocumentService = DocumentService_1 = class DocumentService {
         const skip = (page - 1) * limit;
         const total = await this.documentModel.countDocuments(filter);
         const totalPages = Math.ceil(total / limit);
+        if (filter['metadata.user_id'] && mongoose_2.Types.ObjectId.isValid(filter['metadata.user_id'])) {
+            filter['metadata.user_id'] = new mongoose_2.Types.ObjectId(filter['metadata.user_id']);
+        }
         const documents = await this.documentModel
             .find(filter)
-            .populate('fileUploader', 'firstname lastname email')
+            .populate('metadata.user_id')
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
@@ -94,7 +96,7 @@ let DocumentService = DocumentService_1 = class DocumentService {
         }
         const document = await this.documentModel
             .findById(id)
-            .populate('fileUploader', 'firstname lastname email')
+            .populate('metadata.user_id')
             .exec();
         if (!document) {
             throw new common_1.NotFoundException('Document not found');
@@ -106,15 +108,14 @@ let DocumentService = DocumentService_1 = class DocumentService {
             throw new common_1.BadRequestException('Invalid uploader ID');
         }
         return this.documentModel
-            .find({ fileUploader: new mongoose_2.Types.ObjectId(uploaderId) })
-            .populate('fileUploader', 'firstname lastname email')
+            .find({ 'metadata.user_id': new mongoose_2.Types.ObjectId(uploaderId) })
+            .populate('metadata.user_id')
             .sort({ createdAt: -1 })
             .exec();
     }
     async findDocumentsByExtension(extension) {
         return this.documentModel
             .find({ extension: { $regex: extension, $options: 'i' } })
-            .populate('fileUploader', 'firstname lastname email')
             .sort({ createdAt: -1 })
             .exec();
     }
@@ -122,16 +123,10 @@ let DocumentService = DocumentService_1 = class DocumentService {
         if (!mongoose_2.Types.ObjectId.isValid(id)) {
             throw new common_1.BadRequestException('Invalid document ID');
         }
-        if (updateDocumentDto.fileUploader && !mongoose_2.Types.ObjectId.isValid(updateDocumentDto.fileUploader.toString())) {
-            throw new common_1.BadRequestException('Invalid file uploader ID');
-        }
         const updateData = { ...updateDocumentDto };
-        if (updateDocumentDto.fileUploader) {
-            updateData.fileUploader = new mongoose_2.Types.ObjectId(updateDocumentDto.fileUploader.toString());
-        }
         const document = await this.documentModel
             .findByIdAndUpdate(id, updateData, { new: true })
-            .populate('fileUploader', 'firstname lastname email')
+            .populate('metadata.user_id')
             .exec();
         if (!document) {
             throw new common_1.NotFoundException('Document not found');
@@ -144,7 +139,7 @@ let DocumentService = DocumentService_1 = class DocumentService {
         }
         const document = await this.documentModel
             .findByIdAndDelete(id)
-            .populate('fileUploader', 'firstname lastname email')
+            .populate('metadata.user_id')
             .exec();
         if (!document) {
             throw new common_1.NotFoundException('Document not found');
@@ -155,9 +150,13 @@ let DocumentService = DocumentService_1 = class DocumentService {
         if (!mongoose_2.Types.ObjectId.isValid(id)) {
             throw new common_1.BadRequestException('Invalid document ID');
         }
+        const castedMetadata = { ...metadata };
+        if (castedMetadata && castedMetadata.user_id && mongoose_2.Types.ObjectId.isValid(castedMetadata.user_id)) {
+            castedMetadata.user_id = new mongoose_2.Types.ObjectId(castedMetadata.user_id);
+        }
         const document = await this.documentModel
-            .findByIdAndUpdate(id, { $set: { metadata } }, { new: true })
-            .populate('fileUploader', 'firstname lastname email')
+            .findByIdAndUpdate(id, { $set: { metadata: castedMetadata } }, { new: true })
+            .populate('metadata.user_id')
             .exec();
         if (!document) {
             throw new common_1.NotFoundException('Document not found');
@@ -170,14 +169,14 @@ let DocumentService = DocumentService_1 = class DocumentService {
         }
         const document = await this.documentModel
             .findByIdAndUpdate(id, { rawTextFileId }, { new: true })
-            .populate('fileUploader', 'firstname lastname email')
+            .populate('metadata.user_id')
             .exec();
         if (!document) {
             throw new common_1.NotFoundException('Document not found');
         }
         return document;
     }
-    async submitOcrResult(documentId, extractedText) {
+    async submitOcrResult(documentId, extractedText, page) {
         if (!mongoose_2.Types.ObjectId.isValid(documentId)) {
             throw new common_1.BadRequestException('Invalid document ID');
         }
@@ -186,18 +185,22 @@ let DocumentService = DocumentService_1 = class DocumentService {
             throw new common_1.NotFoundException('Document not found');
         }
         const updateData = {
-            extractedText: extractedText,
+            raw_text: extractedText,
             ocrStatus: 'completed',
-            ocrMetadata: {
-                ...existingDocument.ocrMetadata,
-                processedAt: new Date().toISOString(),
-                textLength: extractedText.length,
-                processingCompletedBy: 'ocr-service',
-            },
+            metadata: {
+                ...(existingDocument.metadata || {}),
+                ocr: {
+                    ...((existingDocument.metadata && existingDocument.metadata.ocr) || {}),
+                    processedAt: new Date().toISOString(),
+                    textLength: extractedText.length,
+                    processingCompletedBy: 'ocr-service',
+                    ...(page ? { page } : {}),
+                }
+            }
         };
         const document = await this.documentModel
             .findByIdAndUpdate(documentId, { $set: updateData }, { new: true })
-            .populate('fileUploader', 'firstname lastname email')
+            .populate('metadata.user_id')
             .exec();
         if (!document) {
             throw new common_1.NotFoundException('Document not found after update');
@@ -211,9 +214,9 @@ let DocumentService = DocumentService_1 = class DocumentService {
         const document = await this.documentModel
             .findByIdAndUpdate(documentId, {
             ocrStatus: 'processing',
-            'ocrMetadata.processingStartedAt': new Date().toISOString()
+            'metadata.ocr.processingStartedAt': new Date().toISOString()
         }, { new: true })
-            .populate('fileUploader', 'firstname lastname email')
+            .populate('metadata.user_id')
             .exec();
         if (!document) {
             throw new common_1.NotFoundException('Document not found');
@@ -227,10 +230,10 @@ let DocumentService = DocumentService_1 = class DocumentService {
         const document = await this.documentModel
             .findByIdAndUpdate(documentId, {
             ocrStatus: 'failed',
-            'ocrMetadata.error': error,
-            'ocrMetadata.failedAt': new Date().toISOString()
+            'metadata.ocr.error': error,
+            'metadata.ocr.failedAt': new Date().toISOString()
         }, { new: true })
-            .populate('fileUploader', 'firstname lastname email')
+            .populate('metadata.user_id')
             .exec();
         if (!document) {
             throw new common_1.NotFoundException('Document not found');
@@ -244,7 +247,7 @@ let DocumentService = DocumentService_1 = class DocumentService {
         }
         return this.documentModel
             .find({ ocrStatus: status })
-            .populate('fileUploader', 'firstname lastname email')
+            .populate('metadata.user_id')
             .sort({ createdAt: -1 })
             .exec();
     }
@@ -255,11 +258,12 @@ let DocumentService = DocumentService_1 = class DocumentService {
             $or: [
                 { filename: searchRegex },
                 { extension: searchRegex },
-                { 'metadata.tags': searchRegex },
-                { 'metadata.description': searchRegex },
+                { 'metadata.title': searchRegex },
+                { 'metadata.owner': searchRegex },
+                { 'metadata.username': searchRegex },
             ]
         })
-            .populate('fileUploader', 'firstname lastname email')
+            .populate('metadata.user_id')
             .sort({ createdAt: -1 })
             .exec();
     }
@@ -271,7 +275,7 @@ let DocumentService = DocumentService_1 = class DocumentService {
             { $limit: 10 }
         ]);
         const documentsByUploader = await this.documentModel.aggregate([
-            { $group: { _id: '$fileUploader', count: { $sum: 1 } } },
+            { $group: { _id: '$metadata.user_id', count: { $sum: 1 } } },
             { $sort: { count: -1 } },
             { $limit: 10 }
         ]);

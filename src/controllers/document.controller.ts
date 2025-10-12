@@ -21,6 +21,7 @@ import { CreateDocumentDto } from '../dto/create-document.dto';
 import { UpdateDocumentDto } from '../dto/update-document.dto';
 import { SubmitOcrResultDto } from '../dto/submit-ocr-result.dto';
 import { DocumentQueryDto } from '../dto/document-query.dto';
+import { DocumentMetadataDto } from '../dto/document-metadata.dto';
 import { Document } from '../schemas/document.schema';
 
 @ApiTags('documents')
@@ -52,7 +53,7 @@ export class DocumentController {
     description: 'Retrieves documents with optional filtering and pagination',
   })
   @ApiQuery({ name: 'extension', required: false, description: 'Filter by file extension' })
-  @ApiQuery({ name: 'fileUploader', required: false, description: 'Filter by uploader user ID' })
+  @ApiQuery({ name: 'metadataUserId', required: false, description: 'Filter by metadata.user_id (uploader)' })
   @ApiQuery({ name: 'filename', required: false, description: 'Search in filename' })
   @ApiQuery({ name: 'dateFrom', required: false, description: 'Filter from date (ISO string)' })
   @ApiQuery({ name: 'dateTo', required: false, description: 'Filter to date (ISO string)' })
@@ -247,11 +248,15 @@ export class DocumentController {
         metadata: {
           type: 'object',
           example: {
-            size: 1024000,
-            mimeType: 'application/pdf',
-            pages: 10,
-            language: 'en',
-            tags: ['report', 'quarterly', 'updated'],
+            user_id: '507f1f77bcf86cd799439012',
+            document_id: 'string2',
+            page_id: 'string111',
+            title: 'string1',
+            approved_date: 'string1',
+            effective_date: 'string1',
+            owner: 'string1',
+            username: 'string1',
+            access_level: 'string1'
           },
         },
       },
@@ -268,9 +273,9 @@ export class DocumentController {
   })
   async updateDocumentMetadata(
     @Param('id') id: string,
-    @Body('metadata') metadata: Record<string, any>,
+    @Body('metadata') metadata: DocumentMetadataDto,
   ): Promise<Document> {
-    return this.documentService.updateDocumentMetadata(id, metadata);
+    return this.documentService.updateDocumentMetadata(id, metadata as Record<string, any>);
   }
 
   @Patch(':id/raw-text')
@@ -360,7 +365,8 @@ export class DocumentController {
   ): Promise<Document> {
     return this.documentService.submitOcrResult(
       submitOcrResultDto.documentId.toString(),
-      submitOcrResultDto.extractedText
+      submitOcrResultDto.raw_text,
+      submitOcrResultDto.page
     );
   }
 

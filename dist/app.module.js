@@ -24,6 +24,8 @@ const document_service_1 = require("./services/document.service");
 const message_service_1 = require("./services/message.service");
 const chat_service_1 = require("./services/chat.service");
 const ocr_service_1 = require("./services/ocr.service");
+const chat_messages_gateway_1 = require("./gateways/chat-messages.gateway");
+const chat_messages_service_1 = require("./services/chat-messages.service");
 const auth_module_1 = require("./auth/auth.module");
 let AppModule = class AppModule {
 };
@@ -52,7 +54,7 @@ exports.AppModule = AppModule = __decorate([
             auth_module_1.AuthModule,
         ],
         controllers: [app_controller_1.AppController, app_controller_1.UserController, document_controller_1.DocumentController, message_controller_1.MessageController, chat_controller_1.ChatController],
-        providers: [app_service_1.AppService, document_service_1.DocumentService, message_service_1.MessageService, chat_service_1.ChatService, ocr_service_1.OcrService],
+        providers: [app_service_1.AppService, document_service_1.DocumentService, message_service_1.MessageService, chat_service_1.ChatService, ocr_service_1.OcrService, chat_messages_gateway_1.ChatMessagesGateway, chat_messages_service_1.ChatMessagesService],
     })
 ], AppModule);
 //# sourceMappingURL=app.module.js.map

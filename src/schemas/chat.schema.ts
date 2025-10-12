@@ -11,17 +11,10 @@ export type ChatDocument = Chat & MongoDocument;
 })
 export class Chat {
   @ApiProperty({
-    description: 'Chat ID',
+    description: 'Conversation ID',
     example: '507f1f77bcf86cd799439011',
   })
   _id: Types.ObjectId;
-
-  @ApiProperty({
-    description: 'Chat session identifier',
-    example: 'session_2023_12_01_user_123',
-  })
-  @Prop({ required: true })
-  session: string;
 
   @ApiProperty({
     description: 'User who owns this chat session',
@@ -37,7 +30,7 @@ export class Chat {
     example: ['507f1f77bcf86cd799439013', '507f1f77bcf86cd799439014'],
   })
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Message' }], default: [] })
-  messageHistory: Types.ObjectId[] | Message[];
+  conversationHistory: Types.ObjectId[] | Message[];
 
   @ApiProperty({
     description: 'Chat creation timestamp',

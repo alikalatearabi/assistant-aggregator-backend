@@ -14,7 +14,8 @@ const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
 class SubmitOcrResultDto {
     documentId;
-    extractedText;
+    raw_text;
+    page;
 }
 exports.SubmitOcrResultDto = SubmitOcrResultDto;
 __decorate([
@@ -33,5 +34,15 @@ __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
-], SubmitOcrResultDto.prototype, "extractedText", void 0);
+], SubmitOcrResultDto.prototype, "raw_text", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Page number within the document for this OCR payload',
+        example: 1,
+    }),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(1),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], SubmitOcrResultDto.prototype, "page", void 0);
 //# sourceMappingURL=submit-ocr-result.dto.js.map
