@@ -1,6 +1,7 @@
 import { DocumentService } from '../services/document.service';
 import { CreateDocumentDto } from '../dto/create-document.dto';
 import { UpdateDocumentDto } from '../dto/update-document.dto';
+import { SubmitOcrResultDto } from '../dto/submit-ocr-result.dto';
 import { DocumentQueryDto } from '../dto/document-query.dto';
 import { Document } from '../schemas/document.schema';
 export declare class DocumentController {
@@ -34,4 +35,8 @@ export declare class DocumentController {
     updateDocumentMetadata(id: string, metadata: Record<string, any>): Promise<Document>;
     updateRawTextFileId(id: string, rawTextFileId: string): Promise<Document>;
     deleteDocument(id: string): Promise<Document>;
+    submitOcrResult(submitOcrResultDto: SubmitOcrResultDto): Promise<Document>;
+    markOcrProcessing(id: string): Promise<Document>;
+    markOcrFailed(id: string, error: string): Promise<Document>;
+    getDocumentsByOcrStatus(status: string): Promise<Document[]>;
 }

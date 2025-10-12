@@ -8,6 +8,10 @@ export declare class Document {
     extension: string;
     fileUploader: Types.ObjectId | User;
     rawTextFileId: string;
+    extractedText: string;
+    ocrConfidence: number;
+    ocrStatus: string;
+    ocrMetadata: Record<string, any>;
     metadata: Record<string, any>;
     createdAt: Date;
     updatedAt: Date;

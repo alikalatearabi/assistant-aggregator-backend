@@ -20,6 +20,10 @@ let Document = class Document {
     extension;
     fileUploader;
     rawTextFileId;
+    extractedText;
+    ocrConfidence;
+    ocrStatus;
+    ocrMetadata;
     metadata;
     createdAt;
     updatedAt;
@@ -73,6 +77,51 @@ __decorate([
     (0, mongoose_1.Prop)({ required: false }),
     __metadata("design:type", String)
 ], Document.prototype, "rawTextFileId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Extracted raw text content from OCR processing',
+        example: 'This is the extracted text content from the document...',
+    }),
+    (0, mongoose_1.Prop)({ required: false }),
+    __metadata("design:type", String)
+], Document.prototype, "extractedText", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'OCR confidence score (0-1)',
+        example: 0.95,
+        minimum: 0,
+        maximum: 1,
+    }),
+    (0, mongoose_1.Prop)({ type: Number, min: 0, max: 1, required: false }),
+    __metadata("design:type", Number)
+], Document.prototype, "ocrConfidence", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'OCR processing status',
+        enum: ['pending', 'processing', 'completed', 'failed'],
+        example: 'completed',
+    }),
+    (0, mongoose_1.Prop)({
+        type: String,
+        enum: ['pending', 'processing', 'completed', 'failed'],
+        default: 'pending'
+    }),
+    __metadata("design:type", String)
+], Document.prototype, "ocrStatus", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'OCR processing metadata',
+        example: {
+            processingTime: 1500,
+            pagesProcessed: 3,
+            language: 'en',
+            ocrEngine: 'tesseract-v5',
+            processedAt: '2023-12-01T10:00:00.000Z'
+        },
+    }),
+    (0, mongoose_1.Prop)({ type: Object, default: {} }),
+    __metadata("design:type", Object)
+], Document.prototype, "ocrMetadata", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: 'Document metadata as JSON object',

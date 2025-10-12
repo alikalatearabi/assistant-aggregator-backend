@@ -3,9 +3,12 @@ import { Document, DocumentDocument } from '../schemas/document.schema';
 import { CreateDocumentDto } from '../dto/create-document.dto';
 import { UpdateDocumentDto } from '../dto/update-document.dto';
 import { DocumentQueryDto } from '../dto/document-query.dto';
+import { OcrService } from './ocr.service';
 export declare class DocumentService {
     private documentModel;
-    constructor(documentModel: Model<DocumentDocument>);
+    private readonly ocrService;
+    private readonly logger;
+    constructor(documentModel: Model<DocumentDocument>, ocrService: OcrService);
     createDocument(createDocumentDto: CreateDocumentDto): Promise<Document>;
     findAllDocuments(query?: DocumentQueryDto): Promise<{
         documents: Document[];
@@ -21,6 +24,10 @@ export declare class DocumentService {
     deleteDocument(id: string): Promise<Document>;
     updateDocumentMetadata(id: string, metadata: Record<string, any>): Promise<Document>;
     updateRawTextFileId(id: string, rawTextFileId: string): Promise<Document>;
+    submitOcrResult(documentId: string, extractedText: string): Promise<Document>;
+    markOcrProcessing(documentId: string): Promise<Document>;
+    markOcrFailed(documentId: string, error: string): Promise<Document>;
+    findDocumentsByOcrStatus(status: string): Promise<Document[]>;
     searchDocuments(searchTerm: string): Promise<Document[]>;
     getDocumentStats(): Promise<{
         totalDocuments: number;

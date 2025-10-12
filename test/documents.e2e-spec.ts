@@ -436,4 +436,210 @@ describe('Documents (e2e)', () => {
         });
     });
   });
+
+  describe('OCR Endpoints', () => {
+    describe('POST /documents/ocr/submit', () => {
+      it('should submit OCR result successfully', async () => {
+        const createDocumentDto = {
+          filename: 'test-document.pdf',
+          fileUrl: 'http://minio:9000/bucket/test-document.pdf',
+          extension: 'pdf',
+          fileUploader: testUser._id,
+          metadata: { type: 'test' },
+        };
+
+        const createResponse = await request(app.getHttpServer())
+          .post('/documents')
+          .send(createDocumentDto)
+          .expect(201);
+
+        const documentId = createResponse.body._id;
+
+        const ocrResultDto = {
+          documentId: documentId,
+          extractedText: 'This is the extracted text from the PDF document.',
+        };
+
+        return request(app.getHttpServer())
+          .post('/documents/ocr/submit')
+          .send(ocrResultDto)
+          .expect(200)
+          .expect((res) => {
+            expect(res.body._id).toBe(documentId);
+            expect(res.body.extractedText).toBe(ocrResultDto.extractedText);
+            expect(res.body.ocrStatus).toBe('completed');
+            expect(res.body.ocrMetadata).toHaveProperty('processedAt');
+            expect(res.body.ocrMetadata).toHaveProperty('textLength');
+            expect(res.body.ocrMetadata.textLength).toBe(ocrResultDto.extractedText.length);
+            expect(res.body.ocrMetadata.processingCompletedBy).toBe('ocr-service');
+          });
+      });
+
+      it('should return 404 for non-existent document', () => {
+        const fakeId = '507f1f77bcf86cd799439011';
+        const ocrResultDto = {
+          documentId: fakeId,
+          extractedText: 'Some extracted text',
+        };
+
+        return request(app.getHttpServer())
+          .post('/documents/ocr/submit')
+          .send(ocrResultDto)
+          .expect(404);
+      });
+
+      it('should return 400 for invalid document ID', () => {
+        const ocrResultDto = {
+          documentId: 'invalid-id',
+          extractedText: 'Some extracted text',
+        };
+
+        return request(app.getHttpServer())
+          .post('/documents/ocr/submit')
+          .send(ocrResultDto)
+          .expect(400);
+      });
+
+      it('should return 400 for missing required fields', () => {
+        const ocrResultDto = {
+          documentId: '507f1f77bcf86cd799439011',
+          // Missing extractedText
+        };
+
+        return request(app.getHttpServer())
+          .post('/documents/ocr/submit')
+          .send(ocrResultDto)
+          .expect(400);
+      });
+
+      it('should return 400 for empty extracted text', () => {
+        const ocrResultDto = {
+          documentId: '507f1f77bcf86cd799439011',
+          extractedText: '', // Empty text should be invalid
+        };
+
+        return request(app.getHttpServer())
+          .post('/documents/ocr/submit')
+          .send(ocrResultDto)
+          .expect(400);
+      });
+    });
+
+    describe('PATCH /documents/:id/ocr/processing', () => {
+      it('should mark document as processing', async () => {
+        const createDocumentDto = {
+          filename: 'processing-test.pdf',
+          fileUrl: 'http://minio:9000/bucket/processing-test.pdf',
+          extension: 'pdf',
+          fileUploader: testUser._id,
+          metadata: {},
+        };
+
+        const createResponse = await request(app.getHttpServer())
+          .post('/documents')
+          .send(createDocumentDto)
+          .expect(201);
+
+        const documentId = createResponse.body._id;
+
+        return request(app.getHttpServer())
+          .patch(`/documents/${documentId}/ocr/processing`)
+          .expect(200)
+          .expect((res) => {
+            expect(res.body._id).toBe(documentId);
+            expect(res.body.ocrStatus).toBe('processing');
+            expect(res.body.ocrMetadata).toHaveProperty('processingStartedAt');
+          });
+      });
+
+      it('should return 404 for non-existent document', () => {
+        const fakeId = '507f1f77bcf86cd799439011';
+        return request(app.getHttpServer())
+          .patch(`/documents/${fakeId}/ocr/processing`)
+          .expect(404);
+      });
+    });
+
+    describe('PATCH /documents/:id/ocr/failed', () => {
+      it('should mark document OCR as failed', async () => {
+        const createDocumentDto = {
+          filename: 'failed-test.pdf',
+          fileUrl: 'http://minio:9000/bucket/failed-test.pdf',
+          extension: 'pdf',
+          fileUploader: testUser._id,
+          metadata: {},
+        };
+
+        const createResponse = await request(app.getHttpServer())
+          .post('/documents')
+          .send(createDocumentDto)
+          .expect(201);
+
+        const documentId = createResponse.body._id;
+        const errorMessage = 'OCR processing failed: Unable to extract text from corrupted file';
+
+        return request(app.getHttpServer())
+          .patch(`/documents/${documentId}/ocr/failed`)
+          .send({ error: errorMessage })
+          .expect(200)
+          .expect((res) => {
+            expect(res.body._id).toBe(documentId);
+            expect(res.body.ocrStatus).toBe('failed');
+            expect(res.body.ocrMetadata.error).toBe(errorMessage);
+            expect(res.body.ocrMetadata).toHaveProperty('failedAt');
+          });
+      });
+    });
+
+    describe('GET /documents/ocr/status/:status', () => {
+      it('should return documents by OCR status', async () => {
+        // Create documents with different OCR statuses
+        const document1 = await request(app.getHttpServer())
+          .post('/documents')
+          .send({
+            filename: 'pending-doc.pdf',
+            fileUrl: 'http://minio:9000/bucket/pending-doc.pdf',
+            extension: 'pdf',
+            fileUploader: testUser._id,
+            metadata: {},
+          })
+          .expect(201);
+
+        const document2 = await request(app.getHttpServer())
+          .post('/documents')
+          .send({
+            filename: 'completed-doc.pdf',
+            fileUrl: 'http://minio:9000/bucket/completed-doc.pdf',
+            extension: 'pdf',
+            fileUploader: testUser._id,
+            metadata: {},
+          })
+          .expect(201);
+
+        // Mark one as completed
+        await request(app.getHttpServer())
+          .post('/documents/ocr/submit')
+          .send({
+            documentId: document2.body._id,
+            extractedText: 'Completed document text',
+          })
+          .expect(200);
+
+        return request(app.getHttpServer())
+          .get('/documents/ocr/status/pending')
+          .expect(200)
+          .expect((res) => {
+            expect(Array.isArray(res.body)).toBe(true);
+            expect(res.body).toHaveLength(1);
+            expect(res.body[0].ocrStatus).toBe('pending');
+          });
+      });
+
+      it('should return 400 for invalid OCR status', () => {
+        return request(app.getHttpServer())
+          .get('/documents/ocr/status/invalid-status')
+          .expect(400);
+      });
+    });
+  });
 });

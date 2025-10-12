@@ -10,6 +10,7 @@ exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
 const config_1 = require("@nestjs/config");
+const axios_1 = require("@nestjs/axios");
 const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
 const user_schema_1 = require("./schemas/user.schema");
@@ -22,6 +23,8 @@ const chat_controller_1 = require("./controllers/chat.controller");
 const document_service_1 = require("./services/document.service");
 const message_service_1 = require("./services/message.service");
 const chat_service_1 = require("./services/chat.service");
+const ocr_service_1 = require("./services/ocr.service");
+const auth_module_1 = require("./auth/auth.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -32,6 +35,7 @@ exports.AppModule = AppModule = __decorate([
                 isGlobal: true,
                 envFilePath: '.env',
             }),
+            axios_1.HttpModule,
             mongoose_1.MongooseModule.forRootAsync({
                 imports: [config_1.ConfigModule],
                 useFactory: async (configService) => ({
@@ -45,9 +49,10 @@ exports.AppModule = AppModule = __decorate([
                 { name: message_schema_1.Message.name, schema: message_schema_1.MessageSchema },
                 { name: chat_schema_1.Chat.name, schema: chat_schema_1.ChatSchema },
             ]),
+            auth_module_1.AuthModule,
         ],
         controllers: [app_controller_1.AppController, app_controller_1.UserController, document_controller_1.DocumentController, message_controller_1.MessageController, chat_controller_1.ChatController],
-        providers: [app_service_1.AppService, document_service_1.DocumentService, message_service_1.MessageService, chat_service_1.ChatService],
+        providers: [app_service_1.AppService, document_service_1.DocumentService, message_service_1.MessageService, chat_service_1.ChatService, ocr_service_1.OcrService],
     })
 ], AppModule);
 //# sourceMappingURL=app.module.js.map

@@ -18,6 +18,7 @@ const swagger_1 = require("@nestjs/swagger");
 const document_service_1 = require("../services/document.service");
 const create_document_dto_1 = require("../dto/create-document.dto");
 const update_document_dto_1 = require("../dto/update-document.dto");
+const submit_ocr_result_dto_1 = require("../dto/submit-ocr-result.dto");
 const document_query_dto_1 = require("../dto/document-query.dto");
 const document_schema_1 = require("../schemas/document.schema");
 let DocumentController = class DocumentController {
@@ -57,6 +58,18 @@ let DocumentController = class DocumentController {
     }
     async deleteDocument(id) {
         return this.documentService.deleteDocument(id);
+    }
+    async submitOcrResult(submitOcrResultDto) {
+        return this.documentService.submitOcrResult(submitOcrResultDto.documentId.toString(), submitOcrResultDto.extractedText);
+    }
+    async markOcrProcessing(id) {
+        return this.documentService.markOcrProcessing(id);
+    }
+    async markOcrFailed(id, error) {
+        return this.documentService.markOcrFailed(id, error);
+    }
+    async getDocumentsByOcrStatus(status) {
+        return this.documentService.findDocumentsByOcrStatus(status);
     }
 };
 exports.DocumentController = DocumentController;
@@ -384,6 +397,115 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], DocumentController.prototype, "deleteDocument", null);
+__decorate([
+    (0, common_1.Post)('ocr/submit'),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Submit OCR analysis result',
+        description: 'Endpoint for OCR service to submit extracted text and analysis results',
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'OCR result submitted successfully',
+        type: document_schema_1.Document,
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 404,
+        description: 'Document not found',
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 400,
+        description: 'Bad Request - Invalid input data or document ID',
+    }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [submit_ocr_result_dto_1.SubmitOcrResultDto]),
+    __metadata("design:returntype", Promise)
+], DocumentController.prototype, "submitOcrResult", null);
+__decorate([
+    (0, common_1.Patch)(':id/ocr/processing'),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Mark document as being processed by OCR',
+        description: 'Updates document status to indicate OCR processing has started',
+    }),
+    (0, swagger_1.ApiParam)({
+        name: 'id',
+        description: 'Document MongoDB ObjectId',
+        example: '507f1f77bcf86cd799439011',
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Document marked as processing',
+        type: document_schema_1.Document,
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 404,
+        description: 'Document not found',
+    }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], DocumentController.prototype, "markOcrProcessing", null);
+__decorate([
+    (0, common_1.Patch)(':id/ocr/failed'),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Mark document OCR processing as failed',
+        description: 'Updates document status to indicate OCR processing has failed',
+    }),
+    (0, swagger_1.ApiParam)({
+        name: 'id',
+        description: 'Document MongoDB ObjectId',
+        example: '507f1f77bcf86cd799439011',
+    }),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            type: 'object',
+            properties: {
+                error: {
+                    type: 'string',
+                    example: 'OCR processing failed: Unable to extract text from image',
+                },
+            },
+            required: ['error'],
+        },
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Document marked as failed',
+        type: document_schema_1.Document,
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 404,
+        description: 'Document not found',
+    }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)('error')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], DocumentController.prototype, "markOcrFailed", null);
+__decorate([
+    (0, common_1.Get)('ocr/status/:status'),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Get documents by OCR status',
+        description: 'Retrieves documents filtered by their OCR processing status',
+    }),
+    (0, swagger_1.ApiParam)({
+        name: 'status',
+        description: 'OCR processing status',
+        enum: ['pending', 'processing', 'completed', 'failed'],
+        example: 'completed',
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Documents retrieved successfully',
+        type: [document_schema_1.Document],
+    }),
+    __param(0, (0, common_1.Param)('status')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], DocumentController.prototype, "getDocumentsByOcrStatus", null);
 exports.DocumentController = DocumentController = __decorate([
     (0, swagger_1.ApiTags)('documents'),
     (0, common_1.Controller)('documents'),

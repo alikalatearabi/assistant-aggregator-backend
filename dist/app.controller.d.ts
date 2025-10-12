@@ -16,11 +16,11 @@ export declare class UserController {
     findActiveUsers(): Promise<User[]>;
     findUsersByRole(role: UserRole): Promise<User[]>;
     findUsersByOrganizationLevel(level: OrganizationLevel): Promise<User[]>;
-    findUserById(id: string): Promise<User>;
+    findUserById(id: string, currentUser: any): Promise<User>;
     findUserByEmail(email: string): Promise<User>;
     findUserByNationalCode(nationalcode: string): Promise<User>;
     findUserByPersonalCode(personalcode: string): Promise<User>;
-    updateUser(id: string, updateUserDto: UpdateUserDto): Promise<User>;
+    updateUser(id: string, updateUserDto: UpdateUserDto, currentUser: any): Promise<User>;
     deactivateUser(id: string): Promise<User>;
     activateUser(id: string): Promise<User>;
     changeUserRole(id: string, changeRoleDto: ChangeRoleDto): Promise<User>;

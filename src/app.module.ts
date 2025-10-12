@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { HttpModule } from '@nestjs/axios';
 import { AppController, UserController } from './app.controller';
 import { AppService } from './app.service';
 import { User, UserSchema } from './schemas/user.schema';
@@ -13,6 +14,8 @@ import { ChatController } from './controllers/chat.controller';
 import { DocumentService } from './services/document.service';
 import { MessageService } from './services/message.service';
 import { ChatService } from './services/chat.service';
+import { OcrService } from './services/ocr.service';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -20,6 +23,7 @@ import { ChatService } from './services/chat.service';
       isGlobal: true,
       envFilePath: '.env',
     }),
+    HttpModule,
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -33,8 +37,9 @@ import { ChatService } from './services/chat.service';
       { name: Message.name, schema: MessageSchema },
       { name: Chat.name, schema: ChatSchema },
     ]),
+    AuthModule,
   ],
   controllers: [AppController, UserController, DocumentController, MessageController, ChatController],
-  providers: [AppService, DocumentService, MessageService, ChatService],
+  providers: [AppService, DocumentService, MessageService, ChatService, OcrService],
 })
 export class AppModule {}

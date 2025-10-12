@@ -1,15 +1,19 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Document, DocumentDocument } from '../schemas/document.schema';
 import { CreateDocumentDto } from '../dto/create-document.dto';
 import { UpdateDocumentDto } from '../dto/update-document.dto';
 import { DocumentQueryDto } from '../dto/document-query.dto';
+import { OcrService } from './ocr.service';
 
 @Injectable()
 export class DocumentService {
+  private readonly logger = new Logger(DocumentService.name);
+
   constructor(
     @InjectModel(Document.name) private documentModel: Model<DocumentDocument>,
+    private readonly ocrService: OcrService,
   ) {}
 
   async createDocument(createDocumentDto: CreateDocumentDto): Promise<Document> {
@@ -23,7 +27,24 @@ export class DocumentService {
       fileUploader: new Types.ObjectId(createDocumentDto.fileUploader.toString()),
     });
     
-    return createdDocument.save();
+    const savedDocument = await createdDocument.save();
+    
+    // Send document to OCR service asynchronously (fire and forget)
+    this.logger.log(`Document created successfully: ${savedDocument._id}, sending to OCR service`);
+    
+    try {
+      await this.ocrService.sendDocumentForOcrAsync({
+        documentId: savedDocument._id.toString(),
+        minioUrl: savedDocument.fileUrl,
+      });
+      
+      this.logger.log(`Document ${savedDocument._id} sent to OCR service successfully`);
+    } catch (error) {
+      // Log error but don't fail document creation
+      this.logger.error(`Failed to send document ${savedDocument._id} to OCR service:`, error);
+    }
+    
+    return savedDocument;
   }
 
   async findAllDocuments(query: DocumentQueryDto = {}): Promise<{
@@ -211,6 +232,108 @@ export class DocumentService {
     }
     
     return document;
+  }
+
+  async submitOcrResult(documentId: string, extractedText: string): Promise<Document> {
+    if (!Types.ObjectId.isValid(documentId)) {
+      throw new BadRequestException('Invalid document ID');
+    }
+
+    // First check if document exists
+    const existingDocument = await this.documentModel.findById(documentId).exec();
+    if (!existingDocument) {
+      throw new NotFoundException('Document not found');
+    }
+
+    // Prepare update data with automatic metadata generation
+    const updateData: any = {
+      extractedText: extractedText,
+      ocrStatus: 'completed',
+      ocrMetadata: {
+        ...existingDocument.ocrMetadata,
+        processedAt: new Date().toISOString(),
+        textLength: extractedText.length,
+        processingCompletedBy: 'ocr-service',
+      },
+    };
+
+    // Update the document
+    const document = await this.documentModel
+      .findByIdAndUpdate(
+        documentId,
+        { $set: updateData },
+        { new: true }
+      )
+      .populate('fileUploader', 'firstname lastname email')
+      .exec();
+    
+    if (!document) {
+      throw new NotFoundException('Document not found after update');
+    }
+    
+    return document;
+  }
+
+  async markOcrProcessing(documentId: string): Promise<Document> {
+    if (!Types.ObjectId.isValid(documentId)) {
+      throw new BadRequestException('Invalid document ID');
+    }
+
+    const document = await this.documentModel
+      .findByIdAndUpdate(
+        documentId,
+        { 
+          ocrStatus: 'processing',
+          'ocrMetadata.processingStartedAt': new Date().toISOString()
+        },
+        { new: true }
+      )
+      .populate('fileUploader', 'firstname lastname email')
+      .exec();
+    
+    if (!document) {
+      throw new NotFoundException('Document not found');
+    }
+    
+    return document;
+  }
+
+  async markOcrFailed(documentId: string, error: string): Promise<Document> {
+    if (!Types.ObjectId.isValid(documentId)) {
+      throw new BadRequestException('Invalid document ID');
+    }
+
+    const document = await this.documentModel
+      .findByIdAndUpdate(
+        documentId,
+        { 
+          ocrStatus: 'failed',
+          'ocrMetadata.error': error,
+          'ocrMetadata.failedAt': new Date().toISOString()
+        },
+        { new: true }
+      )
+      .populate('fileUploader', 'firstname lastname email')
+      .exec();
+    
+    if (!document) {
+      throw new NotFoundException('Document not found');
+    }
+    
+    return document;
+  }
+
+  async findDocumentsByOcrStatus(status: string): Promise<Document[]> {
+    const validStatuses = ['pending', 'processing', 'completed', 'failed'];
+    if (!validStatuses.includes(status)) {
+      throw new BadRequestException('Invalid OCR status. Must be one of: pending, processing, completed, failed');
+    }
+
+    return this.documentModel
+      .find({ ocrStatus: status })
+      .populate('fileUploader', 'firstname lastname email')
+      .sort({ createdAt: -1 })
+      .exec();
   }
 
   async searchDocuments(searchTerm: string): Promise<Document[]> {

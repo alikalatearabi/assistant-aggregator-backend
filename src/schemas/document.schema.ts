@@ -52,6 +52,47 @@ export class Document {
   rawTextFileId: string;
 
   @ApiProperty({
+    description: 'Extracted raw text content from OCR processing',
+    example: 'This is the extracted text content from the document...',
+  })
+  @Prop({ required: false })
+  extractedText: string;
+
+  @ApiProperty({
+    description: 'OCR confidence score (0-1)',
+    example: 0.95,
+    minimum: 0,
+    maximum: 1,
+  })
+  @Prop({ type: Number, min: 0, max: 1, required: false })
+  ocrConfidence: number;
+
+  @ApiProperty({
+    description: 'OCR processing status',
+    enum: ['pending', 'processing', 'completed', 'failed'],
+    example: 'completed',
+  })
+  @Prop({ 
+    type: String, 
+    enum: ['pending', 'processing', 'completed', 'failed'], 
+    default: 'pending' 
+  })
+  ocrStatus: string;
+
+  @ApiProperty({
+    description: 'OCR processing metadata',
+    example: {
+      processingTime: 1500,
+      pagesProcessed: 3,
+      language: 'en',
+      ocrEngine: 'tesseract-v5',
+      processedAt: '2023-12-01T10:00:00.000Z'
+    },
+  })
+  @Prop({ type: Object, default: {} })
+  ocrMetadata: Record<string, any>;
+
+  @ApiProperty({
     description: 'Document metadata as JSON object',
     example: {
       size: 1024000,
