@@ -34,11 +34,14 @@ export class OcrService {
     try {
       this.logger.log(`Sending document for OCR processing: ${ocrRequest.documentId}`);
       
+      const username = this.configService.get<string>('OCR_USERNAME') || 'user1';
+      const password = this.configService.get<string>('OCR_PASSWORD') || 'pass1';
       const authPayload = {
-        api_key: this.configService.get<string>('OCR_API_KEY') || 'mock-api-key',
+        username,
+        password,
       };
 
-      this.logger.debug(`OCR Auth Request payload:`, authPayload);
+      this.logger.debug(`OCR Auth Request payload (username only):`, { username });
 
       const authResponse = await firstValueFrom(
         this.httpService.post(authUrl, authPayload, {
