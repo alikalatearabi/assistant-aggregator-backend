@@ -327,6 +327,41 @@ export class DocumentService {
     return document;
   }
 
+  async reportOcrError(params: { userId: string; documentId: string; page?: number; status: string; message: string }): Promise<Document> {
+    const { userId, documentId, page, status, message } = params;
+    if (!Types.ObjectId.isValid(documentId)) {
+      throw new BadRequestException('Invalid document ID');
+    }
+    if (!Types.ObjectId.isValid(userId)) {
+      throw new BadRequestException('Invalid user ID');
+    }
+
+    const update: any = {
+      ocrStatus: status,
+      'metadata.ocr.error': message,
+      'metadata.ocr.failedAt': new Date().toISOString(),
+      'metadata.user_id': new Types.ObjectId(userId),
+    };
+    if (page) {
+      update['metadata.ocr.page'] = page;
+    }
+
+    const document = await this.documentModel
+      .findByIdAndUpdate(
+        documentId,
+        { $set: update },
+        { new: true }
+      )
+      .populate('metadata.user_id')
+      .exec();
+
+    if (!document) {
+      throw new NotFoundException('Document not found');
+    }
+
+    return document;
+  }
+
   async findDocumentsByOcrStatus(status: string): Promise<Document[]> {
     const validStatuses = ['pending', 'processing', 'completed', 'failed'];
     if (!validStatuses.includes(status)) {

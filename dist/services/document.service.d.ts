@@ -27,6 +27,13 @@ export declare class DocumentService {
     submitOcrResult(documentId: string, extractedText: string, page?: number): Promise<Document>;
     markOcrProcessing(documentId: string): Promise<Document>;
     markOcrFailed(documentId: string, error: string): Promise<Document>;
+    reportOcrError(params: {
+        userId: string;
+        documentId: string;
+        page?: number;
+        status: string;
+        message: string;
+    }): Promise<Document>;
     findDocumentsByOcrStatus(status: string): Promise<Document[]>;
     searchDocuments(searchTerm: string): Promise<Document[]>;
     getDocumentStats(): Promise<{

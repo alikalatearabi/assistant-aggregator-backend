@@ -22,6 +22,7 @@ const submit_ocr_result_dto_1 = require("../dto/submit-ocr-result.dto");
 const document_query_dto_1 = require("../dto/document-query.dto");
 const document_metadata_dto_1 = require("../dto/document-metadata.dto");
 const document_schema_1 = require("../schemas/document.schema");
+const report_ocr_error_dto_1 = require("../dto/report-ocr-error.dto");
 let DocumentController = class DocumentController {
     documentService;
     constructor(documentService) {
@@ -68,6 +69,15 @@ let DocumentController = class DocumentController {
     }
     async markOcrFailed(id, error) {
         return this.documentService.markOcrFailed(id, error);
+    }
+    async reportOcrError(body) {
+        return this.documentService.reportOcrError({
+            userId: body.user_id,
+            documentId: body.document_id,
+            page: body.page,
+            status: body.status,
+            message: body.message,
+        });
     }
     async getDocumentsByOcrStatus(status) {
         return this.documentService.findDocumentsByOcrStatus(status);
@@ -489,6 +499,20 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], DocumentController.prototype, "markOcrFailed", null);
+__decorate([
+    (0, common_1.Post)('ocr/error'),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Report OCR error',
+        description: 'Endpoint for OCR module to report an error with user, document, and optional page context',
+    }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'OCR error recorded', type: document_schema_1.Document }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Invalid input data' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Document not found' }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [report_ocr_error_dto_1.ReportOcrErrorDto]),
+    __metadata("design:returntype", Promise)
+], DocumentController.prototype, "reportOcrError", null);
 __decorate([
     (0, common_1.Get)('ocr/status/:status'),
     (0, swagger_1.ApiOperation)({

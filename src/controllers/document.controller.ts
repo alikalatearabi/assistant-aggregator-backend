@@ -23,6 +23,7 @@ import { SubmitOcrResultDto } from '../dto/submit-ocr-result.dto';
 import { DocumentQueryDto } from '../dto/document-query.dto';
 import { DocumentMetadataDto } from '../dto/document-metadata.dto';
 import { Document } from '../schemas/document.schema';
+import { ReportOcrErrorDto } from '../dto/report-ocr-error.dto';
 
 @ApiTags('documents')
 @Controller('documents')
@@ -429,6 +430,24 @@ export class DocumentController {
     @Body('error') error: string,
   ): Promise<Document> {
     return this.documentService.markOcrFailed(id, error);
+  }
+
+  @Post('ocr/error')
+  @ApiOperation({
+    summary: 'Report OCR error',
+    description: 'Endpoint for OCR module to report an error with user, document, and optional page context',
+  })
+  @ApiResponse({ status: 200, description: 'OCR error recorded', type: Document })
+  @ApiResponse({ status: 400, description: 'Invalid input data' })
+  @ApiResponse({ status: 404, description: 'Document not found' })
+  async reportOcrError(@Body() body: ReportOcrErrorDto): Promise<Document> {
+    return this.documentService.reportOcrError({
+      userId: body.user_id,
+      documentId: body.document_id,
+      page: body.page,
+      status: body.status,
+      message: body.message,
+    });
   }
 
   @Get('ocr/status/:status')
