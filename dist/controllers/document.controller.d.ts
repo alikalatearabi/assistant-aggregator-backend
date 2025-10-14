@@ -37,6 +37,9 @@ export declare class DocumentController {
     updateDocumentMetadata(id: string, metadata: DocumentMetadataDto): Promise<Document>;
     updateRawTextFileId(id: string, rawTextFileId: string): Promise<Document>;
     deleteDocument(id: string): Promise<Document>;
+    getPresignedUrl(id: string, expires?: string): Promise<{
+        url: string;
+    }>;
     submitOcrResult(submitOcrResultDto: SubmitOcrResultDto): Promise<Document>;
     markOcrProcessing(id: string): Promise<Document>;
     markOcrFailed(id: string, error: string): Promise<Document>;

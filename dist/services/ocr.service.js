@@ -29,10 +29,13 @@ let OcrService = OcrService_1 = class OcrService {
         const filesUrl = `${baseUrl}/files`;
         try {
             this.logger.log(`Sending document for OCR processing: ${ocrRequest.documentId}`);
+            const username = this.configService.get('OCR_USERNAME') || 'user1';
+            const password = this.configService.get('OCR_PASSWORD') || 'pass1';
             const authPayload = {
-                api_key: this.configService.get('OCR_API_KEY') || 'mock-api-key',
+                username,
+                password,
             };
-            this.logger.debug(`OCR Auth Request payload:`, authPayload);
+            this.logger.debug(`OCR Auth Request payload (username only):`, { username });
             const authResponse = await (0, rxjs_1.firstValueFrom)(this.httpService.post(authUrl, authPayload, {
                 headers: { 'Content-Type': 'application/json' },
                 timeout: 10000,

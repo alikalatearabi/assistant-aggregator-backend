@@ -19,13 +19,16 @@ const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
 const document_schema_1 = require("../schemas/document.schema");
 const ocr_service_1 = require("./ocr.service");
+const minio_service_1 = require("./minio.service");
 let DocumentService = DocumentService_1 = class DocumentService {
     documentModel;
     ocrService;
+    minioService;
     logger = new common_1.Logger(DocumentService_1.name);
-    constructor(documentModel, ocrService) {
+    constructor(documentModel, ocrService, minioService) {
         this.documentModel = documentModel;
         this.ocrService = ocrService;
+        this.minioService = minioService;
     }
     async createDocument(createDocumentDto) {
         const createdDocument = new this.documentModel({
@@ -317,12 +320,36 @@ let DocumentService = DocumentService_1 = class DocumentService {
             recentDocuments,
         };
     }
+    async getPresignedUrlForDocument(id, expires) {
+        if (!mongoose_2.Types.ObjectId.isValid(id)) {
+            throw new common_1.BadRequestException('Invalid document ID');
+        }
+        const doc = await this.documentModel.findById(id).exec();
+        if (!doc) {
+            throw new common_1.NotFoundException('Document not found');
+        }
+        try {
+            const url = new URL(doc.fileUrl);
+            const pathParts = url.pathname.replace(/^\//, '').split('/');
+            const bucket = pathParts.shift();
+            const objectName = pathParts.join('/');
+            if (!bucket || !objectName) {
+                throw new Error('Invalid MinIO fileUrl format');
+            }
+            const signed = await this.minioService.getPresignedUrl(bucket, objectName, expires ?? 900);
+            return { url: signed };
+        }
+        catch (e) {
+            throw new common_1.BadRequestException(`Failed to create presigned URL: ${e.message}`);
+        }
+    }
 };
 exports.DocumentService = DocumentService;
 exports.DocumentService = DocumentService = DocumentService_1 = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, mongoose_1.InjectModel)(document_schema_1.Document.name)),
     __metadata("design:paramtypes", [mongoose_2.Model,
-        ocr_service_1.OcrService])
+        ocr_service_1.OcrService,
+        minio_service_1.MinioService])
 ], DocumentService);
 //# sourceMappingURL=document.service.js.map

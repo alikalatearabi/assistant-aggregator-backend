@@ -343,6 +343,26 @@ export class DocumentController {
     return this.documentService.deleteDocument(id);
   }
 
+  @Get(':id/presigned-url')
+  @ApiOperation({
+    summary: 'Get presigned URL for document',
+    description: 'Returns a temporary signed URL to download the file from MinIO',
+  })
+  @ApiParam({ name: 'id', description: 'Document MongoDB ObjectId', example: '507f1f77bcf86cd799439011' })
+  @ApiQuery({ name: 'expires', required: false, description: 'Expiry time in seconds (default 900, max 604800)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Presigned URL created',
+    schema: { type: 'object', properties: { url: { type: 'string', example: 'https://minio.local/bucket/object?X-Amz-Expires=900&X-Amz-Signature=...' } } },
+  })
+  async getPresignedUrl(
+    @Param('id') id: string,
+    @Query('expires') expires?: string,
+  ): Promise<{ url: string }> {
+    const exp = expires ? parseInt(expires, 10) : undefined;
+    return this.documentService.getPresignedUrlForDocument(id, exp);
+  }
+
   @Post('ocr/submit')
   @ApiOperation({
     summary: 'Submit OCR analysis result',

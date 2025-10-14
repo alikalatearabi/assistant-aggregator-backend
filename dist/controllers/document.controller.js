@@ -61,6 +61,10 @@ let DocumentController = class DocumentController {
     async deleteDocument(id) {
         return this.documentService.deleteDocument(id);
     }
+    async getPresignedUrl(id, expires) {
+        const exp = expires ? parseInt(expires, 10) : undefined;
+        return this.documentService.getPresignedUrlForDocument(id, exp);
+    }
     async submitOcrResult(submitOcrResultDto) {
         return this.documentService.submitOcrResult(submitOcrResultDto.documentId.toString(), submitOcrResultDto.raw_text, submitOcrResultDto.page);
     }
@@ -412,6 +416,25 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], DocumentController.prototype, "deleteDocument", null);
+__decorate([
+    (0, common_1.Get)(':id/presigned-url'),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Get presigned URL for document',
+        description: 'Returns a temporary signed URL to download the file from MinIO',
+    }),
+    (0, swagger_1.ApiParam)({ name: 'id', description: 'Document MongoDB ObjectId', example: '507f1f77bcf86cd799439011' }),
+    (0, swagger_1.ApiQuery)({ name: 'expires', required: false, description: 'Expiry time in seconds (default 900, max 604800)' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Presigned URL created',
+        schema: { type: 'object', properties: { url: { type: 'string', example: 'https://minio.local/bucket/object?X-Amz-Expires=900&X-Amz-Signature=...' } } },
+    }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Query)('expires')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], DocumentController.prototype, "getPresignedUrl", null);
 __decorate([
     (0, common_1.Post)('ocr/submit'),
     (0, swagger_1.ApiOperation)({

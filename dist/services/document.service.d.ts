@@ -4,11 +4,13 @@ import { CreateDocumentDto } from '../dto/create-document.dto';
 import { UpdateDocumentDto } from '../dto/update-document.dto';
 import { DocumentQueryDto } from '../dto/document-query.dto';
 import { OcrService } from './ocr.service';
+import { MinioService } from './minio.service';
 export declare class DocumentService {
     private documentModel;
     private readonly ocrService;
+    private readonly minioService;
     private readonly logger;
-    constructor(documentModel: Model<DocumentDocument>, ocrService: OcrService);
+    constructor(documentModel: Model<DocumentDocument>, ocrService: OcrService, minioService: MinioService);
     createDocument(createDocumentDto: CreateDocumentDto): Promise<Document>;
     findAllDocuments(query?: DocumentQueryDto): Promise<{
         documents: Document[];
@@ -47,5 +49,8 @@ export declare class DocumentService {
             count: number;
         }>;
         recentDocuments: number;
+    }>;
+    getPresignedUrlForDocument(id: string, expires?: number): Promise<{
+        url: string;
     }>;
 }

@@ -6,6 +6,7 @@ import { CreateDocumentDto } from '../dto/create-document.dto';
 import { UpdateDocumentDto } from '../dto/update-document.dto';
 import { DocumentQueryDto } from '../dto/document-query.dto';
 import { OcrService } from './ocr.service';
+import { MinioService } from './minio.service';
 
 @Injectable()
 export class DocumentService {
@@ -14,6 +15,7 @@ export class DocumentService {
   constructor(
     @InjectModel(Document.name) private documentModel: Model<DocumentDocument>,
     private readonly ocrService: OcrService,
+    private readonly minioService: MinioService,
   ) {}
 
   async createDocument(createDocumentDto: CreateDocumentDto): Promise<Document> {
@@ -425,5 +427,32 @@ export class DocumentService {
       documentsByUploader,
       recentDocuments,
     };
+  }
+
+  async getPresignedUrlForDocument(id: string, expires?: number): Promise<{ url: string }> {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('Invalid document ID');
+    }
+
+    const doc = await this.documentModel.findById(id).exec();
+    if (!doc) {
+      throw new NotFoundException('Document not found');
+    }
+
+    // Expecting fileUrl like http://host:port/bucket/path/to/object.ext
+    try {
+      const url = new URL(doc.fileUrl);
+      // url.pathname starts with /bucket/object...
+      const pathParts = url.pathname.replace(/^\//, '').split('/');
+      const bucket = pathParts.shift() as string;
+      const objectName = pathParts.join('/');
+      if (!bucket || !objectName) {
+        throw new Error('Invalid MinIO fileUrl format');
+      }
+      const signed = await this.minioService.getPresignedUrl(bucket, objectName, expires ?? 900);
+      return { url: signed };
+    } catch (e: any) {
+      throw new BadRequestException(`Failed to create presigned URL: ${e.message}`);
+    }
   }
 }
