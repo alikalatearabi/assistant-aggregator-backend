@@ -1,5 +1,5 @@
 import { Controller, Post, Body, UseGuards, Get, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiExcludeController } from '@nestjs/swagger';
 import { AuthService } from '../services/auth.service';
 import { LoginDto } from '../dto/login.dto';
 import { RegisterDto } from '../dto/register.dto';
@@ -9,6 +9,7 @@ import { GetUser } from '../auth/get-user.decorator';
 import { User } from '../schemas/user.schema';
 
 @ApiTags('Authentication')
+@ApiExcludeController()
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
