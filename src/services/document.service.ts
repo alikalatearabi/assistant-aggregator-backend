@@ -304,30 +304,7 @@ export class DocumentService {
     return document;
   }
 
-  async markOcrFailed(documentId: string, error: string): Promise<Document> {
-    if (!Types.ObjectId.isValid(documentId)) {
-      throw new BadRequestException('Invalid document ID');
-    }
-
-    const document = await this.documentModel
-      .findByIdAndUpdate(
-        documentId,
-        { 
-          ocrStatus: 'failed',
-          'metadata.ocr.error': error,
-          'metadata.ocr.failedAt': new Date().toISOString()
-        },
-        { new: true }
-      )
-      .populate('metadata.user_id')
-      .exec();
-    
-    if (!document) {
-      throw new NotFoundException('Document not found');
-    }
-    
-    return document;
-  }
+  
 
   async reportOcrError(params: { userId: string; documentId: string; page?: number; status: string; message: string }): Promise<Document> {
     const { userId, documentId, page, status, message } = params;

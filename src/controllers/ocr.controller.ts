@@ -38,17 +38,6 @@ export class OcrController {
     return this.documentService.markOcrProcessing(id);
   }
 
-  @Patch(':id/failed')
-  @ApiOperation({
-    summary: 'Mark document OCR processing as failed',
-    description: 'Updates document status to indicate OCR processing has failed',
-  })
-  @ApiParam({ name: 'id', description: 'Document MongoDB ObjectId', example: '507f1f77bcf86cd799439011' })
-  @ApiResponse({ status: 200, description: 'Document marked as failed', type: Document })
-  @ApiResponse({ status: 404, description: 'Document not found' })
-  async markOcrFailed(@Param('id') id: string, @Body('error') error: string): Promise<Document> {
-    return this.documentService.markOcrFailed(id, error);
-  }
 
   @Post('error')
   @ApiOperation({
