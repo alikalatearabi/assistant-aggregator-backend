@@ -15,6 +15,7 @@ import {
   ApiParam,
   ApiQuery,
   ApiBody,
+  ApiExcludeEndpoint,
 } from '@nestjs/swagger';
 import { ChatService } from '../services/chat.service';
 import { CreateChatDto } from '../dto/create-chat.dto';
@@ -80,33 +81,7 @@ export class ChatController {
   }
 
   @Get('stats')
-  @ApiOperation({
-    summary: 'Get chat statistics',
-    description: 'Retrieves comprehensive statistics about chat sessions',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Chat statistics retrieved successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        totalChats: { type: 'number', example: 150 },
-        chatsByUser: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              _id: { type: 'string', example: '507f1f77bcf86cd799439012' },
-              count: { type: 'number', example: 5 },
-            },
-          },
-        },
-        averageMessagesPerChat: { type: 'number', example: 12.5 },
-        recentChats: { type: 'number', example: 8 },
-        activeSessions: { type: 'number', example: 45 },
-      },
-    },
-  })
+  @ApiExcludeEndpoint()
   async getChatStats() {
     return this.chatService.getChatStats();
   }
@@ -114,24 +89,7 @@ export class ChatController {
   // Session-based search endpoint removed as session is no longer part of the schema
 
   @Get('user/:userId')
-  @ApiOperation({
-    summary: 'Get chats by user',
-    description: 'Retrieves all chat sessions for a specific user',
-  })
-  @ApiParam({
-    name: 'userId',
-    description: 'User ID',
-    example: '507f1f77bcf86cd799439012',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'User chats retrieved successfully',
-    type: [Chat],
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Invalid user ID',
-  })
+  @ApiExcludeEndpoint()
   async findChatsByUser(@Param('userId') userId: string): Promise<Chat[]> {
     return this.chatService.findChatsByUser(userId);
   }
@@ -139,64 +97,13 @@ export class ChatController {
   // Session-based retrieval endpoint removed
 
   @Get(':id')
-  @ApiOperation({
-    summary: 'Get chat by ID',
-    description: 'Retrieves a specific chat by its MongoDB ObjectId',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'Chat MongoDB ObjectId',
-    example: '507f1f77bcf86cd799439011',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Chat found successfully',
-    type: Chat,
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Chat not found',
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Invalid chat ID',
-  })
+  @ApiExcludeEndpoint()
   async findChatById(@Param('id') id: string): Promise<Chat> {
     return this.chatService.findChatById(id);
   }
 
   @Get(':id/messages')
-  @ApiOperation({
-    summary: 'Get chat conversation history',
-    description: 'Retrieves the complete conversation history (messages) for a specific chat',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'Chat MongoDB ObjectId',
-    example: '507f1f77bcf86cd799439011',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Conversation history retrieved successfully',
-    schema: {
-      type: 'array',
-      items: {
-        type: 'object',
-        properties: {
-          _id: { type: 'string', example: '507f1f77bcf86cd799439013' },
-          category: { type: 'string', example: 'support' },
-          text: { type: 'string', example: 'How can I help you?' },
-          date: { type: 'string', example: '2023-12-01T10:00:00.000Z' },
-          score: { type: 'number', example: 0.8 },
-          createdAt: { type: 'string', example: '2023-12-01T10:00:00.000Z' },
-        },
-      },
-    },
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Chat not found',
-  })
+  @ApiExcludeEndpoint()
   async getChatMessageHistory(@Param('id') id: string) {
     return this.chatService.getChatMessageHistory(id);
   }
@@ -232,29 +139,7 @@ export class ChatController {
   }
 
   @Patch(':id/add-message')
-  @ApiOperation({
-    summary: 'Add message to chat',
-    description: 'Adds a message to the chat conversation history',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'Chat MongoDB ObjectId',
-    example: '507f1f77bcf86cd799439011',
-  })
-  @ApiBody({ type: AddMessageToChatDto })
-  @ApiResponse({
-    status: 200,
-    description: 'Message added to chat successfully',
-    type: Chat,
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Chat not found',
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Invalid chat or message ID',
-  })
+  @ApiExcludeEndpoint()
   async addMessageToChat(
     @Param('id') id: string,
     @Body() addMessageDto: AddMessageToChatDto,
@@ -263,33 +148,7 @@ export class ChatController {
   }
 
   @Patch(':id/remove-message/:messageId')
-  @ApiOperation({
-    summary: 'Remove message from chat',
-    description: 'Removes a message from the chat conversation history',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'Chat MongoDB ObjectId',
-    example: '507f1f77bcf86cd799439011',
-  })
-  @ApiParam({
-    name: 'messageId',
-    description: 'Message MongoDB ObjectId',
-    example: '507f1f77bcf86cd799439013',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Message removed from chat successfully',
-    type: Chat,
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Chat not found',
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Invalid chat or message ID',
-  })
+  @ApiExcludeEndpoint()
   async removeMessageFromChat(
     @Param('id') id: string,
     @Param('messageId') messageId: string,
