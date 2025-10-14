@@ -15,6 +15,7 @@ import {
   ApiParam,
   ApiQuery,
   ApiBody,
+  ApiExcludeEndpoint,
 } from '@nestjs/swagger';
 import { DocumentService } from '../services/document.service';
 import { CreateDocumentDto } from '../dto/create-document.dto';
@@ -79,125 +80,31 @@ export class DocumentController {
   }
 
   @Get('stats')
-  @ApiOperation({
-    summary: 'Get document statistics',
-    description: 'Retrieves various statistics about documents in the system',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Document statistics retrieved successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        totalDocuments: { type: 'number', example: 150 },
-        documentsByExtension: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              _id: { type: 'string', example: 'pdf' },
-              count: { type: 'number', example: 45 },
-            },
-          },
-        },
-        documentsByUploader: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              _id: { type: 'string', example: '507f1f77bcf86cd799439012' },
-              count: { type: 'number', example: 12 },
-            },
-          },
-        },
-        recentDocuments: { type: 'number', example: 8 },
-      },
-    },
-  })
+  @ApiExcludeEndpoint()
   async getDocumentStats() {
     return this.documentService.getDocumentStats();
   }
 
   @Get('search')
-  @ApiOperation({
-    summary: 'Search documents',
-    description: 'Search documents by filename, extension, or metadata',
-  })
-  @ApiQuery({ name: 'q', required: true, description: 'Search term' })
-  @ApiResponse({
-    status: 200,
-    description: 'Search results retrieved successfully',
-    type: [Document],
-  })
+  @ApiExcludeEndpoint()
   async searchDocuments(@Query('q') searchTerm: string): Promise<Document[]> {
     return this.documentService.searchDocuments(searchTerm);
   }
 
   @Get('uploader/:uploaderId')
-  @ApiOperation({
-    summary: 'Get documents by uploader',
-    description: 'Retrieves all documents uploaded by a specific user',
-  })
-  @ApiParam({
-    name: 'uploaderId',
-    description: 'User ID of the uploader',
-    example: '507f1f77bcf86cd799439012',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Documents retrieved successfully',
-    type: [Document],
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Invalid uploader ID',
-  })
+  @ApiExcludeEndpoint()
   async findDocumentsByUploader(@Param('uploaderId') uploaderId: string): Promise<Document[]> {
     return this.documentService.findDocumentsByUploader(uploaderId);
   }
 
   @Get('extension/:extension')
-  @ApiOperation({
-    summary: 'Get documents by extension',
-    description: 'Retrieves all documents with a specific file extension',
-  })
-  @ApiParam({
-    name: 'extension',
-    description: 'File extension',
-    example: 'pdf',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Documents retrieved successfully',
-    type: [Document],
-  })
+  @ApiExcludeEndpoint()
   async findDocumentsByExtension(@Param('extension') extension: string): Promise<Document[]> {
     return this.documentService.findDocumentsByExtension(extension);
   }
 
   @Get(':id')
-  @ApiOperation({
-    summary: 'Get document by ID',
-    description: 'Retrieves a specific document by its MongoDB ObjectId',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'Document MongoDB ObjectId',
-    example: '507f1f77bcf86cd799439011',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Document found successfully',
-    type: Document,
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Document not found',
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Invalid document ID',
-  })
+  @ApiExcludeEndpoint()
   async findDocumentById(@Param('id') id: string): Promise<Document> {
     return this.documentService.findDocumentById(id);
   }
@@ -233,45 +140,7 @@ export class DocumentController {
   }
 
   @Patch(':id/metadata')
-  @ApiOperation({
-    summary: 'Update document metadata',
-    description: 'Updates only the metadata field of a document',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'Document MongoDB ObjectId',
-    example: '507f1f77bcf86cd799439011',
-  })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        metadata: {
-          type: 'object',
-          example: {
-            user_id: '507f1f77bcf86cd799439012',
-            document_id: 'string2',
-            page_id: 'string111',
-            title: 'string1',
-            approved_date: 'string1',
-            effective_date: 'string1',
-            owner: 'string1',
-            username: 'string1',
-            access_level: 'string1'
-          },
-        },
-      },
-    },
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Document metadata updated successfully',
-    type: Document,
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Document not found',
-  })
+  @ApiExcludeEndpoint()
   async updateDocumentMetadata(
     @Param('id') id: string,
     @Body('metadata') metadata: DocumentMetadataDto,
@@ -280,35 +149,7 @@ export class DocumentController {
   }
 
   @Patch(':id/raw-text')
-  @ApiOperation({
-    summary: 'Update document raw text file ID',
-    description: 'Updates the Elasticsearch document ID for raw text content',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'Document MongoDB ObjectId',
-    example: '507f1f77bcf86cd799439011',
-  })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        rawTextFileId: {
-          type: 'string',
-          example: 'assistant_aggregator_documents_507f1f77bcf86cd799439011',
-        },
-      },
-    },
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Document raw text file ID updated successfully',
-    type: Document,
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Document not found',
-  })
+  @ApiExcludeEndpoint()
   async updateRawTextFileId(
     @Param('id') id: string,
     @Body('rawTextFileId') rawTextFileId: string,
