@@ -14,6 +14,7 @@ import {
   ApiResponse,
   ApiParam,
   ApiQuery,
+  ApiExcludeEndpoint,
 } from '@nestjs/swagger';
 import { MessageService } from '../services/message.service';
 import { CreateMessageDto } from '../dto/create-message.dto';
@@ -76,141 +77,43 @@ export class MessageController {
   }
 
   @Get('stats')
-  @ApiOperation({
-    summary: 'Get message statistics',
-    description: 'Retrieves comprehensive statistics about messages including sentiment analysis',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Message statistics retrieved successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        totalMessages: { type: 'number', example: 150 },
-        messagesByCategory: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              _id: { type: 'string', example: 'support' },
-              count: { type: 'number', example: 45 },
-            },
-          },
-        },
-        averageScore: { type: 'number', example: 0.234 },
-        positiveMessages: { type: 'number', example: 80 },
-        negativeMessages: { type: 'number', example: 30 },
-        neutralMessages: { type: 'number', example: 40 },
-        scoreDistribution: {
-          type: 'object',
-          properties: {
-            veryNegative: { type: 'number', example: 5 },
-            negative: { type: 'number', example: 25 },
-            neutral: { type: 'number', example: 40 },
-            positive: { type: 'number', example: 60 },
-            veryPositive: { type: 'number', example: 20 },
-          },
-        },
-        recentMessages: { type: 'number', example: 12 },
-      },
-    },
-  })
+  @ApiExcludeEndpoint()
   async getMessageStats() {
     return this.messageService.getMessageStats();
   }
 
   @Get('search')
-  @ApiOperation({
-    summary: 'Search messages',
-    description: 'Search messages by category or text content',
-  })
-  @ApiQuery({ name: 'q', required: true, description: 'Search term' })
-  @ApiResponse({
-    status: 200,
-    description: 'Search results retrieved successfully',
-    type: [Message],
-  })
+  @ApiExcludeEndpoint()
   async searchMessages(@Query('q') searchTerm: string): Promise<Message[]> {
     return this.messageService.searchMessages(searchTerm);
   }
 
   @Get('positive')
-  @ApiOperation({
-    summary: 'Get positive messages',
-    description: 'Retrieves all messages with positive sentiment scores (> 0)',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Positive messages retrieved successfully',
-    type: [Message],
-  })
+  @ApiExcludeEndpoint()
   async findPositiveMessages(): Promise<Message[]> {
     return this.messageService.findPositiveMessages();
   }
 
   @Get('negative')
-  @ApiOperation({
-    summary: 'Get negative messages',
-    description: 'Retrieves all messages with negative sentiment scores (< 0)',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Negative messages retrieved successfully',
-    type: [Message],
-  })
+  @ApiExcludeEndpoint()
   async findNegativeMessages(): Promise<Message[]> {
     return this.messageService.findNegativeMessages();
   }
 
   @Get('neutral')
-  @ApiOperation({
-    summary: 'Get neutral messages',
-    description: 'Retrieves all messages with neutral sentiment scores (= 0)',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Neutral messages retrieved successfully',
-    type: [Message],
-  })
+  @ApiExcludeEndpoint()
   async findNeutralMessages(): Promise<Message[]> {
     return this.messageService.findNeutralMessages();
   }
 
   @Get('category/:category')
-  @ApiOperation({
-    summary: 'Get messages by category',
-    description: 'Retrieves all messages in a specific category',
-  })
-  @ApiParam({
-    name: 'category',
-    description: 'Message category',
-    example: 'support',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Messages retrieved successfully',
-    type: [Message],
-  })
+  @ApiExcludeEndpoint()
   async findMessagesByCategory(@Param('category') category: string): Promise<Message[]> {
     return this.messageService.findMessagesByCategory(category);
   }
 
   @Get('score-range')
-  @ApiOperation({
-    summary: 'Get messages by score range',
-    description: 'Retrieves messages within a specified sentiment score range',
-  })
-  @ApiQuery({ name: 'min', required: true, description: 'Minimum score (-1.0 to 1.0)' })
-  @ApiQuery({ name: 'max', required: true, description: 'Maximum score (-1.0 to 1.0)' })
-  @ApiResponse({
-    status: 200,
-    description: 'Messages retrieved successfully',
-    type: [Message],
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Invalid score range',
-  })
+  @ApiExcludeEndpoint()
   async findMessagesByScoreRange(
     @Query('min') minScore: number,
     @Query('max') maxScore: number,
