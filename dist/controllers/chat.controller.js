@@ -232,7 +232,7 @@ __decorate([
         summary: 'Generate chat messages',
         description: 'Generates a chat response. If responseMode is streaming, emits WS events; if blocking, returns a REST payload',
     }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Blocking response', type: 'object' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Blocking response', type: chat_messages_dto_1.ChatMessageAnswerResponseDto }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [chat_messages_dto_1.ChatMessagesRequestDto]),

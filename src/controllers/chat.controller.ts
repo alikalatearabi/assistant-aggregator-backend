@@ -23,7 +23,7 @@ import { UpdateChatDto } from '../dto/update-chat.dto';
 import { ChatQueryDto } from '../dto/chat-query.dto';
 import { AddMessageToChatDto } from '../dto/add-message-to-chat.dto';
 import { Chat } from '../schemas/chat.schema';
-import { ChatMessagesRequestDto, ChatMessagesResponseDto, ChatMessagesResponseMode } from '../dto/chat-messages.dto';
+import { ChatMessagesRequestDto, ChatMessageAnswerResponseDto, ChatMessagesResponseMode } from '../dto/chat-messages.dto';
 import { ChatMessagesService } from '../services/chat-messages.service';
 
 @ApiTags('chats')
@@ -188,10 +188,10 @@ export class ChatController {
     summary: 'Generate chat messages',
     description: 'Generates a chat response. If responseMode is streaming, emits WS events; if blocking, returns a REST payload',
   })
-  @ApiResponse({ status: 200, description: 'Blocking response', type: 'object' })
+  @ApiResponse({ status: 200, description: 'Blocking response', type: ChatMessageAnswerResponseDto })
   async chatMessages(
     @Body() body: ChatMessagesRequestDto,
-  ): Promise<ChatMessagesResponseDto | { taskId: string }> {
+  ): Promise<ChatMessageAnswerResponseDto | { taskId: string }> {
     if (body.responseMode === ChatMessagesResponseMode.STREAMING) {
       return this.chatMessagesService.processStreaming(body);
     }

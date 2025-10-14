@@ -4,7 +4,7 @@ import { UpdateChatDto } from '../dto/update-chat.dto';
 import { ChatQueryDto } from '../dto/chat-query.dto';
 import { AddMessageToChatDto } from '../dto/add-message-to-chat.dto';
 import { Chat } from '../schemas/chat.schema';
-import { ChatMessagesRequestDto, ChatMessagesResponseDto } from '../dto/chat-messages.dto';
+import { ChatMessagesRequestDto, ChatMessageAnswerResponseDto } from '../dto/chat-messages.dto';
 import { ChatMessagesService } from '../services/chat-messages.service';
 export declare class ChatController {
     private readonly chatService;
@@ -35,7 +35,7 @@ export declare class ChatController {
     addMessageToChat(id: string, addMessageDto: AddMessageToChatDto): Promise<Chat>;
     removeMessageFromChat(id: string, messageId: string): Promise<Chat>;
     deleteChat(id: string): Promise<Chat>;
-    chatMessages(body: ChatMessagesRequestDto): Promise<ChatMessagesResponseDto | {
+    chatMessages(body: ChatMessagesRequestDto): Promise<ChatMessageAnswerResponseDto | {
         taskId: string;
     }>;
 }

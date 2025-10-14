@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsArray, IsBoolean, IsEnum, IsMongoId, IsNotEmpty, IsObject, IsOptional, IsString, ValidateNested, IsInt, Min } from 'class-validator';
+import { IsArray, IsBoolean, IsEnum, IsMongoId, IsNotEmpty, IsObject, IsOptional, IsString, ValidateNested, IsInt, Min, IsNumber } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class ChatMessagesInputsDto {
@@ -54,44 +54,56 @@ export class ChatMessagesRequestDto {
 }
 
 export class ChatMessagesMetadataDto {
-  @ApiPropertyOptional({ description: 'Retriever resources used', type: Object })
-  @IsObject()
-  @IsOptional()
-  retrieverResources?: Record<string, any>;
-
   @ApiPropertyOptional({ description: 'Usage details', type: Object })
   @IsObject()
   @IsOptional()
   usage?: Record<string, any>;
 }
 
-export class ChatMessagesResponseDto {
-  @ApiProperty({ description: 'Event type', example: 'message.completed' })
-  event: string;
+export class RetrieverResourceDto {
+  @ApiProperty({ description: 'Position in ranking', example: 1 })
+  @IsInt()
+  @Min(0)
+  position: number;
 
-  @ApiProperty({ description: 'Task ID (UUID)' })
-  taskId: string;
+  @ApiProperty({ description: 'Dataset ID', example: 'dataset-123' })
+  @IsString()
+  dataset_id: string;
 
-  @ApiProperty({ description: 'Event ID' })
-  id: string;
+  @ApiProperty({ description: 'Dataset name', example: 'Finance Reports' })
+  @IsString()
+  dataset_name: string;
 
-  @ApiProperty({ description: 'Message ID (same as id)' })
-  messageId: string;
+  @ApiProperty({ description: 'Document name', example: 'Q3_KPI.pdf' })
+  @IsString()
+  document_name: string;
 
+  @ApiProperty({ description: 'Document ID', example: '507f1f77bcf86cd799439011' })
+  @IsString()
+  document_id: string;
+
+  @ApiProperty({ description: 'Segment ID', example: 'seg-42' })
+  @IsString()
+  segment_id: string;
+
+  @ApiProperty({ description: 'Similarity score', example: 0.87 })
+  @IsNumber()
+  score: number;
+
+  @ApiProperty({ description: 'Content snippet', example: 'The Q3 KPI increased by 15%...' })
+  @IsString()
+  content: string;
+}
+
+export class ChatMessageAnswerResponseDto {
   @ApiProperty({ description: 'Conversation ID' })
-  conversationId: string;
-
-  @ApiProperty({ description: 'Mode', example: 'chat', default: 'chat' })
-  mode: string;
+  conversation_id: string;
 
   @ApiProperty({ description: 'Answer content' })
   answer: string;
 
-  @ApiProperty({ description: 'Metadata object', type: ChatMessagesMetadataDto })
-  metadata: ChatMessagesMetadataDto;
-
-  @ApiProperty({ description: 'Creation timestamp', example: new Date().toISOString() })
-  created_at: string;
+  @ApiProperty({ description: 'Metadata', type: ChatMessagesMetadataDto })
+  metadata: ChatMessagesMetadataDto & { retriever_resources?: RetrieverResourceDto[] };
 }
 
 export class ChatMessagesErrorDto {

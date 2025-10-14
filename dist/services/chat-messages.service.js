@@ -20,8 +20,18 @@ let ChatMessagesService = class ChatMessagesService {
     }
     async generateAnswer(req) {
         const answer = `Answer for: ${req.query}`;
+        const retriever_resources = Array.from({ length: Math.max(1, req.inputs.contextCount) }).map((_, i) => ({
+            position: i,
+            dataset_id: 'dataset-demo',
+            dataset_name: 'Demo Dataset',
+            document_name: `Doc-${i + 1}`,
+            document_id: '507f1f77bcf86cd7994390' + String(10 + i),
+            segment_id: `seg-${i}`,
+            score: Math.max(0, 1 - i * 0.1),
+            content: `Snippet ${i + 1} related to ${req.query}`,
+        }));
         const metadata = {
-            retrieverResources: { topK: req.inputs.contextCount, threshold: req.inputs.similarityThreshold },
+            retriever_resources,
             usage: { tokens: 42 },
         };
         return { answer, metadata };
@@ -30,17 +40,10 @@ let ChatMessagesService = class ChatMessagesService {
         const taskId = (0, crypto_1.randomUUID)();
         try {
             const { answer, metadata } = await this.generateAnswer(req);
-            const id = (0, crypto_1.randomUUID)();
             return {
-                event: 'message.completed',
-                taskId,
-                id,
-                messageId: id,
-                conversationId: req.conversationId,
-                mode: 'chat',
+                conversation_id: req.conversationId,
                 answer,
                 metadata,
-                created_at: new Date().toISOString(),
             };
         }
         catch (e) {
