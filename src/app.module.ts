@@ -9,6 +9,7 @@ import { Document, DocumentSchema } from './schemas/document.schema';
 import { Message, MessageSchema } from './schemas/message.schema';
 import { Chat, ChatSchema } from './schemas/chat.schema';
 import { DocumentController } from './controllers/document.controller';
+import { OcrController } from './controllers/ocr.controller';
 import { MessageController } from './controllers/message.controller';
 import { ChatController } from './controllers/chat.controller';
 import { DocumentService } from './services/document.service';
@@ -42,7 +43,7 @@ import { AuthModule } from './auth/auth.module';
     ]),
     AuthModule,
   ],
-  controllers: [AppController, UserController, DocumentController, MessageController, ChatController],
+  controllers: [AppController, UserController, DocumentController, OcrController, MessageController, ChatController],
   providers: [AppService, DocumentService, MessageService, ChatService, OcrService, ChatMessagesGateway, ChatMessagesService, MinioService],
 })
 export class AppModule {}
