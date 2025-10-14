@@ -37,12 +37,9 @@ let DocumentService = DocumentService_1 = class DocumentService {
         const savedDocument = await createdDocument.save();
         this.logger.log(`Document created successfully: ${savedDocument._id}, sending to OCR service`);
         try {
-            const metaUserId = savedDocument?.metadata?.user_id;
-            const userId = metaUserId ? (typeof metaUserId === 'string' ? metaUserId : metaUserId.toString()) : undefined;
             await this.ocrService.sendDocumentForOcrAsync({
                 documentId: savedDocument._id.toString(),
                 minioUrl: savedDocument.fileUrl,
-                userId,
             });
             this.logger.log(`Document ${savedDocument._id} sent to OCR service successfully`);
         }
@@ -226,36 +223,15 @@ let DocumentService = DocumentService_1 = class DocumentService {
         }
         return document;
     }
-    async markOcrFailed(documentId, error) {
-        if (!mongoose_2.Types.ObjectId.isValid(documentId)) {
-            throw new common_1.BadRequestException('Invalid document ID');
-        }
-        const document = await this.documentModel
-            .findByIdAndUpdate(documentId, {
-            ocrStatus: 'failed',
-            'metadata.ocr.error': error,
-            'metadata.ocr.failedAt': new Date().toISOString()
-        }, { new: true })
-            .populate('metadata.user_id')
-            .exec();
-        if (!document) {
-            throw new common_1.NotFoundException('Document not found');
-        }
-        return document;
-    }
     async reportOcrError(params) {
-        const { userId, documentId, page, status, message } = params;
+        const { documentId, page, status, message } = params;
         if (!mongoose_2.Types.ObjectId.isValid(documentId)) {
             throw new common_1.BadRequestException('Invalid document ID');
-        }
-        if (!mongoose_2.Types.ObjectId.isValid(userId)) {
-            throw new common_1.BadRequestException('Invalid user ID');
         }
         const update = {
             ocrStatus: status,
             'metadata.ocr.error': message,
             'metadata.ocr.failedAt': new Date().toISOString(),
-            'metadata.user_id': new mongoose_2.Types.ObjectId(userId),
         };
         if (page) {
             update['metadata.ocr.page'] = page;

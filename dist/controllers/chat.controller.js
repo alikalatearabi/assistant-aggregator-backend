@@ -120,57 +120,14 @@ __decorate([
 ], ChatController.prototype, "findAllChats", null);
 __decorate([
     (0, common_1.Get)('stats'),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Get chat statistics',
-        description: 'Retrieves comprehensive statistics about chat sessions',
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Chat statistics retrieved successfully',
-        schema: {
-            type: 'object',
-            properties: {
-                totalChats: { type: 'number', example: 150 },
-                chatsByUser: {
-                    type: 'array',
-                    items: {
-                        type: 'object',
-                        properties: {
-                            _id: { type: 'string', example: '507f1f77bcf86cd799439012' },
-                            count: { type: 'number', example: 5 },
-                        },
-                    },
-                },
-                averageMessagesPerChat: { type: 'number', example: 12.5 },
-                recentChats: { type: 'number', example: 8 },
-                activeSessions: { type: 'number', example: 45 },
-            },
-        },
-    }),
+    (0, swagger_1.ApiExcludeEndpoint)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], ChatController.prototype, "getChatStats", null);
 __decorate([
     (0, common_1.Get)('user/:userId'),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Get chats by user',
-        description: 'Retrieves all chat sessions for a specific user',
-    }),
-    (0, swagger_1.ApiParam)({
-        name: 'userId',
-        description: 'User ID',
-        example: '507f1f77bcf86cd799439012',
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'User chats retrieved successfully',
-        type: [chat_schema_1.Chat],
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 400,
-        description: 'Invalid user ID',
-    }),
+    (0, swagger_1.ApiExcludeEndpoint)(),
     __param(0, (0, common_1.Param)('userId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -178,28 +135,7 @@ __decorate([
 ], ChatController.prototype, "findChatsByUser", null);
 __decorate([
     (0, common_1.Get)(':id'),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Get chat by ID',
-        description: 'Retrieves a specific chat by its MongoDB ObjectId',
-    }),
-    (0, swagger_1.ApiParam)({
-        name: 'id',
-        description: 'Chat MongoDB ObjectId',
-        example: '507f1f77bcf86cd799439011',
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Chat found successfully',
-        type: chat_schema_1.Chat,
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 404,
-        description: 'Chat not found',
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 400,
-        description: 'Invalid chat ID',
-    }),
+    (0, swagger_1.ApiExcludeEndpoint)(),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -207,37 +143,7 @@ __decorate([
 ], ChatController.prototype, "findChatById", null);
 __decorate([
     (0, common_1.Get)(':id/messages'),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Get chat conversation history',
-        description: 'Retrieves the complete conversation history (messages) for a specific chat',
-    }),
-    (0, swagger_1.ApiParam)({
-        name: 'id',
-        description: 'Chat MongoDB ObjectId',
-        example: '507f1f77bcf86cd799439011',
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Conversation history retrieved successfully',
-        schema: {
-            type: 'array',
-            items: {
-                type: 'object',
-                properties: {
-                    _id: { type: 'string', example: '507f1f77bcf86cd799439013' },
-                    category: { type: 'string', example: 'support' },
-                    text: { type: 'string', example: 'How can I help you?' },
-                    date: { type: 'string', example: '2023-12-01T10:00:00.000Z' },
-                    score: { type: 'number', example: 0.8 },
-                    createdAt: { type: 'string', example: '2023-12-01T10:00:00.000Z' },
-                },
-            },
-        },
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 404,
-        description: 'Chat not found',
-    }),
+    (0, swagger_1.ApiExcludeEndpoint)(),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -275,29 +181,7 @@ __decorate([
 ], ChatController.prototype, "updateChat", null);
 __decorate([
     (0, common_1.Patch)(':id/add-message'),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Add message to chat',
-        description: 'Adds a message to the chat conversation history',
-    }),
-    (0, swagger_1.ApiParam)({
-        name: 'id',
-        description: 'Chat MongoDB ObjectId',
-        example: '507f1f77bcf86cd799439011',
-    }),
-    (0, swagger_1.ApiBody)({ type: add_message_to_chat_dto_1.AddMessageToChatDto }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Message added to chat successfully',
-        type: chat_schema_1.Chat,
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 404,
-        description: 'Chat not found',
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 400,
-        description: 'Invalid chat or message ID',
-    }),
+    (0, swagger_1.ApiExcludeEndpoint)(),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -306,33 +190,7 @@ __decorate([
 ], ChatController.prototype, "addMessageToChat", null);
 __decorate([
     (0, common_1.Patch)(':id/remove-message/:messageId'),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Remove message from chat',
-        description: 'Removes a message from the chat conversation history',
-    }),
-    (0, swagger_1.ApiParam)({
-        name: 'id',
-        description: 'Chat MongoDB ObjectId',
-        example: '507f1f77bcf86cd799439011',
-    }),
-    (0, swagger_1.ApiParam)({
-        name: 'messageId',
-        description: 'Message MongoDB ObjectId',
-        example: '507f1f77bcf86cd799439013',
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Message removed from chat successfully',
-        type: chat_schema_1.Chat,
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 404,
-        description: 'Chat not found',
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 400,
-        description: 'Invalid chat or message ID',
-    }),
+    (0, swagger_1.ApiExcludeEndpoint)(),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Param)('messageId')),
     __metadata("design:type", Function),

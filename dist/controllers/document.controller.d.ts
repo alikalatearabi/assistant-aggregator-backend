@@ -1,11 +1,9 @@
 import { DocumentService } from '../services/document.service';
 import { CreateDocumentDto } from '../dto/create-document.dto';
 import { UpdateDocumentDto } from '../dto/update-document.dto';
-import { SubmitOcrResultDto } from '../dto/submit-ocr-result.dto';
 import { DocumentQueryDto } from '../dto/document-query.dto';
 import { DocumentMetadataDto } from '../dto/document-metadata.dto';
 import { Document } from '../schemas/document.schema';
-import { ReportOcrErrorDto } from '../dto/report-ocr-error.dto';
 export declare class DocumentController {
     private readonly documentService;
     constructor(documentService: DocumentService);
@@ -40,9 +38,4 @@ export declare class DocumentController {
     getPresignedUrl(id: string, expires?: string): Promise<{
         url: string;
     }>;
-    submitOcrResult(submitOcrResultDto: SubmitOcrResultDto): Promise<Document>;
-    markOcrProcessing(id: string): Promise<Document>;
-    markOcrFailed(id: string, error: string): Promise<Document>;
-    reportOcrError(body: ReportOcrErrorDto): Promise<Document>;
-    getDocumentsByOcrStatus(status: string): Promise<Document[]>;
 }

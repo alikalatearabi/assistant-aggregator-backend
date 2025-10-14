@@ -118,61 +118,14 @@ __decorate([
 ], MessageController.prototype, "findAllMessages", null);
 __decorate([
     (0, common_1.Get)('stats'),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Get message statistics',
-        description: 'Retrieves comprehensive statistics about messages including sentiment analysis',
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Message statistics retrieved successfully',
-        schema: {
-            type: 'object',
-            properties: {
-                totalMessages: { type: 'number', example: 150 },
-                messagesByCategory: {
-                    type: 'array',
-                    items: {
-                        type: 'object',
-                        properties: {
-                            _id: { type: 'string', example: 'support' },
-                            count: { type: 'number', example: 45 },
-                        },
-                    },
-                },
-                averageScore: { type: 'number', example: 0.234 },
-                positiveMessages: { type: 'number', example: 80 },
-                negativeMessages: { type: 'number', example: 30 },
-                neutralMessages: { type: 'number', example: 40 },
-                scoreDistribution: {
-                    type: 'object',
-                    properties: {
-                        veryNegative: { type: 'number', example: 5 },
-                        negative: { type: 'number', example: 25 },
-                        neutral: { type: 'number', example: 40 },
-                        positive: { type: 'number', example: 60 },
-                        veryPositive: { type: 'number', example: 20 },
-                    },
-                },
-                recentMessages: { type: 'number', example: 12 },
-            },
-        },
-    }),
+    (0, swagger_1.ApiExcludeEndpoint)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], MessageController.prototype, "getMessageStats", null);
 __decorate([
     (0, common_1.Get)('search'),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Search messages',
-        description: 'Search messages by category or text content',
-    }),
-    (0, swagger_1.ApiQuery)({ name: 'q', required: true, description: 'Search term' }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Search results retrieved successfully',
-        type: [message_schema_1.Message],
-    }),
+    (0, swagger_1.ApiExcludeEndpoint)(),
     __param(0, (0, common_1.Query)('q')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -180,65 +133,28 @@ __decorate([
 ], MessageController.prototype, "searchMessages", null);
 __decorate([
     (0, common_1.Get)('positive'),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Get positive messages',
-        description: 'Retrieves all messages with positive sentiment scores (> 0)',
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Positive messages retrieved successfully',
-        type: [message_schema_1.Message],
-    }),
+    (0, swagger_1.ApiExcludeEndpoint)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], MessageController.prototype, "findPositiveMessages", null);
 __decorate([
     (0, common_1.Get)('negative'),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Get negative messages',
-        description: 'Retrieves all messages with negative sentiment scores (< 0)',
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Negative messages retrieved successfully',
-        type: [message_schema_1.Message],
-    }),
+    (0, swagger_1.ApiExcludeEndpoint)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], MessageController.prototype, "findNegativeMessages", null);
 __decorate([
     (0, common_1.Get)('neutral'),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Get neutral messages',
-        description: 'Retrieves all messages with neutral sentiment scores (= 0)',
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Neutral messages retrieved successfully',
-        type: [message_schema_1.Message],
-    }),
+    (0, swagger_1.ApiExcludeEndpoint)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], MessageController.prototype, "findNeutralMessages", null);
 __decorate([
     (0, common_1.Get)('category/:category'),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Get messages by category',
-        description: 'Retrieves all messages in a specific category',
-    }),
-    (0, swagger_1.ApiParam)({
-        name: 'category',
-        description: 'Message category',
-        example: 'support',
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Messages retrieved successfully',
-        type: [message_schema_1.Message],
-    }),
+    (0, swagger_1.ApiExcludeEndpoint)(),
     __param(0, (0, common_1.Param)('category')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -246,21 +162,7 @@ __decorate([
 ], MessageController.prototype, "findMessagesByCategory", null);
 __decorate([
     (0, common_1.Get)('score-range'),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Get messages by score range',
-        description: 'Retrieves messages within a specified sentiment score range',
-    }),
-    (0, swagger_1.ApiQuery)({ name: 'min', required: true, description: 'Minimum score (-1.0 to 1.0)' }),
-    (0, swagger_1.ApiQuery)({ name: 'max', required: true, description: 'Maximum score (-1.0 to 1.0)' }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Messages retrieved successfully',
-        type: [message_schema_1.Message],
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 400,
-        description: 'Invalid score range',
-    }),
+    (0, swagger_1.ApiExcludeEndpoint)(),
     __param(0, (0, common_1.Query)('min')),
     __param(1, (0, common_1.Query)('max')),
     __metadata("design:type", Function),

@@ -3,7 +3,6 @@ import { HttpService } from '@nestjs/axios';
 export interface OcrRequest {
     documentId: string;
     minioUrl: string;
-    userId?: string;
 }
 export interface OcrResponse {
     success: boolean;

@@ -19,7 +19,7 @@ async function bootstrap() {
         .addTag('documents', 'Document management operations')
         .addTag('messages', 'Message management operations')
         .addTag('chats', 'Chat session management operations')
-        .addTag('auth', 'Authentication operations')
+        .addTag('Authentication', 'Auth endpoints: register, login, profile')
         .addBearerAuth()
         .build();
     const document = swagger_1.SwaggerModule.createDocument(app, config);

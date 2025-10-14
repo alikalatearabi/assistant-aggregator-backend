@@ -18,11 +18,9 @@ const swagger_1 = require("@nestjs/swagger");
 const document_service_1 = require("../services/document.service");
 const create_document_dto_1 = require("../dto/create-document.dto");
 const update_document_dto_1 = require("../dto/update-document.dto");
-const submit_ocr_result_dto_1 = require("../dto/submit-ocr-result.dto");
 const document_query_dto_1 = require("../dto/document-query.dto");
 const document_metadata_dto_1 = require("../dto/document-metadata.dto");
 const document_schema_1 = require("../schemas/document.schema");
-const report_ocr_error_dto_1 = require("../dto/report-ocr-error.dto");
 let DocumentController = class DocumentController {
     documentService;
     constructor(documentService) {
@@ -64,27 +62,6 @@ let DocumentController = class DocumentController {
     async getPresignedUrl(id, expires) {
         const exp = expires ? parseInt(expires, 10) : undefined;
         return this.documentService.getPresignedUrlForDocument(id, exp);
-    }
-    async submitOcrResult(submitOcrResultDto) {
-        return this.documentService.submitOcrResult(submitOcrResultDto.documentId.toString(), submitOcrResultDto.raw_text, submitOcrResultDto.page);
-    }
-    async markOcrProcessing(id) {
-        return this.documentService.markOcrProcessing(id);
-    }
-    async markOcrFailed(id, error) {
-        return this.documentService.markOcrFailed(id, error);
-    }
-    async reportOcrError(body) {
-        return this.documentService.reportOcrError({
-            userId: body.user_id,
-            documentId: body.document_id,
-            page: body.page,
-            status: body.status,
-            message: body.message,
-        });
-    }
-    async getDocumentsByOcrStatus(status) {
-        return this.documentService.findDocumentsByOcrStatus(status);
     }
 };
 exports.DocumentController = DocumentController;
@@ -142,57 +119,14 @@ __decorate([
 ], DocumentController.prototype, "findAllDocuments", null);
 __decorate([
     (0, common_1.Get)('stats'),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Get document statistics',
-        description: 'Retrieves various statistics about documents in the system',
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Document statistics retrieved successfully',
-        schema: {
-            type: 'object',
-            properties: {
-                totalDocuments: { type: 'number', example: 150 },
-                documentsByExtension: {
-                    type: 'array',
-                    items: {
-                        type: 'object',
-                        properties: {
-                            _id: { type: 'string', example: 'pdf' },
-                            count: { type: 'number', example: 45 },
-                        },
-                    },
-                },
-                documentsByUploader: {
-                    type: 'array',
-                    items: {
-                        type: 'object',
-                        properties: {
-                            _id: { type: 'string', example: '507f1f77bcf86cd799439012' },
-                            count: { type: 'number', example: 12 },
-                        },
-                    },
-                },
-                recentDocuments: { type: 'number', example: 8 },
-            },
-        },
-    }),
+    (0, swagger_1.ApiExcludeEndpoint)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], DocumentController.prototype, "getDocumentStats", null);
 __decorate([
     (0, common_1.Get)('search'),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Search documents',
-        description: 'Search documents by filename, extension, or metadata',
-    }),
-    (0, swagger_1.ApiQuery)({ name: 'q', required: true, description: 'Search term' }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Search results retrieved successfully',
-        type: [document_schema_1.Document],
-    }),
+    (0, swagger_1.ApiExcludeEndpoint)(),
     __param(0, (0, common_1.Query)('q')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -200,24 +134,7 @@ __decorate([
 ], DocumentController.prototype, "searchDocuments", null);
 __decorate([
     (0, common_1.Get)('uploader/:uploaderId'),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Get documents by uploader',
-        description: 'Retrieves all documents uploaded by a specific user',
-    }),
-    (0, swagger_1.ApiParam)({
-        name: 'uploaderId',
-        description: 'User ID of the uploader',
-        example: '507f1f77bcf86cd799439012',
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Documents retrieved successfully',
-        type: [document_schema_1.Document],
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 400,
-        description: 'Invalid uploader ID',
-    }),
+    (0, swagger_1.ApiExcludeEndpoint)(),
     __param(0, (0, common_1.Param)('uploaderId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -225,20 +142,7 @@ __decorate([
 ], DocumentController.prototype, "findDocumentsByUploader", null);
 __decorate([
     (0, common_1.Get)('extension/:extension'),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Get documents by extension',
-        description: 'Retrieves all documents with a specific file extension',
-    }),
-    (0, swagger_1.ApiParam)({
-        name: 'extension',
-        description: 'File extension',
-        example: 'pdf',
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Documents retrieved successfully',
-        type: [document_schema_1.Document],
-    }),
+    (0, swagger_1.ApiExcludeEndpoint)(),
     __param(0, (0, common_1.Param)('extension')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -246,28 +150,7 @@ __decorate([
 ], DocumentController.prototype, "findDocumentsByExtension", null);
 __decorate([
     (0, common_1.Get)(':id'),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Get document by ID',
-        description: 'Retrieves a specific document by its MongoDB ObjectId',
-    }),
-    (0, swagger_1.ApiParam)({
-        name: 'id',
-        description: 'Document MongoDB ObjectId',
-        example: '507f1f77bcf86cd799439011',
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Document found successfully',
-        type: document_schema_1.Document,
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 404,
-        description: 'Document not found',
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 400,
-        description: 'Invalid document ID',
-    }),
+    (0, swagger_1.ApiExcludeEndpoint)(),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -305,45 +188,7 @@ __decorate([
 ], DocumentController.prototype, "updateDocument", null);
 __decorate([
     (0, common_1.Patch)(':id/metadata'),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Update document metadata',
-        description: 'Updates only the metadata field of a document',
-    }),
-    (0, swagger_1.ApiParam)({
-        name: 'id',
-        description: 'Document MongoDB ObjectId',
-        example: '507f1f77bcf86cd799439011',
-    }),
-    (0, swagger_1.ApiBody)({
-        schema: {
-            type: 'object',
-            properties: {
-                metadata: {
-                    type: 'object',
-                    example: {
-                        user_id: '507f1f77bcf86cd799439012',
-                        document_id: 'string2',
-                        page_id: 'string111',
-                        title: 'string1',
-                        approved_date: 'string1',
-                        effective_date: 'string1',
-                        owner: 'string1',
-                        username: 'string1',
-                        access_level: 'string1'
-                    },
-                },
-            },
-        },
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Document metadata updated successfully',
-        type: document_schema_1.Document,
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 404,
-        description: 'Document not found',
-    }),
+    (0, swagger_1.ApiExcludeEndpoint)(),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)('metadata')),
     __metadata("design:type", Function),
@@ -352,35 +197,7 @@ __decorate([
 ], DocumentController.prototype, "updateDocumentMetadata", null);
 __decorate([
     (0, common_1.Patch)(':id/raw-text'),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Update document raw text file ID',
-        description: 'Updates the Elasticsearch document ID for raw text content',
-    }),
-    (0, swagger_1.ApiParam)({
-        name: 'id',
-        description: 'Document MongoDB ObjectId',
-        example: '507f1f77bcf86cd799439011',
-    }),
-    (0, swagger_1.ApiBody)({
-        schema: {
-            type: 'object',
-            properties: {
-                rawTextFileId: {
-                    type: 'string',
-                    example: 'assistant_aggregator_documents_507f1f77bcf86cd799439011',
-                },
-            },
-        },
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Document raw text file ID updated successfully',
-        type: document_schema_1.Document,
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 404,
-        description: 'Document not found',
-    }),
+    (0, swagger_1.ApiExcludeEndpoint)(),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)('rawTextFileId')),
     __metadata("design:type", Function),
@@ -435,129 +252,6 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], DocumentController.prototype, "getPresignedUrl", null);
-__decorate([
-    (0, common_1.Post)('ocr/submit'),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Submit OCR analysis result',
-        description: 'Endpoint for OCR service to submit extracted text and analysis results',
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'OCR result submitted successfully',
-        type: document_schema_1.Document,
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 404,
-        description: 'Document not found',
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 400,
-        description: 'Bad Request - Invalid input data or document ID',
-    }),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [submit_ocr_result_dto_1.SubmitOcrResultDto]),
-    __metadata("design:returntype", Promise)
-], DocumentController.prototype, "submitOcrResult", null);
-__decorate([
-    (0, common_1.Patch)(':id/ocr/processing'),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Mark document as being processed by OCR',
-        description: 'Updates document status to indicate OCR processing has started',
-    }),
-    (0, swagger_1.ApiParam)({
-        name: 'id',
-        description: 'Document MongoDB ObjectId',
-        example: '507f1f77bcf86cd799439011',
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Document marked as processing',
-        type: document_schema_1.Document,
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 404,
-        description: 'Document not found',
-    }),
-    __param(0, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], DocumentController.prototype, "markOcrProcessing", null);
-__decorate([
-    (0, common_1.Patch)(':id/ocr/failed'),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Mark document OCR processing as failed',
-        description: 'Updates document status to indicate OCR processing has failed',
-    }),
-    (0, swagger_1.ApiParam)({
-        name: 'id',
-        description: 'Document MongoDB ObjectId',
-        example: '507f1f77bcf86cd799439011',
-    }),
-    (0, swagger_1.ApiBody)({
-        schema: {
-            type: 'object',
-            properties: {
-                error: {
-                    type: 'string',
-                    example: 'OCR processing failed: Unable to extract text from image',
-                },
-            },
-            required: ['error'],
-        },
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Document marked as failed',
-        type: document_schema_1.Document,
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 404,
-        description: 'Document not found',
-    }),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)('error')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
-    __metadata("design:returntype", Promise)
-], DocumentController.prototype, "markOcrFailed", null);
-__decorate([
-    (0, common_1.Post)('ocr/error'),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Report OCR error',
-        description: 'Endpoint for OCR module to report an error with user, document, and optional page context',
-    }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'OCR error recorded', type: document_schema_1.Document }),
-    (0, swagger_1.ApiResponse)({ status: 400, description: 'Invalid input data' }),
-    (0, swagger_1.ApiResponse)({ status: 404, description: 'Document not found' }),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [report_ocr_error_dto_1.ReportOcrErrorDto]),
-    __metadata("design:returntype", Promise)
-], DocumentController.prototype, "reportOcrError", null);
-__decorate([
-    (0, common_1.Get)('ocr/status/:status'),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Get documents by OCR status',
-        description: 'Retrieves documents filtered by their OCR processing status',
-    }),
-    (0, swagger_1.ApiParam)({
-        name: 'status',
-        description: 'OCR processing status',
-        enum: ['pending', 'processing', 'completed', 'failed'],
-        example: 'completed',
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Documents retrieved successfully',
-        type: [document_schema_1.Document],
-    }),
-    __param(0, (0, common_1.Param)('status')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], DocumentController.prototype, "getDocumentsByOcrStatus", null);
 exports.DocumentController = DocumentController = __decorate([
     (0, swagger_1.ApiTags)('documents'),
     (0, common_1.Controller)('documents'),

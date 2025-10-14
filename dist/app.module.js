@@ -18,6 +18,7 @@ const document_schema_1 = require("./schemas/document.schema");
 const message_schema_1 = require("./schemas/message.schema");
 const chat_schema_1 = require("./schemas/chat.schema");
 const document_controller_1 = require("./controllers/document.controller");
+const ocr_controller_1 = require("./controllers/ocr.controller");
 const message_controller_1 = require("./controllers/message.controller");
 const chat_controller_1 = require("./controllers/chat.controller");
 const document_service_1 = require("./services/document.service");
@@ -54,7 +55,7 @@ exports.AppModule = AppModule = __decorate([
             ]),
             auth_module_1.AuthModule,
         ],
-        controllers: [app_controller_1.AppController, app_controller_1.UserController, document_controller_1.DocumentController, message_controller_1.MessageController, chat_controller_1.ChatController],
+        controllers: [app_controller_1.AppController, app_controller_1.UserController, document_controller_1.DocumentController, ocr_controller_1.OcrController, message_controller_1.MessageController, chat_controller_1.ChatController],
         providers: [app_service_1.AppService, document_service_1.DocumentService, message_service_1.MessageService, chat_service_1.ChatService, ocr_service_1.OcrService, chat_messages_gateway_1.ChatMessagesGateway, chat_messages_service_1.ChatMessagesService, minio_service_1.MinioService],
     })
 ], AppModule);

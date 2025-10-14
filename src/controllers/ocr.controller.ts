@@ -42,14 +42,13 @@ export class OcrController {
   @Post('error')
   @ApiOperation({
     summary: 'Report OCR error',
-    description: 'Endpoint for OCR module to report an error with user, document, and optional page context',
+    description: 'Endpoint for OCR module to report an error for a document with optional page context',
   })
   @ApiResponse({ status: 200, description: 'OCR error recorded', type: Document })
   @ApiResponse({ status: 400, description: 'Invalid input data' })
   @ApiResponse({ status: 404, description: 'Document not found' })
   async reportOcrError(@Body() body: ReportOcrErrorDto): Promise<Document> {
     return this.documentService.reportOcrError({
-      userId: body.user_id,
       documentId: body.document_id,
       page: body.page,
       status: body.status,

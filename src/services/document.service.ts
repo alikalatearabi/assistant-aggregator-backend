@@ -29,13 +29,9 @@ export class DocumentService {
     this.logger.log(`Document created successfully: ${savedDocument._id}, sending to OCR service`);
     
     try {
-      const metaUserId: any = (savedDocument as any)?.metadata?.user_id;
-      const userId = metaUserId ? (typeof metaUserId === 'string' ? metaUserId : metaUserId.toString()) : undefined;
-
       await this.ocrService.sendDocumentForOcrAsync({
         documentId: savedDocument._id.toString(),
         minioUrl: savedDocument.fileUrl,
-        userId,
       });
       
       this.logger.log(`Document ${savedDocument._id} sent to OCR service successfully`);
@@ -306,20 +302,16 @@ export class DocumentService {
 
   
 
-  async reportOcrError(params: { userId: string; documentId: string; page?: number; status: string; message: string }): Promise<Document> {
-    const { userId, documentId, page, status, message } = params;
+  async reportOcrError(params: { documentId: string; page?: number; status: string; message: string }): Promise<Document> {
+    const { documentId, page, status, message } = params;
     if (!Types.ObjectId.isValid(documentId)) {
       throw new BadRequestException('Invalid document ID');
-    }
-    if (!Types.ObjectId.isValid(userId)) {
-      throw new BadRequestException('Invalid user ID');
     }
 
     const update: any = {
       ocrStatus: status,
       'metadata.ocr.error': message,
       'metadata.ocr.failedAt': new Date().toISOString(),
-      'metadata.user_id': new Types.ObjectId(userId),
     };
     if (page) {
       update['metadata.ocr.page'] = page;

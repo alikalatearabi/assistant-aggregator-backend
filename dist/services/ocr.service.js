@@ -46,7 +46,6 @@ let OcrService = OcrService_1 = class OcrService {
                 throw new Error('OCR authorization failed: access_token not present in response');
             }
             const requestPayload = {
-                user_id: ocrRequest.userId,
                 job_id: ocrRequest.documentId,
                 url: ocrRequest.minioUrl,
             };

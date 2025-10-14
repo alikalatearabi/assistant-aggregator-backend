@@ -6,7 +6,6 @@ import { firstValueFrom } from 'rxjs';
 export interface OcrRequest {
   documentId: string;
   minioUrl: string;
-  userId?: string;
 }
 
 export interface OcrResponse {
@@ -59,7 +58,6 @@ export class OcrService {
 
       // 2) Submit file with bearer token
       const requestPayload = {
-        user_id: ocrRequest.userId,
         job_id: ocrRequest.documentId,
         url: ocrRequest.minioUrl,
       };

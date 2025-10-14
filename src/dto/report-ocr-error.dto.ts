@@ -2,10 +2,6 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsMongoId, IsNotEmpty, IsOptional, IsInt, Min, IsIn, IsString } from 'class-validator';
 
 export class ReportOcrErrorDto {
-  @ApiProperty({ description: 'User identifier', example: '507f1f77bcf86cd799439012' })
-  @IsMongoId()
-  user_id: string;
-
   @ApiProperty({ description: 'Document identifier', example: '507f1f77bcf86cd799439011' })
   @IsMongoId()
   document_id: string;
