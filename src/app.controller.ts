@@ -17,6 +17,7 @@ import {
   ApiParam,
   ApiBody,
   ApiBearerAuth,
+  ApiExcludeEndpoint,
 } from '@nestjs/swagger';
 import { AppService } from './app.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -106,19 +107,7 @@ export class UserController {
   @Get('active')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.SUPERVISOR)
-  @ApiOperation({ 
-    summary: 'Get active users', 
-    description: 'Retrieves a list of all active users - Admin/Manager/Supervisor only' 
-  })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'List of active users retrieved successfully', 
-    type: [User] 
-  })
-  @ApiResponse({ 
-    status: 403, 
-    description: 'Forbidden - Insufficient permissions' 
-  })
+  @ApiExcludeEndpoint()
   async findActiveUsers(): Promise<User[]> {
     return this.appService.findActiveUsers();
   }
@@ -126,25 +115,7 @@ export class UserController {
   @Get('role/:role')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.SUPERVISOR)
-  @ApiOperation({ 
-    summary: 'Get users by role', 
-    description: 'Retrieves all users with the specified role - Admin/Manager/Supervisor only' 
-  })
-  @ApiParam({ 
-    name: 'role', 
-    enum: UserRole, 
-    description: 'User role to filter by',
-    example: UserRole.USER,
-  })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'List of users with specified role', 
-    type: [User] 
-  })
-  @ApiResponse({ 
-    status: 403, 
-    description: 'Forbidden - Insufficient permissions' 
-  })
+  @ApiExcludeEndpoint()
   async findUsersByRole(@Param('role') role: UserRole): Promise<User[]> {
     return this.appService.findUsersByRole(role);
   }
@@ -152,52 +123,13 @@ export class UserController {
   @Get('organization-level/:level')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.SUPERVISOR)
-  @ApiOperation({ 
-    summary: 'Get users by organization level', 
-    description: 'Retrieves all users with the specified organization level - Admin/Manager/Supervisor only' 
-  })
-  @ApiParam({ 
-    name: 'level', 
-    enum: OrganizationLevel, 
-    description: 'Organization level to filter by',
-    example: OrganizationLevel.SENIOR,
-  })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'List of users with specified organization level', 
-    type: [User] 
-  })
-  @ApiResponse({ 
-    status: 403, 
-    description: 'Forbidden - Insufficient permissions' 
-  })
+  @ApiExcludeEndpoint()
   async findUsersByOrganizationLevel(@Param('level') level: OrganizationLevel): Promise<User[]> {
     return this.appService.findUsersByOrganizationLevel(level);
   }
 
   @Get(':id')
-  @ApiOperation({ 
-    summary: 'Get user by ID', 
-    description: 'Retrieves a specific user by their MongoDB ObjectId (own profile or admin/manager access)' 
-  })
-  @ApiParam({ 
-    name: 'id', 
-    description: 'User MongoDB ObjectId',
-    example: '507f1f77bcf86cd799439011',
-  })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'User found successfully', 
-    type: User 
-  })
-  @ApiResponse({ 
-    status: 404, 
-    description: 'User not found' 
-  })
-  @ApiResponse({ 
-    status: 403, 
-    description: 'Forbidden - Can only access own profile unless admin/manager' 
-  })
+  @ApiExcludeEndpoint()
   async findUserById(@Param('id') id: string, @GetUser() currentUser: any): Promise<User> {
     // Allow users to access their own profile, or admin/manager to access any profile
     if (currentUser.id !== id && 
@@ -210,28 +142,7 @@ export class UserController {
   @Get('email/:email')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.MANAGER)
-  @ApiOperation({ 
-    summary: 'Get user by email', 
-    description: 'Retrieves a specific user by their email address - Admin/Manager only' 
-  })
-  @ApiParam({ 
-    name: 'email', 
-    description: 'User email address',
-    example: 'john.doe@company.com',
-  })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'User found successfully', 
-    type: User 
-  })
-  @ApiResponse({ 
-    status: 404, 
-    description: 'User not found' 
-  })
-  @ApiResponse({ 
-    status: 403, 
-    description: 'Forbidden - Admin/Manager access required' 
-  })
+  @ApiExcludeEndpoint()
   async findUserByEmail(@Param('email') email: string): Promise<User> {
     return this.appService.findUserByEmail(email);
   }
@@ -239,28 +150,7 @@ export class UserController {
   @Get('nationalcode/:nationalcode')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.MANAGER)
-  @ApiOperation({ 
-    summary: 'Get user by national code', 
-    description: 'Retrieves a specific user by their national code - Admin/Manager only' 
-  })
-  @ApiParam({ 
-    name: 'nationalcode', 
-    description: 'User national code',
-    example: '1234567890',
-  })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'User found successfully', 
-    type: User 
-  })
-  @ApiResponse({ 
-    status: 404, 
-    description: 'User not found' 
-  })
-  @ApiResponse({ 
-    status: 403, 
-    description: 'Forbidden - Admin/Manager access required' 
-  })
+  @ApiExcludeEndpoint()
   async findUserByNationalCode(@Param('nationalcode') nationalcode: string): Promise<User> {
     return this.appService.findUserByNationalCode(nationalcode);
   }
@@ -268,28 +158,7 @@ export class UserController {
   @Get('personalcode/:personalcode')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.MANAGER)
-  @ApiOperation({ 
-    summary: 'Get user by personal code', 
-    description: 'Retrieves a specific user by their personal code (employee ID) - Admin/Manager only' 
-  })
-  @ApiParam({ 
-    name: 'personalcode', 
-    description: 'User personal code (employee ID)',
-    example: 'EMP001',
-  })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'User found successfully', 
-    type: User 
-  })
-  @ApiResponse({ 
-    status: 404, 
-    description: 'User not found' 
-  })
-  @ApiResponse({ 
-    status: 403, 
-    description: 'Forbidden - Admin/Manager access required' 
-  })
+  @ApiExcludeEndpoint()
   async findUserByPersonalCode(@Param('personalcode') personalcode: string): Promise<User> {
     return this.appService.findUserByPersonalCode(personalcode);
   }
@@ -337,28 +206,7 @@ export class UserController {
   @Patch(':id/deactivate')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.MANAGER)
-  @ApiOperation({ 
-    summary: 'Deactivate user', 
-    description: 'Sets the user status to inactive - Admin/Manager only' 
-  })
-  @ApiParam({ 
-    name: 'id', 
-    description: 'User MongoDB ObjectId',
-    example: '507f1f77bcf86cd799439011',
-  })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'User deactivated successfully', 
-    type: User 
-  })
-  @ApiResponse({ 
-    status: 404, 
-    description: 'User not found' 
-  })
-  @ApiResponse({ 
-    status: 403, 
-    description: 'Forbidden - Insufficient permissions' 
-  })
+  @ApiExcludeEndpoint()
   async deactivateUser(@Param('id') id: string): Promise<User> {
     return this.appService.deactivateUser(id);
   }
@@ -366,28 +214,7 @@ export class UserController {
   @Patch(':id/activate')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.MANAGER)
-  @ApiOperation({ 
-    summary: 'Activate user', 
-    description: 'Sets the user status to active - Admin/Manager only' 
-  })
-  @ApiParam({ 
-    name: 'id', 
-    description: 'User MongoDB ObjectId',
-    example: '507f1f77bcf86cd799439011',
-  })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'User activated successfully', 
-    type: User 
-  })
-  @ApiResponse({ 
-    status: 404, 
-    description: 'User not found' 
-  })
-  @ApiResponse({ 
-    status: 403, 
-    description: 'Forbidden - Insufficient permissions' 
-  })
+  @ApiExcludeEndpoint()
   async activateUser(@Param('id') id: string): Promise<User> {
     return this.appService.activateUser(id);
   }
