@@ -17,7 +17,6 @@ async function bootstrap() {
         .setVersion('1.0')
         .addTag('users', 'User management operations')
         .addTag('documents', 'Document management operations')
-        .addTag('messages', 'Message management operations')
         .addTag('chats', 'Chat session management operations')
         .addTag('Authentication', 'Auth endpoints: register, login, profile')
         .addBearerAuth()

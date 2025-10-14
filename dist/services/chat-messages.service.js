@@ -13,10 +13,13 @@ exports.ChatMessagesService = void 0;
 const common_1 = require("@nestjs/common");
 const crypto_1 = require("crypto");
 const chat_messages_gateway_1 = require("../gateways/chat-messages.gateway");
+const chat_service_1 = require("./chat.service");
 let ChatMessagesService = class ChatMessagesService {
     gateway;
-    constructor(gateway) {
+    chatService;
+    constructor(gateway, chatService) {
         this.gateway = gateway;
+        this.chatService = chatService;
     }
     async generateAnswer(req) {
         const answer = `Answer for: ${req.query}`;
@@ -39,9 +42,17 @@ let ChatMessagesService = class ChatMessagesService {
     async processBlocking(req) {
         const taskId = (0, crypto_1.randomUUID)();
         try {
+            let conversationId = req.conversationId;
+            if (!conversationId) {
+                const newChat = await this.chatService.createChat({
+                    user: req.user,
+                    conversationHistory: [],
+                });
+                conversationId = newChat._id.toString();
+            }
             const { answer, metadata } = await this.generateAnswer(req);
             return {
-                conversation_id: req.conversationId,
+                conversation_id: conversationId,
                 answer,
                 metadata,
             };
@@ -61,13 +72,21 @@ let ChatMessagesService = class ChatMessagesService {
     async processStreaming(req) {
         const taskId = (0, crypto_1.randomUUID)();
         try {
+            let conversationId = req.conversationId;
+            if (!conversationId) {
+                const newChat = await this.chatService.createChat({
+                    user: req.user,
+                    conversationHistory: [],
+                });
+                conversationId = newChat._id.toString();
+            }
             const chunks = [`Working on: ${req.query}`, ' ...', ' done.'];
             for (const chunk of chunks) {
                 this.gateway.broadcast({
                     event: 'message',
                     taskId,
                     messageId: undefined,
-                    conversationId: req.conversationId,
+                    conversationId: conversationId,
                     mode: 'chat',
                     answer: chunk,
                     metadata: {},
@@ -81,7 +100,7 @@ let ChatMessagesService = class ChatMessagesService {
                 event: 'message_end',
                 taskId,
                 messageId: id,
-                conversationId: req.conversationId,
+                conversationId: conversationId,
                 mode: 'chat',
                 answer,
                 metadata,
@@ -94,7 +113,7 @@ let ChatMessagesService = class ChatMessagesService {
                 event: 'error',
                 taskId,
                 messageId: undefined,
-                conversationId: req.conversationId,
+                conversationId: req.conversationId || 'unknown',
                 mode: 'chat',
                 answer: '',
                 status: 500,
@@ -109,6 +128,7 @@ let ChatMessagesService = class ChatMessagesService {
 exports.ChatMessagesService = ChatMessagesService;
 exports.ChatMessagesService = ChatMessagesService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [chat_messages_gateway_1.ChatMessagesGateway])
+    __metadata("design:paramtypes", [chat_messages_gateway_1.ChatMessagesGateway,
+        chat_service_1.ChatService])
 ], ChatMessagesService);
 //# sourceMappingURL=chat-messages.service.js.map

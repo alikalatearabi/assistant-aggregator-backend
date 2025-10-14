@@ -68,8 +68,9 @@ __decorate([
     __metadata("design:type", String)
 ], ChatMessagesRequestDto.prototype, "user", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Conversation ID', example: '507f1f77bcf86cd799439011' }),
+    (0, swagger_1.ApiPropertyOptional)({ description: 'Conversation ID (optional, will create new chat if not provided)', example: '507f1f77bcf86cd799439011' }),
     (0, class_validator_1.IsMongoId)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], ChatMessagesRequestDto.prototype, "conversationId", void 0);
 __decorate([

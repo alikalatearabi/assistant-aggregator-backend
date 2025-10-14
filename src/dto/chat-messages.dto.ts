@@ -38,9 +38,10 @@ export class ChatMessagesRequestDto {
   @IsMongoId()
   user: string;
 
-  @ApiProperty({ description: 'Conversation ID', example: '507f1f77bcf86cd799439011' })
+  @ApiPropertyOptional({ description: 'Conversation ID (optional, will create new chat if not provided)', example: '507f1f77bcf86cd799439011' })
   @IsMongoId()
-  conversationId: string;
+  @IsOptional()
+  conversationId?: string;
 
   @ApiPropertyOptional({ description: 'Associated file IDs', type: [String], example: ['507f1f77bcf86cd799439021'] })
   @IsArray()

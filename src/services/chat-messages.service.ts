@@ -1,11 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { ChatMessagesGateway } from '../gateways/chat-messages.gateway';
+import { ChatService } from './chat.service';
 import { ChatMessagesRequestDto, ChatMessageAnswerResponseDto, ChatMessagesErrorDto, RetrieverResourceDto } from '../dto/chat-messages.dto';
 
 @Injectable()
 export class ChatMessagesService {
-  constructor(private readonly gateway: ChatMessagesGateway) {}
+  constructor(
+    private readonly gateway: ChatMessagesGateway,
+    private readonly chatService: ChatService,
+  ) {}
 
   // Simulated retriever/LLM processing
   private async generateAnswer(req: ChatMessagesRequestDto): Promise<{ answer: string; metadata: any }> {
@@ -31,9 +35,19 @@ export class ChatMessagesService {
   async processBlocking(req: ChatMessagesRequestDto): Promise<ChatMessageAnswerResponseDto | { event: 'error'; error: ChatMessagesErrorDto; taskId: string }> {
     const taskId = randomUUID();
     try {
+      // Create new chat if conversationId is not provided
+      let conversationId = req.conversationId;
+      if (!conversationId) {
+        const newChat = await this.chatService.createChat({
+          user: req.user,
+          conversationHistory: [],
+        });
+        conversationId = newChat._id.toString();
+      }
+
       const { answer, metadata } = await this.generateAnswer(req);
       return {
-        conversation_id: req.conversationId,
+        conversation_id: conversationId,
         answer,
         metadata,
       };
@@ -53,6 +67,16 @@ export class ChatMessagesService {
   async processStreaming(req: ChatMessagesRequestDto): Promise<{ taskId: string }> {
     const taskId = randomUUID();
     try {
+      // Create new chat if conversationId is not provided
+      let conversationId = req.conversationId;
+      if (!conversationId) {
+        const newChat = await this.chatService.createChat({
+          user: req.user,
+          conversationHistory: [],
+        });
+        conversationId = newChat._id.toString();
+      }
+
       // Simulate streaming chunks
       const chunks = [`Working on: ${req.query}`, ' ...', ' done.'];
       for (const chunk of chunks) {
@@ -61,7 +85,7 @@ export class ChatMessagesService {
           taskId,
         //   id: randomUUID(),
           messageId: undefined,
-          conversationId: req.conversationId,
+          conversationId: conversationId,
           mode: 'chat',
           answer: chunk,
           metadata: {},
@@ -78,7 +102,7 @@ export class ChatMessagesService {
         taskId,
         // id,
         messageId: id,
-        conversationId: req.conversationId,
+        conversationId: conversationId,
         mode: 'chat',
         answer,
         metadata,
@@ -91,7 +115,7 @@ export class ChatMessagesService {
         taskId,
         // id: randomUUID(),
         messageId: undefined,
-        conversationId: req.conversationId,
+        conversationId: req.conversationId || 'unknown',
         mode: 'chat',
         answer: '',
         status: 500,
