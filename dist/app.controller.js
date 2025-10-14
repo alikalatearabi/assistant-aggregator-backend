@@ -166,19 +166,7 @@ __decorate([
     (0, common_1.Get)('active'),
     (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)(user_schema_1.UserRole.ADMIN, user_schema_1.UserRole.MANAGER, user_schema_1.UserRole.SUPERVISOR),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Get active users',
-        description: 'Retrieves a list of all active users - Admin/Manager/Supervisor only'
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'List of active users retrieved successfully',
-        type: [user_schema_1.User]
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 403,
-        description: 'Forbidden - Insufficient permissions'
-    }),
+    (0, swagger_1.ApiExcludeEndpoint)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
@@ -187,25 +175,7 @@ __decorate([
     (0, common_1.Get)('role/:role'),
     (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)(user_schema_1.UserRole.ADMIN, user_schema_1.UserRole.MANAGER, user_schema_1.UserRole.SUPERVISOR),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Get users by role',
-        description: 'Retrieves all users with the specified role - Admin/Manager/Supervisor only'
-    }),
-    (0, swagger_1.ApiParam)({
-        name: 'role',
-        enum: user_schema_1.UserRole,
-        description: 'User role to filter by',
-        example: user_schema_1.UserRole.USER,
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'List of users with specified role',
-        type: [user_schema_1.User]
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 403,
-        description: 'Forbidden - Insufficient permissions'
-    }),
+    (0, swagger_1.ApiExcludeEndpoint)(),
     __param(0, (0, common_1.Param)('role')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -215,25 +185,7 @@ __decorate([
     (0, common_1.Get)('organization-level/:level'),
     (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)(user_schema_1.UserRole.ADMIN, user_schema_1.UserRole.MANAGER, user_schema_1.UserRole.SUPERVISOR),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Get users by organization level',
-        description: 'Retrieves all users with the specified organization level - Admin/Manager/Supervisor only'
-    }),
-    (0, swagger_1.ApiParam)({
-        name: 'level',
-        enum: user_schema_1.OrganizationLevel,
-        description: 'Organization level to filter by',
-        example: user_schema_1.OrganizationLevel.SENIOR,
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'List of users with specified organization level',
-        type: [user_schema_1.User]
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 403,
-        description: 'Forbidden - Insufficient permissions'
-    }),
+    (0, swagger_1.ApiExcludeEndpoint)(),
     __param(0, (0, common_1.Param)('level')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -241,28 +193,7 @@ __decorate([
 ], UserController.prototype, "findUsersByOrganizationLevel", null);
 __decorate([
     (0, common_1.Get)(':id'),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Get user by ID',
-        description: 'Retrieves a specific user by their MongoDB ObjectId (own profile or admin/manager access)'
-    }),
-    (0, swagger_1.ApiParam)({
-        name: 'id',
-        description: 'User MongoDB ObjectId',
-        example: '507f1f77bcf86cd799439011',
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'User found successfully',
-        type: user_schema_1.User
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 404,
-        description: 'User not found'
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 403,
-        description: 'Forbidden - Can only access own profile unless admin/manager'
-    }),
+    (0, swagger_1.ApiExcludeEndpoint)(),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, get_user_decorator_1.GetUser)()),
     __metadata("design:type", Function),
@@ -273,28 +204,7 @@ __decorate([
     (0, common_1.Get)('email/:email'),
     (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)(user_schema_1.UserRole.ADMIN, user_schema_1.UserRole.MANAGER),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Get user by email',
-        description: 'Retrieves a specific user by their email address - Admin/Manager only'
-    }),
-    (0, swagger_1.ApiParam)({
-        name: 'email',
-        description: 'User email address',
-        example: 'john.doe@company.com',
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'User found successfully',
-        type: user_schema_1.User
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 404,
-        description: 'User not found'
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 403,
-        description: 'Forbidden - Admin/Manager access required'
-    }),
+    (0, swagger_1.ApiExcludeEndpoint)(),
     __param(0, (0, common_1.Param)('email')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -304,28 +214,7 @@ __decorate([
     (0, common_1.Get)('nationalcode/:nationalcode'),
     (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)(user_schema_1.UserRole.ADMIN, user_schema_1.UserRole.MANAGER),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Get user by national code',
-        description: 'Retrieves a specific user by their national code - Admin/Manager only'
-    }),
-    (0, swagger_1.ApiParam)({
-        name: 'nationalcode',
-        description: 'User national code',
-        example: '1234567890',
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'User found successfully',
-        type: user_schema_1.User
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 404,
-        description: 'User not found'
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 403,
-        description: 'Forbidden - Admin/Manager access required'
-    }),
+    (0, swagger_1.ApiExcludeEndpoint)(),
     __param(0, (0, common_1.Param)('nationalcode')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -335,28 +224,7 @@ __decorate([
     (0, common_1.Get)('personalcode/:personalcode'),
     (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)(user_schema_1.UserRole.ADMIN, user_schema_1.UserRole.MANAGER),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Get user by personal code',
-        description: 'Retrieves a specific user by their personal code (employee ID) - Admin/Manager only'
-    }),
-    (0, swagger_1.ApiParam)({
-        name: 'personalcode',
-        description: 'User personal code (employee ID)',
-        example: 'EMP001',
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'User found successfully',
-        type: user_schema_1.User
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 404,
-        description: 'User not found'
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 403,
-        description: 'Forbidden - Admin/Manager access required'
-    }),
+    (0, swagger_1.ApiExcludeEndpoint)(),
     __param(0, (0, common_1.Param)('personalcode')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -401,28 +269,7 @@ __decorate([
     (0, common_1.Patch)(':id/deactivate'),
     (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)(user_schema_1.UserRole.ADMIN, user_schema_1.UserRole.MANAGER),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Deactivate user',
-        description: 'Sets the user status to inactive - Admin/Manager only'
-    }),
-    (0, swagger_1.ApiParam)({
-        name: 'id',
-        description: 'User MongoDB ObjectId',
-        example: '507f1f77bcf86cd799439011',
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'User deactivated successfully',
-        type: user_schema_1.User
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 404,
-        description: 'User not found'
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 403,
-        description: 'Forbidden - Insufficient permissions'
-    }),
+    (0, swagger_1.ApiExcludeEndpoint)(),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -432,28 +279,7 @@ __decorate([
     (0, common_1.Patch)(':id/activate'),
     (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)(user_schema_1.UserRole.ADMIN, user_schema_1.UserRole.MANAGER),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Activate user',
-        description: 'Sets the user status to active - Admin/Manager only'
-    }),
-    (0, swagger_1.ApiParam)({
-        name: 'id',
-        description: 'User MongoDB ObjectId',
-        example: '507f1f77bcf86cd799439011',
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'User activated successfully',
-        type: user_schema_1.User
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 404,
-        description: 'User not found'
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 403,
-        description: 'Forbidden - Insufficient permissions'
-    }),
+    (0, swagger_1.ApiExcludeEndpoint)(),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),

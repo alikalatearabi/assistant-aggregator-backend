@@ -66,29 +66,29 @@ services:
       timeout: 10s
       retries: 5
 
-  # app:
-  #   build: .
-  #   container_name: assistant-aggregator-app
-  #   restart: unless-stopped
-  #   ports:
-  #     - "3000:3000"
-  #   environment:
-  #     - NODE_ENV=production
-  #     - MONGODB_URI=mongodb://admin:password123@mongodb:27017/assistant_aggregator?authSource=admin
-  #     - MINIO_ENDPOINT=minio
-  #     - MINIO_PORT=9000
-  #     - MINIO_ACCESS_KEY=minioadmin
-  #     - MINIO_SECRET_KEY=minioadmin123
-  #     - MINIO_USE_SSL=false
-  #     - MINIO_BUCKET_NAME=assistant-aggregator
-  #     - ELASTICSEARCH_NODE=http://elasticsearch:9200
-  #     - ELASTICSEARCH_INDEX_PREFIX=assistant_aggregator
-  #   depends_on:
-  #     - mongodb
-  #     - minio
-  #     - elasticsearch
-  #   networks:
-  #     - assistant-aggregator-network
+  app:
+    build: .
+    container_name: assistant-aggregator-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://admin:password123@mongodb:27017/assistant_aggregator?authSource=admin
+      - MINIO_ENDPOINT=minio
+      - MINIO_PORT=9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin123
+      - MINIO_USE_SSL=false
+      - MINIO_BUCKET_NAME=assistant-aggregator
+      - ELASTICSEARCH_NODE=http://elasticsearch:9200
+      - ELASTICSEARCH_INDEX_PREFIX=assistant_aggregator
+    depends_on:
+      - mongodb
+      - minio
+      - elasticsearch
+    networks:
+      - assistant-aggregator-network
 
 volumes:
   mongodb_data:
