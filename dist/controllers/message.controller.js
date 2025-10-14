@@ -259,6 +259,7 @@ __decorate([
 ], MessageController.prototype, "deleteMessage", null);
 exports.MessageController = MessageController = __decorate([
     (0, swagger_1.ApiTags)('messages'),
+    (0, swagger_1.ApiExcludeController)(),
     (0, common_1.Controller)('messages'),
     __metadata("design:paramtypes", [message_service_1.MessageService])
 ], MessageController);

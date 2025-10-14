@@ -15,6 +15,7 @@ import {
   ApiParam,
   ApiQuery,
   ApiExcludeEndpoint,
+  ApiExcludeController,
 } from '@nestjs/swagger';
 import { MessageService } from '../services/message.service';
 import { CreateMessageDto } from '../dto/create-message.dto';
@@ -23,6 +24,7 @@ import { MessageQueryDto } from '../dto/message-query.dto';
 import { Message } from '../schemas/message.schema';
 
 @ApiTags('messages')
+@ApiExcludeController()
 @Controller('messages')
 export class MessageController {
   constructor(private readonly messageService: MessageService) {}
