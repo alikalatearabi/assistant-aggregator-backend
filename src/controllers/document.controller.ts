@@ -7,6 +7,8 @@ import {
   Param,
   Delete,
   Query,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -16,8 +18,12 @@ import {
   ApiQuery,
   ApiBody,
   ApiExcludeEndpoint,
+  ApiConsumes,
 } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { DocumentService } from '../services/document.service';
+import { MinioService } from '../services/minio.service';
+import { BadRequestException } from '@nestjs/common';
 import { CreateDocumentDto } from '../dto/create-document.dto';
 import { UpdateDocumentDto } from '../dto/update-document.dto';
 import { DocumentQueryDto } from '../dto/document-query.dto';
@@ -27,24 +33,76 @@ import { Document } from '../schemas/document.schema';
 @ApiTags('documents')
 @Controller('documents')
 export class DocumentController {
-  constructor(private readonly documentService: DocumentService) {}
+  constructor(
+    private readonly documentService: DocumentService,
+    private readonly minioService: MinioService,
+  ) {}
 
   @Post()
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
   @ApiOperation({
-    summary: 'Create a new document',
-    description: 'Creates a new document record with file information and metadata',
+    summary: 'Upload and create a new document',
+    description: 'Uploads a file and creates a document record; file is sent to OCR service afterward',
   })
-  @ApiResponse({
-    status: 201,
-    description: 'Document created successfully',
-    type: Document,
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: { type: 'string', format: 'binary', description: 'Document file to upload' },
+        filename: { type: 'string', example: 'report.pdf' },
+        extension: { type: 'string', example: 'pdf' },
+        metadata: {
+          type: 'object',
+          additionalProperties: true,
+          description: 'Optional metadata JSON (will be stored under metadata)'
+        },
+      },
+      required: ['file', 'filename', 'extension'],
+    },
   })
-  @ApiResponse({
-    status: 400,
-    description: 'Bad Request - Invalid input data',
-  })
-  async createDocument(@Body() createDocumentDto: CreateDocumentDto): Promise<Document> {
-    return this.documentService.createDocument(createDocumentDto);
+  @ApiResponse({ status: 201, description: 'Document created successfully', type: Document })
+  @ApiResponse({ status: 400, description: 'Bad Request - Invalid input data' })
+  async createDocument(
+    @UploadedFile() file: any,
+    @Body() body: any,
+  ): Promise<Document> {
+    // Validate required fields from body
+    if (!file || !body?.filename || !body?.extension) {
+      throw new BadRequestException('file, filename and extension are required');
+    }
+
+    // Parse metadata if it's a JSON string
+    let metadataParsed: any = undefined;
+    if (typeof body?.metadata === 'string') {
+      try {
+        metadataParsed = JSON.parse(body.metadata);
+      } catch (e) {
+        throw new BadRequestException('metadata must be a valid JSON string');
+      }
+    } else if (body?.metadata && typeof body.metadata === 'object') {
+      metadataParsed = body.metadata;
+    }
+
+    // Upload to MinIO and obtain a public URL
+    const safeName = String(body.filename).replace(/\s+/g, '_');
+    const objectName = `documents/${Date.now()}_${safeName}`;
+    const fileUrl = await this.minioService.uploadAndGetUrl({
+      buffer: file.buffer,
+      objectName,
+      contentType: file.mimetype,
+    });
+
+    // Build DTO expected by service
+    const dto: CreateDocumentDto = {
+      filename: body.filename,
+      fileUrl,
+      extension: body.extension,
+      rawTextFileId: body.rawTextFileId,
+      metadata: metadataParsed,
+    } as any;
+
+    return this.documentService.createDocument(dto);
   }
 
   @Get()

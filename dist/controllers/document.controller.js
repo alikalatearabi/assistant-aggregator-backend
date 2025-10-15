@@ -15,19 +15,52 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DocumentController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
+const platform_express_1 = require("@nestjs/platform-express");
 const document_service_1 = require("../services/document.service");
-const create_document_dto_1 = require("../dto/create-document.dto");
+const minio_service_1 = require("../services/minio.service");
+const common_2 = require("@nestjs/common");
 const update_document_dto_1 = require("../dto/update-document.dto");
 const document_query_dto_1 = require("../dto/document-query.dto");
 const document_metadata_dto_1 = require("../dto/document-metadata.dto");
 const document_schema_1 = require("../schemas/document.schema");
 let DocumentController = class DocumentController {
     documentService;
-    constructor(documentService) {
+    minioService;
+    constructor(documentService, minioService) {
         this.documentService = documentService;
+        this.minioService = minioService;
     }
-    async createDocument(createDocumentDto) {
-        return this.documentService.createDocument(createDocumentDto);
+    async createDocument(file, body) {
+        if (!file || !body?.filename || !body?.extension) {
+            throw new common_2.BadRequestException('file, filename and extension are required');
+        }
+        let metadataParsed = undefined;
+        if (typeof body?.metadata === 'string') {
+            try {
+                metadataParsed = JSON.parse(body.metadata);
+            }
+            catch (e) {
+                throw new common_2.BadRequestException('metadata must be a valid JSON string');
+            }
+        }
+        else if (body?.metadata && typeof body.metadata === 'object') {
+            metadataParsed = body.metadata;
+        }
+        const safeName = String(body.filename).replace(/\s+/g, '_');
+        const objectName = `documents/${Date.now()}_${safeName}`;
+        const fileUrl = await this.minioService.uploadAndGetUrl({
+            buffer: file.buffer,
+            objectName,
+            contentType: file.mimetype,
+        });
+        const dto = {
+            filename: body.filename,
+            fileUrl,
+            extension: body.extension,
+            rawTextFileId: body.rawTextFileId,
+            metadata: metadataParsed,
+        };
+        return this.documentService.createDocument(dto);
     }
     async findAllDocuments(query) {
         return this.documentService.findAllDocuments(query);
@@ -67,22 +100,34 @@ let DocumentController = class DocumentController {
 exports.DocumentController = DocumentController;
 __decorate([
     (0, common_1.Post)(),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
+    (0, swagger_1.ApiConsumes)('multipart/form-data'),
     (0, swagger_1.ApiOperation)({
-        summary: 'Create a new document',
-        description: 'Creates a new document record with file information and metadata',
+        summary: 'Upload and create a new document',
+        description: 'Uploads a file and creates a document record; file is sent to OCR service afterward',
     }),
-    (0, swagger_1.ApiResponse)({
-        status: 201,
-        description: 'Document created successfully',
-        type: document_schema_1.Document,
+    (0, swagger_1.ApiBody)({
+        schema: {
+            type: 'object',
+            properties: {
+                file: { type: 'string', format: 'binary', description: 'Document file to upload' },
+                filename: { type: 'string', example: 'report.pdf' },
+                extension: { type: 'string', example: 'pdf' },
+                metadata: {
+                    type: 'object',
+                    additionalProperties: true,
+                    description: 'Optional metadata JSON (will be stored under metadata)'
+                },
+            },
+            required: ['file', 'filename', 'extension'],
+        },
     }),
-    (0, swagger_1.ApiResponse)({
-        status: 400,
-        description: 'Bad Request - Invalid input data',
-    }),
-    __param(0, (0, common_1.Body)()),
+    (0, swagger_1.ApiResponse)({ status: 201, description: 'Document created successfully', type: document_schema_1.Document }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Bad Request - Invalid input data' }),
+    __param(0, (0, common_1.UploadedFile)()),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_document_dto_1.CreateDocumentDto]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], DocumentController.prototype, "createDocument", null);
 __decorate([
@@ -255,6 +300,7 @@ __decorate([
 exports.DocumentController = DocumentController = __decorate([
     (0, swagger_1.ApiTags)('documents'),
     (0, common_1.Controller)('documents'),
-    __metadata("design:paramtypes", [document_service_1.DocumentService])
+    __metadata("design:paramtypes", [document_service_1.DocumentService,
+        minio_service_1.MinioService])
 ], DocumentController);
 //# sourceMappingURL=document.controller.js.map

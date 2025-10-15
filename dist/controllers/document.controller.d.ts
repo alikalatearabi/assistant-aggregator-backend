@@ -1,13 +1,14 @@
 import { DocumentService } from '../services/document.service';
-import { CreateDocumentDto } from '../dto/create-document.dto';
+import { MinioService } from '../services/minio.service';
 import { UpdateDocumentDto } from '../dto/update-document.dto';
 import { DocumentQueryDto } from '../dto/document-query.dto';
 import { DocumentMetadataDto } from '../dto/document-metadata.dto';
 import { Document } from '../schemas/document.schema';
 export declare class DocumentController {
     private readonly documentService;
-    constructor(documentService: DocumentService);
-    createDocument(createDocumentDto: CreateDocumentDto): Promise<Document>;
+    private readonly minioService;
+    constructor(documentService: DocumentService, minioService: MinioService);
+    createDocument(file: any, body: any): Promise<Document>;
     findAllDocuments(query: DocumentQueryDto): Promise<{
         documents: Document[];
         total: number;
