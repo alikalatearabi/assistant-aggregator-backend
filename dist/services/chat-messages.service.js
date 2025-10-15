@@ -13,13 +13,10 @@ exports.ChatMessagesService = void 0;
 const common_1 = require("@nestjs/common");
 const crypto_1 = require("crypto");
 const chat_messages_gateway_1 = require("../gateways/chat-messages.gateway");
-const chat_service_1 = require("./chat.service");
 let ChatMessagesService = class ChatMessagesService {
     gateway;
-    chatService;
-    constructor(gateway, chatService) {
+    constructor(gateway) {
         this.gateway = gateway;
-        this.chatService = chatService;
     }
     async generateAnswer(req) {
         const answer = `Answer for: ${req.query}`;
@@ -42,17 +39,9 @@ let ChatMessagesService = class ChatMessagesService {
     async processBlocking(req) {
         const taskId = (0, crypto_1.randomUUID)();
         try {
-            let conversationId = req.conversationId;
-            if (!conversationId) {
-                const newChat = await this.chatService.createChat({
-                    user: req.user,
-                    conversationHistory: [],
-                });
-                conversationId = newChat._id.toString();
-            }
             const { answer, metadata } = await this.generateAnswer(req);
             return {
-                conversation_id: conversationId,
+                conversation_id: req.conversationId || 'unknown',
                 answer,
                 metadata,
             };
@@ -72,22 +61,12 @@ let ChatMessagesService = class ChatMessagesService {
     async processStreaming(req) {
         const taskId = (0, crypto_1.randomUUID)();
         try {
-            let conversationId = req.conversationId;
-            if (!conversationId) {
-                const newChat = await this.chatService.createChat({
-                    user: req.user,
-                    conversationHistory: [],
-                });
-                conversationId = newChat._id.toString();
-            }
             const chunks = [`Working on: ${req.query}`, ' ...', ' done.'];
             for (const chunk of chunks) {
                 this.gateway.broadcast({
                     event: 'message',
                     taskId,
-                    messageId: undefined,
-                    conversationId: conversationId,
-                    mode: 'chat',
+                    conversation_id: req.conversationId || 'unknown',
                     answer: chunk,
                     metadata: {},
                     created_at: new Date().toISOString(),
@@ -95,13 +74,10 @@ let ChatMessagesService = class ChatMessagesService {
                 await new Promise((r) => setTimeout(r, 150));
             }
             const { answer, metadata } = await this.generateAnswer(req);
-            const id = (0, crypto_1.randomUUID)();
             this.gateway.broadcast({
                 event: 'message_end',
                 taskId,
-                messageId: id,
-                conversationId: conversationId,
-                mode: 'chat',
+                conversation_id: req.conversationId || 'unknown',
                 answer,
                 metadata,
                 created_at: new Date().toISOString(),
@@ -112,9 +88,7 @@ let ChatMessagesService = class ChatMessagesService {
             this.gateway.broadcast({
                 event: 'error',
                 taskId,
-                messageId: undefined,
-                conversationId: req.conversationId || 'unknown',
-                mode: 'chat',
+                conversation_id: req.conversationId || 'unknown',
                 answer: '',
                 status: 500,
                 code: 'INTERNAL_ERROR',
@@ -128,7 +102,6 @@ let ChatMessagesService = class ChatMessagesService {
 exports.ChatMessagesService = ChatMessagesService;
 exports.ChatMessagesService = ChatMessagesService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [chat_messages_gateway_1.ChatMessagesGateway,
-        chat_service_1.ChatService])
+    __metadata("design:paramtypes", [chat_messages_gateway_1.ChatMessagesGateway])
 ], ChatMessagesService);
 //# sourceMappingURL=chat-messages.service.js.map

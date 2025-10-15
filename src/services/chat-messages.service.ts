@@ -1,19 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { ChatMessagesGateway } from '../gateways/chat-messages.gateway';
-import { ChatService } from './chat.service';
 import { ChatMessagesRequestDto, ChatMessageAnswerResponseDto, ChatMessagesErrorDto, RetrieverResourceDto } from '../dto/chat-messages.dto';
 
 @Injectable()
 export class ChatMessagesService {
-  constructor(
-    private readonly gateway: ChatMessagesGateway,
-    private readonly chatService: ChatService,
-  ) {}
+  constructor(private readonly gateway: ChatMessagesGateway) {}
 
   // Simulated retriever/LLM processing
-  private async generateAnswer(req: ChatMessagesRequestDto): Promise<{ answer: string; metadata: any }> {
-    // In real impl, call retriever/LLM with req.query, req.inputs, etc.
+  private async generateAnswer(
+    req: ChatMessagesRequestDto,
+  ): Promise<{ answer: string; metadata: { retriever_resources: RetrieverResourceDto[]; usage: any } }> {
     const answer = `Answer for: ${req.query}`;
     const retriever_resources: RetrieverResourceDto[] = Array.from({ length: Math.max(1, req.inputs.contextCount) }).map((_, i) => ({
       position: i,
@@ -32,22 +29,17 @@ export class ChatMessagesService {
     return { answer, metadata };
   }
 
-  async processBlocking(req: ChatMessagesRequestDto): Promise<ChatMessageAnswerResponseDto | { event: 'error'; error: ChatMessagesErrorDto; taskId: string }> {
+  async processBlocking(
+    req: ChatMessagesRequestDto,
+  ): Promise<
+    | ChatMessageAnswerResponseDto
+    | { event: 'error'; error: ChatMessagesErrorDto; taskId: string }
+  > {
     const taskId = randomUUID();
     try {
-      // Create new chat if conversationId is not provided
-      let conversationId = req.conversationId;
-      if (!conversationId) {
-        const newChat = await this.chatService.createChat({
-          user: req.user,
-          conversationHistory: [],
-        });
-        conversationId = newChat._id.toString();
-      }
-
       const { answer, metadata } = await this.generateAnswer(req);
       return {
-        conversation_id: conversationId,
+        conversation_id: req.conversationId || 'unknown',
         answer,
         metadata,
       };
@@ -67,26 +59,13 @@ export class ChatMessagesService {
   async processStreaming(req: ChatMessagesRequestDto): Promise<{ taskId: string }> {
     const taskId = randomUUID();
     try {
-      // Create new chat if conversationId is not provided
-      let conversationId = req.conversationId;
-      if (!conversationId) {
-        const newChat = await this.chatService.createChat({
-          user: req.user,
-          conversationHistory: [],
-        });
-        conversationId = newChat._id.toString();
-      }
-
       // Simulate streaming chunks
       const chunks = [`Working on: ${req.query}`, ' ...', ' done.'];
       for (const chunk of chunks) {
         this.gateway.broadcast({
           event: 'message',
           taskId,
-        //   id: randomUUID(),
-          messageId: undefined,
-          conversationId: conversationId,
-          mode: 'chat',
+          conversation_id: req.conversationId || 'unknown',
           answer: chunk,
           metadata: {},
           created_at: new Date().toISOString(),
@@ -96,14 +75,10 @@ export class ChatMessagesService {
 
       // Final event
       const { answer, metadata } = await this.generateAnswer(req);
-      const id = randomUUID();
       this.gateway.broadcast({
         event: 'message_end',
         taskId,
-        // id,
-        messageId: id,
-        conversationId: conversationId,
-        mode: 'chat',
+        conversation_id: req.conversationId || 'unknown',
         answer,
         metadata,
         created_at: new Date().toISOString(),
@@ -113,10 +88,7 @@ export class ChatMessagesService {
       this.gateway.broadcast({
         event: 'error',
         taskId,
-        // id: randomUUID(),
-        messageId: undefined,
-        conversationId: req.conversationId || 'unknown',
-        mode: 'chat',
+        conversation_id: req.conversationId || 'unknown',
         answer: '',
         status: 500,
         code: 'INTERNAL_ERROR',
