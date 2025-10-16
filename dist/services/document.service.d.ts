@@ -28,6 +28,7 @@ export declare class DocumentService {
     updateRawTextFileId(id: string, rawTextFileId: string): Promise<Document>;
     submitOcrResult(documentId: string, extractedText: string, page?: number): Promise<Document>;
     markOcrProcessing(documentId: string): Promise<Document>;
+    resetOcrData(documentId: string): Promise<Document>;
     reportOcrError(params: {
         documentId: string;
         page?: number;

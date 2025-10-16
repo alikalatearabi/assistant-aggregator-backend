@@ -177,6 +177,14 @@ let DocumentService = DocumentService_1 = class DocumentService {
         return document;
     }
     async submitOcrResult(documentId, extractedText, page) {
+        this.logger.log(`DocumentService - Processing OCR result for document: ${documentId}, page: ${page || 'unknown'}`);
+        this.logger.debug(`DocumentService - OCR parameters:`, {
+            documentId,
+            textLength: extractedText?.length || 0,
+            page,
+            hasPage: page !== undefined,
+            pageType: typeof page,
+        });
         if (!mongoose_2.Types.ObjectId.isValid(documentId)) {
             throw new common_1.BadRequestException('Invalid document ID');
         }
@@ -184,20 +192,55 @@ let DocumentService = DocumentService_1 = class DocumentService {
         if (!existingDocument) {
             throw new common_1.NotFoundException('Document not found');
         }
+        this.logger.debug(`DocumentService - Found existing document:`, {
+            id: existingDocument._id,
+            filename: existingDocument.filename,
+            currentOcrStatus: existingDocument.ocrStatus,
+            hasExistingMetadata: !!existingDocument.metadata,
+            currentRawTextLength: existingDocument.raw_text?.length || 0,
+        });
+        let accumulatedText = extractedText;
+        let isMultiPage = false;
+        if (existingDocument.raw_text && page && page > 1) {
+            accumulatedText = existingDocument.raw_text + '\n\n--- PAGE ' + page + ' ---\n\n' + extractedText;
+            isMultiPage = true;
+            this.logger.log(`DocumentService - Appending page ${page} to existing content. Total length: ${accumulatedText.length}`);
+        }
+        else if (existingDocument.raw_text && !page) {
+            accumulatedText = existingDocument.raw_text + '\n\n--- ADDITIONAL CONTENT ---\n\n' + extractedText;
+            isMultiPage = true;
+            this.logger.log(`DocumentService - Appending additional content (no page info). Total length: ${accumulatedText.length}`);
+        }
+        else {
+            this.logger.log(`DocumentService - First page or new content for document: ${documentId}`);
+        }
+        const existingPages = (existingDocument.metadata?.ocr?.pages) || [];
+        const currentPage = page || 1;
+        const updatedPages = existingPages.includes(currentPage) ? existingPages : [...existingPages, currentPage].sort((a, b) => a - b);
         const updateData = {
-            raw_text: extractedText,
+            raw_text: accumulatedText,
             ocrStatus: 'completed',
             metadata: {
                 ...(existingDocument.metadata || {}),
                 ocr: {
                     ...((existingDocument.metadata && existingDocument.metadata.ocr) || {}),
                     processedAt: new Date().toISOString(),
-                    textLength: extractedText.length,
+                    textLength: accumulatedText.length,
                     processingCompletedBy: 'ocr-service',
-                    ...(page ? { page } : {}),
+                    pages: updatedPages,
+                    totalPages: updatedPages.length,
+                    isMultiPage,
+                    ...(page ? { lastProcessedPage: page } : {}),
                 }
             }
         };
+        this.logger.debug(`DocumentService - Prepared update data:`, {
+            raw_text_length: updateData.raw_text?.length,
+            ocrStatus: updateData.ocrStatus,
+            metadata_ocr: updateData.metadata?.ocr,
+            pages_processed: updatedPages,
+            is_multi_page: isMultiPage,
+        });
         const document = await this.documentModel
             .findByIdAndUpdate(documentId, { $set: updateData }, { new: true })
             .populate('metadata.user_id')
@@ -205,6 +248,14 @@ let DocumentService = DocumentService_1 = class DocumentService {
         if (!document) {
             throw new common_1.NotFoundException('Document not found after update');
         }
+        this.logger.log(`DocumentService - OCR result saved successfully for document: ${documentId}`);
+        this.logger.debug(`DocumentService - Final document state:`, {
+            id: document._id,
+            ocrStatus: document.ocrStatus,
+            raw_text_length: document.raw_text?.length || 0,
+            metadata_ocr: document.metadata?.ocr,
+            final_page_value: document.metadata?.ocr?.page,
+        });
         return document;
     }
     async markOcrProcessing(documentId) {
@@ -214,13 +265,34 @@ let DocumentService = DocumentService_1 = class DocumentService {
         const document = await this.documentModel
             .findByIdAndUpdate(documentId, {
             ocrStatus: 'processing',
-            'metadata.ocr.processingStartedAt': new Date().toISOString()
+            raw_text: '',
+            'metadata.ocr.processingStartedAt': new Date().toISOString(),
+            'metadata.ocr.pages': [],
         }, { new: true })
             .populate('metadata.user_id')
             .exec();
         if (!document) {
             throw new common_1.NotFoundException('Document not found');
         }
+        this.logger.log(`DocumentService - Marked document ${documentId} as processing and cleared existing OCR data`);
+        return document;
+    }
+    async resetOcrData(documentId) {
+        if (!mongoose_2.Types.ObjectId.isValid(documentId)) {
+            throw new common_1.BadRequestException('Invalid document ID');
+        }
+        const document = await this.documentModel
+            .findByIdAndUpdate(documentId, {
+            ocrStatus: 'pending',
+            raw_text: '',
+            $unset: { 'metadata.ocr': 1 }
+        }, { new: true })
+            .populate('metadata.user_id')
+            .exec();
+        if (!document) {
+            throw new common_1.NotFoundException('Document not found');
+        }
+        this.logger.log(`DocumentService - Reset OCR data for document ${documentId}`);
         return document;
     }
     async reportOcrError(params) {

@@ -1,4 +1,4 @@
-import { Controller, Post, Patch, Body, Param, Get } from '@nestjs/common';
+import { Controller, Post, Patch, Body, Param, Get, Logger } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { DocumentService } from '../services/document.service';
 import { SubmitOcrResultDto } from '../dto/submit-ocr-result.dto';
@@ -8,6 +8,8 @@ import { Document } from '../schemas/document.schema';
 @ApiTags('ocr')
 @Controller('ocr')
 export class OcrController {
+  private readonly logger = new Logger(OcrController.name);
+
   constructor(private readonly documentService: DocumentService) {}
 
   @Post('submit')
@@ -19,11 +21,23 @@ export class OcrController {
   @ApiResponse({ status: 404, description: 'Document not found' })
   @ApiResponse({ status: 400, description: 'Bad Request - Invalid input data or document ID' })
   async submitOcrResult(@Body() submitOcrResultDto: SubmitOcrResultDto): Promise<Document> {
-    return this.documentService.submitOcrResult(
+    this.logger.log(`OCR Submit - Received payload for document: ${submitOcrResultDto.documentId}`);
+    this.logger.debug(`OCR Submit - Full payload:`, {
+      documentId: submitOcrResultDto.documentId,
+      raw_text_length: submitOcrResultDto.raw_text?.length || 0,
+      raw_text_preview: submitOcrResultDto.raw_text?.substring(0, 100) + '...',
+      page: submitOcrResultDto.page,
+      has_page: submitOcrResultDto.page !== undefined,
+    });
+
+    const result = await this.documentService.submitOcrResult(
       submitOcrResultDto.documentId.toString(),
       submitOcrResultDto.raw_text,
       submitOcrResultDto.page,
     );
+
+    this.logger.log(`OCR Submit - Successfully processed for document: ${submitOcrResultDto.documentId}`);
+    return result;
   }
 
   @Patch(':id/processing')
@@ -70,5 +84,18 @@ export class OcrController {
   @ApiResponse({ status: 200, description: 'Documents retrieved successfully', type: [Document] })
   async getDocumentsByOcrStatus(@Param('status') status: string): Promise<Document[]> {
     return this.documentService.findDocumentsByOcrStatus(status);
+  }
+
+  @Patch(':id/reset')
+  @ApiOperation({
+    summary: 'Reset OCR data for a document',
+    description: 'Clears all OCR data and resets status to pending for reprocessing',
+  })
+  @ApiParam({ name: 'id', description: 'Document MongoDB ObjectId', example: '507f1f77bcf86cd799439011' })
+  @ApiResponse({ status: 200, description: 'OCR data reset successfully', type: Document })
+  @ApiResponse({ status: 404, description: 'Document not found' })
+  async resetOcrData(@Param('id') id: string): Promise<Document> {
+    this.logger.log(`OCR Reset - Resetting OCR data for document: ${id}`);
+    return this.documentService.resetOcrData(id);
   }
 }
