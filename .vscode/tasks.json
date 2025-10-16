@@ -89,6 +89,15 @@
 				"$tsc"
 			],
 			"group": "build"
+		},
+		{
+			"label": "Build NestJS project",
+			"type": "shell",
+			"command": "npm run build",
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build"
 		}
 	]
 }

@@ -24,20 +24,19 @@ let OcrService = OcrService_1 = class OcrService {
         this.httpService = httpService;
     }
     async sendDocumentForOcr(ocrRequest) {
-        const baseUrl = this.configService.get('OCR_API_URL_BASE') || 'http://78.39.182.65:8005';
+        const baseUrl = this.configService.get('OCR_API_URL_BASE') || 'http://78.39.182.65:8000';
         const authUrl = `${baseUrl}/authorize`;
         const filesUrl = `${baseUrl}/files`;
         try {
             this.logger.log(`Sending document for OCR processing: ${ocrRequest.documentId}`);
             const username = this.configService.get('OCR_USERNAME') || 'user1';
             const password = this.configService.get('OCR_PASSWORD') || 'pass1';
-            const authPayload = {
-                user_id: username,
-                password,
-            };
-            this.logger.debug(`OCR Auth Request payload:`, { user_id: username, password: '[REDACTED]' });
-            const authResponse = await (0, rxjs_1.firstValueFrom)(this.httpService.post(authUrl, authPayload, {
-                headers: { 'Content-Type': 'application/json' },
+            const authPayload = new URLSearchParams();
+            authPayload.append('username', username);
+            authPayload.append('password', password);
+            this.logger.debug(`OCR Auth Request payload:`, { username, password: '[REDACTED]' });
+            const authResponse = await (0, rxjs_1.firstValueFrom)(this.httpService.post(authUrl, authPayload.toString(), {
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 timeout: 10000,
             }));
             const accessToken = authResponse.data?.access_token || authResponse.data?.accessToken;

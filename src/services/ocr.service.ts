@@ -35,16 +35,17 @@ export class OcrService {
       
       const username = this.configService.get<string>('OCR_USERNAME') || 'user1';
       const password = this.configService.get<string>('OCR_PASSWORD') || 'pass1';
-      const authPayload = {
-        user_id: username,  // OCR API expects 'user_id', not 'username'
-        password,
-      };
+      
+      // Create URL-encoded form data for OCR auth
+      const authPayload = new URLSearchParams();
+      authPayload.append('username', username);
+      authPayload.append('password', password);
 
-      this.logger.debug(`OCR Auth Request payload:`, { user_id: username, password: '[REDACTED]' });
+      this.logger.debug(`OCR Auth Request payload:`, { username, password: '[REDACTED]' });
 
       const authResponse = await firstValueFrom(
-        this.httpService.post(authUrl, authPayload, {
-          headers: { 'Content-Type': 'application/json' },
+        this.httpService.post(authUrl, authPayload.toString(), {
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           timeout: 10000,
         })
       );
