@@ -454,18 +454,14 @@ export class DocumentService {
       throw new BadRequestException('Invalid document ID');
     }
 
-    // Clear any existing OCR metadata and set new error state
     const updateData: any = {
       ocrStatus: 'failed',
-      'metadata.ocr': {
-        error: errorData.message,
-        failedAt: new Date().toISOString(),
-      },
+      'metadata.ocr.error': errorData.message,
+      'metadata.ocr.failedAt': new Date().toISOString(),
     };
 
-    // Only add page information if it's explicitly provided and meaningful
-    if (errorData.page !== undefined && errorData.page > 0) {
-      updateData['metadata.ocr'].failedPage = errorData.page;
+    if (errorData.page !== undefined) {
+      updateData['metadata.ocr.failedPage'] = errorData.page;
     }
 
     const document = await this.documentModel
