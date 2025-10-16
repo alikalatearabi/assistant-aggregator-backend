@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
+import FormData = require('form-data');
 
 export interface OcrRequest {
   documentId: string;
@@ -57,18 +58,20 @@ export class OcrService {
         throw new Error('OCR authorization failed: access_token not present in response');
       }
 
-      // 2) Submit file with bearer token
-      const requestPayload = {
+      // 2) Submit file with bearer token - using multipart/form-data
+      const formData = new FormData();
+      formData.append('job_id', ocrRequest.documentId);
+      formData.append('url', ocrRequest.minioUrl);
+
+      this.logger.debug(`OCR Files Request payload:`, {
         job_id: ocrRequest.documentId,
         url: ocrRequest.minioUrl,
-      };
-
-      this.logger.debug(`OCR Files Request payload:`, requestPayload);
+      });
 
       const response = await firstValueFrom(
-        this.httpService.post(filesUrl, requestPayload, {
+        this.httpService.post(filesUrl, formData, {
           headers: {
-            'Content-Type': 'application/json',
+            ...formData.getHeaders(),
             'Authorization': `Bearer ${accessToken}`,
           },
           timeout: 10000, // 10 seconds timeout

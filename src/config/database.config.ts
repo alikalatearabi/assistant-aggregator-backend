@@ -1,6 +1,6 @@
 export const databaseConfig = () => ({
   database: {
-    uri: process.env.MONGODB_URI || 'mongodb://admin:password123@localhost:27017/assistant_aggregator?authSource=admin',
+    uri: process.env.MONGODB_URI || 'mongodb://admin:password123@185.149.192.130:27017/assistant_aggregator?authSource=admin'
   },
   minio: {
     endpoint: process.env.MINIO_ENDPOINT || 'localhost',

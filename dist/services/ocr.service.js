@@ -15,6 +15,7 @@ const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const axios_1 = require("@nestjs/axios");
 const rxjs_1 = require("rxjs");
+const FormData = require("form-data");
 let OcrService = OcrService_1 = class OcrService {
     configService;
     httpService;
@@ -44,14 +45,16 @@ let OcrService = OcrService_1 = class OcrService {
             if (!accessToken) {
                 throw new Error('OCR authorization failed: access_token not present in response');
             }
-            const requestPayload = {
+            const formData = new FormData();
+            formData.append('job_id', ocrRequest.documentId);
+            formData.append('url', ocrRequest.minioUrl);
+            this.logger.debug(`OCR Files Request payload:`, {
                 job_id: ocrRequest.documentId,
                 url: ocrRequest.minioUrl,
-            };
-            this.logger.debug(`OCR Files Request payload:`, requestPayload);
-            const response = await (0, rxjs_1.firstValueFrom)(this.httpService.post(filesUrl, requestPayload, {
+            });
+            const response = await (0, rxjs_1.firstValueFrom)(this.httpService.post(filesUrl, formData, {
                 headers: {
-                    'Content-Type': 'application/json',
+                    ...formData.getHeaders(),
                     'Authorization': `Bearer ${accessToken}`,
                 },
                 timeout: 10000,
