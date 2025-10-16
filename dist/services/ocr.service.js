@@ -38,7 +38,6 @@ let OcrService = OcrService_1 = class OcrService {
             this.logger.debug(`OCR Auth Request payload:`, { username, password: '[REDACTED]' });
             const authResponse = await (0, rxjs_1.firstValueFrom)(this.httpService.post(authUrl, authPayload.toString(), {
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                timeout: 10000,
             }));
             const accessToken = authResponse.data?.access_token || authResponse.data?.accessToken;
             const refreshToken = authResponse.data?.refresh_token || authResponse.data?.refreshToken;
@@ -57,7 +56,6 @@ let OcrService = OcrService_1 = class OcrService {
                     ...formData.getHeaders(),
                     'Authorization': `Bearer ${accessToken}`,
                 },
-                timeout: 10000,
             }));
             this.logger.log(`OCR Files Response for document ${ocrRequest.documentId}:`, {
                 status: response.status,

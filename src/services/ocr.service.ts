@@ -47,7 +47,6 @@ export class OcrService {
       const authResponse = await firstValueFrom(
         this.httpService.post(authUrl, authPayload.toString(), {
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          timeout: 10000,
         })
       );
 
@@ -74,7 +73,6 @@ export class OcrService {
             ...formData.getHeaders(),
             'Authorization': `Bearer ${accessToken}`,
           },
-          timeout: 10000, // 10 seconds timeout
         })
       );
 
