@@ -22,7 +22,7 @@ export class MinioService {
     this.logger.log(`- PORT: ${this.config.get<string>('MINIO_PORT') || '9000'}`);
     this.logger.log(`- USE_SSL: ${this.config.get<string>('MINIO_USE_SSL') || 'false'}`);
     this.logger.log(`- BUCKET: ${this.config.get<string>('MINIO_BUCKET') || 'assistant-aggregator'}`);
-    this.logger.log(`- PUBLIC_URL: ${this.config.get<string>('MINIO_PUBLIC_URL') || 'NOT SET - USING FALLBACK'}`);
+    this.logger.log(`- EXTERNAL_URL: HARDCODED TO 185.149.192.130:9000 for external API access`);
   }
 
   async getPresignedUrl(bucket: string, objectName: string, expiresSeconds = 900): Promise<string> {
@@ -36,23 +36,11 @@ export class MinioService {
   }
 
   private buildPublicUrl(bucket: string, objectName: string): string {
-    // Use MINIO_PUBLIC_URL for external access, fallback to internal endpoint
-    const publicUrl = this.config.get<string>('MINIO_PUBLIC_URL');
-    if (publicUrl) {
-      // Remove trailing slash if present
-      const baseUrl = publicUrl.replace(/\/$/, '');
-      const url = `${baseUrl}/${bucket}/${objectName}`;
-      this.logger.log(`Built public URL using MINIO_PUBLIC_URL: ${url}`);
-      return url;
-    }
-
-    // Fallback to internal endpoint construction
-    const host = this.config.get<string>('MINIO_ENDPOINT') || 'localhost';
-    const port = parseInt(this.config.get<string>('MINIO_PORT') || '9000', 10);
-    const useSSL = (this.config.get<string>('MINIO_USE_SSL') || 'false') === 'true';
-    const protocol = useSSL ? 'https' : 'http';
-    const url = `${protocol}://${host}:${port}/${bucket}/${objectName}`;
-    this.logger.warn(`Using fallback URL construction (set MINIO_PUBLIC_URL for proper external access): ${url}`);
+    // Hardcoded external server address for external API access
+    const serverExternalIp = '185.149.192.130:9000';
+    const url = `http://${serverExternalIp}/${bucket}/${objectName}`;
+    
+    this.logger.log(`Built public URL for external access: ${url}`);
     return url;
   }
 
