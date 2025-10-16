@@ -20,6 +20,9 @@ export declare class Document {
     fileUrl: string;
     extension: string;
     dataset?: Types.ObjectId | Dataset;
+    originalDocumentId?: Types.ObjectId;
+    pageNumber?: number;
+    isPageDocument?: boolean;
     rawTextFileId: string;
     raw_text: string;
     ocrStatus: string;

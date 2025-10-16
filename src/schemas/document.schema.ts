@@ -90,6 +90,30 @@ export class Document {
   dataset?: Types.ObjectId | Dataset;
 
   @ApiProperty({
+    description: 'Original document ID that this page belongs to',
+    example: '507f1f77bcf86cd799439011',
+    required: false,
+  })
+  @Prop({ type: Types.ObjectId, required: false })
+  originalDocumentId?: Types.ObjectId;
+
+  @ApiProperty({
+    description: 'Page number within the document',
+    example: 1,
+    required: false,
+  })
+  @Prop({ required: false })
+  pageNumber?: number;
+
+  @ApiProperty({
+    description: 'Indicates if this is a page from a multi-page document',
+    example: false,
+    required: false,
+  })
+  @Prop({ default: false })
+  isPageDocument?: boolean;
+
+  @ApiProperty({
     description: 'Elasticsearch document ID or address for raw text content',
     example: 'assistant_aggregator_documents_507f1f77bcf86cd799439011',
   })

@@ -117,6 +117,14 @@ let DocumentController = DocumentController_1 = class DocumentController {
         await this.minioService.ensurePublicAccess();
         return { message: 'Bucket policy updated to allow public read access' };
     }
+    async getDocumentPages(id) {
+        this.logger.log(`Request: Get pages for document ${id}`);
+        return this.documentService.findPagesByOriginalDocument(id);
+    }
+    async getOriginalDocuments() {
+        this.logger.log('Request: Get all original documents');
+        return this.documentService.findOriginalDocuments();
+    }
 };
 exports.DocumentController = DocumentController;
 __decorate([
@@ -331,6 +339,48 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], DocumentController.prototype, "ensurePublicBucket", null);
+__decorate([
+    (0, common_1.Get)(':id/pages'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get all page documents for an original document' }),
+    (0, swagger_1.ApiParam)({ name: 'id', description: 'Original document MongoDB ObjectId' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Page documents retrieved',
+        schema: {
+            type: 'array',
+            items: {
+                type: 'object',
+                properties: {
+                    _id: { type: 'string' },
+                    filename: { type: 'string' },
+                    originalDocumentId: { type: 'string' },
+                    pageNumber: { type: 'number' },
+                    raw_text: { type: 'string' },
+                    ocrStatus: { type: 'string' }
+                }
+            }
+        }
+    }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], DocumentController.prototype, "getDocumentPages", null);
+__decorate([
+    (0, common_1.Get)('originals'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get all original documents (excluding page documents)' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Original documents retrieved',
+        schema: {
+            type: 'array',
+            items: { type: 'object' }
+        }
+    }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], DocumentController.prototype, "getOriginalDocuments", null);
 exports.DocumentController = DocumentController = DocumentController_1 = __decorate([
     (0, swagger_1.ApiTags)('documents'),
     (0, common_1.Controller)('documents'),

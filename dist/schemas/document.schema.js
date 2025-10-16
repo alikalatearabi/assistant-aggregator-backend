@@ -85,6 +85,9 @@ let Document = class Document {
     fileUrl;
     extension;
     dataset;
+    originalDocumentId;
+    pageNumber;
+    isPageDocument;
     rawTextFileId;
     raw_text;
     ocrStatus;
@@ -134,6 +137,33 @@ __decorate([
     (0, mongoose_1.Prop)({ type: mongoose_2.Types.ObjectId, ref: 'Dataset', required: false }),
     __metadata("design:type", Object)
 ], Document.prototype, "dataset", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Original document ID that this page belongs to',
+        example: '507f1f77bcf86cd799439011',
+        required: false,
+    }),
+    (0, mongoose_1.Prop)({ type: mongoose_2.Types.ObjectId, required: false }),
+    __metadata("design:type", mongoose_2.Types.ObjectId)
+], Document.prototype, "originalDocumentId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Page number within the document',
+        example: 1,
+        required: false,
+    }),
+    (0, mongoose_1.Prop)({ required: false }),
+    __metadata("design:type", Number)
+], Document.prototype, "pageNumber", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Indicates if this is a page from a multi-page document',
+        example: false,
+        required: false,
+    }),
+    (0, mongoose_1.Prop)({ default: false }),
+    __metadata("design:type", Boolean)
+], Document.prototype, "isPageDocument", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: 'Elasticsearch document ID or address for raw text content',

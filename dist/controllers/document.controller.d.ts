@@ -43,4 +43,6 @@ export declare class DocumentController {
     ensurePublicBucket(): Promise<{
         message: string;
     }>;
+    getDocumentPages(id: string): Promise<Document[]>;
+    getOriginalDocuments(): Promise<Document[]>;
 }

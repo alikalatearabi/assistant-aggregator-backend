@@ -37,6 +37,8 @@ export declare class DocumentService {
     }): Promise<Document>;
     findDocumentsByOcrStatus(status: string): Promise<Document[]>;
     searchDocuments(searchTerm: string): Promise<Document[]>;
+    findPagesByOriginalDocument(originalDocumentId: string): Promise<Document[]>;
+    findOriginalDocuments(): Promise<Document[]>;
     getDocumentStats(): Promise<{
         totalDocuments: number;
         documentsByExtension: Array<{

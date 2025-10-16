@@ -294,4 +294,45 @@ export class DocumentController {
     await this.minioService.ensurePublicAccess();
     return { message: 'Bucket policy updated to allow public read access' };
   }
+
+  @Get(':id/pages')
+  @ApiOperation({ summary: 'Get all page documents for an original document' })
+  @ApiParam({ name: 'id', description: 'Original document MongoDB ObjectId' })
+  @ApiResponse({
+    status: 200,
+    description: 'Page documents retrieved',
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          _id: { type: 'string' },
+          filename: { type: 'string' },
+          originalDocumentId: { type: 'string' },
+          pageNumber: { type: 'number' },
+          raw_text: { type: 'string' },
+          ocrStatus: { type: 'string' }
+        }
+      }
+    }
+  })
+  async getDocumentPages(@Param('id') id: string) {
+    this.logger.log(`Request: Get pages for document ${id}`);
+    return this.documentService.findPagesByOriginalDocument(id);
+  }
+
+  @Get('originals')
+  @ApiOperation({ summary: 'Get all original documents (excluding page documents)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Original documents retrieved',
+    schema: {
+      type: 'array',
+      items: { type: 'object' }
+    }
+  })
+  async getOriginalDocuments() {
+    this.logger.log('Request: Get all original documents');
+    return this.documentService.findOriginalDocuments();
+  }
 }
