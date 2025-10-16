@@ -36,11 +36,11 @@ export class OcrService {
       const username = this.configService.get<string>('OCR_USERNAME') || 'user1';
       const password = this.configService.get<string>('OCR_PASSWORD') || 'pass1';
       const authPayload = {
-        username,
+        user_id: username,  // OCR API expects 'user_id', not 'username'
         password,
       };
 
-      this.logger.debug(`OCR Auth Request payload (username only):`, { username });
+      this.logger.debug(`OCR Auth Request payload:`, { user_id: username, password: '[REDACTED]' });
 
       const authResponse = await firstValueFrom(
         this.httpService.post(authUrl, authPayload, {

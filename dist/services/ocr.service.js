@@ -32,10 +32,10 @@ let OcrService = OcrService_1 = class OcrService {
             const username = this.configService.get('OCR_USERNAME') || 'user1';
             const password = this.configService.get('OCR_PASSWORD') || 'pass1';
             const authPayload = {
-                username,
+                user_id: username,
                 password,
             };
-            this.logger.debug(`OCR Auth Request payload (username only):`, { username });
+            this.logger.debug(`OCR Auth Request payload:`, { user_id: username, password: '[REDACTED]' });
             const authResponse = await (0, rxjs_1.firstValueFrom)(this.httpService.post(authUrl, authPayload, {
                 headers: { 'Content-Type': 'application/json' },
                 timeout: 10000,

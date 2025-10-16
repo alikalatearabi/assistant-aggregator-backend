@@ -15,6 +15,14 @@ export class MinioService {
       accessKey: this.config.get<string>('MINIO_ACCESS_KEY') || 'minioadmin',
       secretKey: this.config.get<string>('MINIO_SECRET_KEY') || 'minioadmin',
     });
+    
+    // Log configuration on startup (without secrets)
+    this.logger.log(`MinIO Configuration:`);
+    this.logger.log(`- ENDPOINT: ${this.config.get<string>('MINIO_ENDPOINT') || 'localhost'}`);
+    this.logger.log(`- PORT: ${this.config.get<string>('MINIO_PORT') || '9000'}`);
+    this.logger.log(`- USE_SSL: ${this.config.get<string>('MINIO_USE_SSL') || 'false'}`);
+    this.logger.log(`- BUCKET: ${this.config.get<string>('MINIO_BUCKET') || 'assistant-aggregator'}`);
+    this.logger.log(`- PUBLIC_URL: ${this.config.get<string>('MINIO_PUBLIC_URL') || 'NOT SET - USING FALLBACK'}`);
   }
 
   async getPresignedUrl(bucket: string, objectName: string, expiresSeconds = 900): Promise<string> {
