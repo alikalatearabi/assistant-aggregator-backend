@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document as MongoDocument, Types } from 'mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from './user.schema';
+import { Dataset } from './dataset.schema';
 
 export type DocumentDocument = Document & MongoDocument;
 
@@ -78,6 +79,15 @@ export class Document {
   })
   @Prop({ required: true })
   extension: string;
+
+  @ApiProperty({
+    description: 'Reference to Dataset entity',
+    example: '507f1f77bcf86cd799439013',
+    type: String,
+    required: false,
+  })
+  @Prop({ type: Types.ObjectId, ref: 'Dataset', required: false })
+  dataset?: Types.ObjectId | Dataset;
 
   @ApiProperty({
     description: 'Elasticsearch document ID or address for raw text content',

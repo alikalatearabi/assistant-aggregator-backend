@@ -18,6 +18,7 @@ class CreateDocumentDto {
     filename;
     fileUrl;
     extension;
+    dataset;
     rawTextFileId;
     metadata;
 }
@@ -49,6 +50,15 @@ __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreateDocumentDto.prototype, "extension", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Reference to Dataset entity (MongoDB ObjectId)',
+        example: '507f1f77bcf86cd799439013',
+    }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateDocumentDto.prototype, "dataset", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({
         description: 'Elasticsearch document ID or address for raw text content',

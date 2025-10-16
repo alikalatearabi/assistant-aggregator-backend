@@ -1,5 +1,6 @@
 import { Document as MongoDocument, Types } from 'mongoose';
 import { User } from './user.schema';
+import { Dataset } from './dataset.schema';
 export type DocumentDocument = Document & MongoDocument;
 export declare class DocumentMetadata {
     user_id?: Types.ObjectId | User;
@@ -18,6 +19,7 @@ export declare class Document {
     filename: string;
     fileUrl: string;
     extension: string;
+    dataset?: Types.ObjectId | Dataset;
     rawTextFileId: string;
     raw_text: string;
     ocrStatus: string;

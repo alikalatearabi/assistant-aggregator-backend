@@ -84,6 +84,7 @@ let Document = class Document {
     filename;
     fileUrl;
     extension;
+    dataset;
     rawTextFileId;
     raw_text;
     ocrStatus;
@@ -123,6 +124,16 @@ __decorate([
     (0, mongoose_1.Prop)({ required: true }),
     __metadata("design:type", String)
 ], Document.prototype, "extension", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Reference to Dataset entity',
+        example: '507f1f77bcf86cd799439013',
+        type: String,
+        required: false,
+    }),
+    (0, mongoose_1.Prop)({ type: mongoose_2.Types.ObjectId, ref: 'Dataset', required: false }),
+    __metadata("design:type", Object)
+], Document.prototype, "dataset", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: 'Elasticsearch document ID or address for raw text content',

@@ -17,11 +17,14 @@ const user_schema_1 = require("./schemas/user.schema");
 const document_schema_1 = require("./schemas/document.schema");
 const message_schema_1 = require("./schemas/message.schema");
 const chat_schema_1 = require("./schemas/chat.schema");
+const dataset_schema_1 = require("./schemas/dataset.schema");
 const document_controller_1 = require("./controllers/document.controller");
+const dataset_controller_1 = require("./controllers/dataset.controller");
 const ocr_controller_1 = require("./controllers/ocr.controller");
 const message_controller_1 = require("./controllers/message.controller");
 const chat_controller_1 = require("./controllers/chat.controller");
 const document_service_1 = require("./services/document.service");
+const dataset_service_1 = require("./services/dataset.service");
 const message_service_1 = require("./services/message.service");
 const chat_service_1 = require("./services/chat.service");
 const ocr_service_1 = require("./services/ocr.service");
@@ -52,11 +55,12 @@ exports.AppModule = AppModule = __decorate([
                 { name: document_schema_1.Document.name, schema: document_schema_1.DocumentSchema },
                 { name: message_schema_1.Message.name, schema: message_schema_1.MessageSchema },
                 { name: chat_schema_1.Chat.name, schema: chat_schema_1.ChatSchema },
+                { name: dataset_schema_1.Dataset.name, schema: dataset_schema_1.DatasetSchema },
             ]),
             auth_module_1.AuthModule,
         ],
-        controllers: [app_controller_1.AppController, app_controller_1.UserController, document_controller_1.DocumentController, ocr_controller_1.OcrController, message_controller_1.MessageController, chat_controller_1.ChatController],
-        providers: [app_service_1.AppService, document_service_1.DocumentService, message_service_1.MessageService, chat_service_1.ChatService, ocr_service_1.OcrService, chat_messages_gateway_1.ChatMessagesGateway, chat_messages_service_1.ChatMessagesService, minio_service_1.MinioService],
+        controllers: [app_controller_1.AppController, app_controller_1.UserController, document_controller_1.DocumentController, dataset_controller_1.DatasetController, ocr_controller_1.OcrController, message_controller_1.MessageController, chat_controller_1.ChatController],
+        providers: [app_service_1.AppService, document_service_1.DocumentService, dataset_service_1.DatasetService, message_service_1.MessageService, chat_service_1.ChatService, ocr_service_1.OcrService, chat_messages_gateway_1.ChatMessagesGateway, chat_messages_service_1.ChatMessagesService, minio_service_1.MinioService],
     })
 ], AppModule);
 //# sourceMappingURL=app.module.js.map

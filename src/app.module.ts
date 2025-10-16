@@ -8,11 +8,14 @@ import { User, UserSchema } from './schemas/user.schema';
 import { Document, DocumentSchema } from './schemas/document.schema';
 import { Message, MessageSchema } from './schemas/message.schema';
 import { Chat, ChatSchema } from './schemas/chat.schema';
+import { Dataset, DatasetSchema } from './schemas/dataset.schema';
 import { DocumentController } from './controllers/document.controller';
+import { DatasetController } from './controllers/dataset.controller';
 import { OcrController } from './controllers/ocr.controller';
 import { MessageController } from './controllers/message.controller';
 import { ChatController } from './controllers/chat.controller';
 import { DocumentService } from './services/document.service';
+import { DatasetService } from './services/dataset.service';
 import { MessageService } from './services/message.service';
 import { ChatService } from './services/chat.service';
 import { OcrService } from './services/ocr.service';
@@ -40,10 +43,11 @@ import { AuthModule } from './auth/auth.module';
       { name: Document.name, schema: DocumentSchema },
       { name: Message.name, schema: MessageSchema },
       { name: Chat.name, schema: ChatSchema },
+      { name: Dataset.name, schema: DatasetSchema },
     ]),
     AuthModule,
   ],
-  controllers: [AppController, UserController, DocumentController, OcrController, MessageController, ChatController],
-  providers: [AppService, DocumentService, MessageService, ChatService, OcrService, ChatMessagesGateway, ChatMessagesService, MinioService],
+  controllers: [AppController, UserController, DocumentController, DatasetController, OcrController, MessageController, ChatController],
+  providers: [AppService, DocumentService, DatasetService, MessageService, ChatService, OcrService, ChatMessagesGateway, ChatMessagesService, MinioService],
 })
 export class AppModule {}

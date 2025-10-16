@@ -29,6 +29,14 @@ export class CreateDocumentDto {
   @IsNotEmpty()
   readonly extension: string;
 
+  @ApiPropertyOptional({
+    description: 'Reference to Dataset entity (MongoDB ObjectId)',
+    example: '507f1f77bcf86cd799439013',
+  })
+  @IsString()
+  @IsOptional()
+  readonly dataset?: string;
+
   // user id moved into metadata.user_id
 
   @ApiPropertyOptional({
