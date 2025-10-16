@@ -4,13 +4,11 @@ import { CreateDocumentDto } from '../dto/create-document.dto';
 import { UpdateDocumentDto } from '../dto/update-document.dto';
 import { DocumentQueryDto } from '../dto/document-query.dto';
 import { OcrService } from './ocr.service';
-import { MinioService } from './minio.service';
 export declare class DocumentService {
     private documentModel;
     private readonly ocrService;
-    private readonly minioService;
     private readonly logger;
-    constructor(documentModel: Model<DocumentDocument>, ocrService: OcrService, minioService: MinioService);
+    constructor(documentModel: Model<DocumentDocument>, ocrService: OcrService);
     createDocument(createDocumentDto: CreateDocumentDto): Promise<Document>;
     findAllDocuments(query?: DocumentQueryDto): Promise<{
         documents: Document[];
@@ -28,17 +26,9 @@ export declare class DocumentService {
     updateRawTextFileId(id: string, rawTextFileId: string): Promise<Document>;
     submitOcrResult(documentId: string, extractedText: string, page?: number): Promise<Document>;
     markOcrProcessing(documentId: string): Promise<Document>;
-    resetOcrData(documentId: string): Promise<Document>;
-    reportOcrError(params: {
-        documentId: string;
-        page?: number;
-        status: string;
-        message: string;
-    }): Promise<Document>;
+    markOcrFailed(documentId: string, error: string): Promise<Document>;
     findDocumentsByOcrStatus(status: string): Promise<Document[]>;
     searchDocuments(searchTerm: string): Promise<Document[]>;
-    findPagesByOriginalDocument(originalDocumentId: string): Promise<Document[]>;
-    findOriginalDocuments(): Promise<Document[]>;
     getDocumentStats(): Promise<{
         totalDocuments: number;
         documentsByExtension: Array<{
@@ -51,7 +41,14 @@ export declare class DocumentService {
         }>;
         recentDocuments: number;
     }>;
-    getPresignedUrlForDocument(id: string, expires?: number): Promise<{
-        url: string;
-    }>;
+    getPresignedUrlForDocument(id: string, exp?: number): Promise<any>;
+    findPagesByOriginalDocument(originalDocumentId: string): Promise<Document[]>;
+    findOriginalDocuments(): Promise<Document[]>;
+    reportOcrError(errorData: {
+        documentId: string;
+        error: string;
+        page?: number;
+        status?: string;
+    }): Promise<Document>;
+    resetOcrData(id: string): Promise<Document>;
 }

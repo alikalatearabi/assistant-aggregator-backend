@@ -64,9 +64,9 @@ export class OcrController {
   async reportOcrError(@Body() body: ReportOcrErrorDto): Promise<Document> {
     return this.documentService.reportOcrError({
       documentId: body.document_id,
+      error: body.message,
       page: body.page,
       status: body.status,
-      message: body.message,
     });
   }
 

@@ -19,21 +19,19 @@ const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
 const document_schema_1 = require("../schemas/document.schema");
 const ocr_service_1 = require("./ocr.service");
-const minio_service_1 = require("./minio.service");
 let DocumentService = DocumentService_1 = class DocumentService {
     documentModel;
     ocrService;
-    minioService;
     logger = new common_1.Logger(DocumentService_1.name);
-    constructor(documentModel, ocrService, minioService) {
+    constructor(documentModel, ocrService) {
         this.documentModel = documentModel;
         this.ocrService = ocrService;
-        this.minioService = minioService;
     }
     async createDocument(createDocumentDto) {
-        const createdDocument = new this.documentModel({
-            ...createDocumentDto,
-        });
+        if (createDocumentDto.metadata?.user_id && !mongoose_2.Types.ObjectId.isValid(createDocumentDto.metadata.user_id.toString())) {
+            throw new common_1.BadRequestException('Invalid user ID in metadata');
+        }
+        const createdDocument = new this.documentModel(createDocumentDto);
         const savedDocument = await createdDocument.save();
         this.logger.log(`Document created successfully: ${savedDocument._id}, sending to OCR service`);
         try {
@@ -54,8 +52,8 @@ let DocumentService = DocumentService_1 = class DocumentService {
         if (extension) {
             filter.extension = { $regex: extension, $options: 'i' };
         }
-        if (metadataUserId) {
-            filter['metadata.user_id'] = metadataUserId;
+        if (metadataUserId && mongoose_2.Types.ObjectId.isValid(metadataUserId)) {
+            filter['metadata.user_id'] = new mongoose_2.Types.ObjectId(metadataUserId);
         }
         if (filename) {
             filter.filename = { $regex: filename, $options: 'i' };
@@ -72,12 +70,9 @@ let DocumentService = DocumentService_1 = class DocumentService {
         const skip = (page - 1) * limit;
         const total = await this.documentModel.countDocuments(filter);
         const totalPages = Math.ceil(total / limit);
-        if (filter['metadata.user_id'] && mongoose_2.Types.ObjectId.isValid(filter['metadata.user_id'])) {
-            filter['metadata.user_id'] = new mongoose_2.Types.ObjectId(filter['metadata.user_id']);
-        }
         const documents = await this.documentModel
             .find(filter)
-            .populate('metadata.user_id')
+            .populate('metadata.user_id', 'firstname lastname email')
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
@@ -96,7 +91,7 @@ let DocumentService = DocumentService_1 = class DocumentService {
         }
         const document = await this.documentModel
             .findById(id)
-            .populate('metadata.user_id')
+            .populate('metadata.user_id', 'firstname lastname email')
             .exec();
         if (!document) {
             throw new common_1.NotFoundException('Document not found');
@@ -108,14 +103,15 @@ let DocumentService = DocumentService_1 = class DocumentService {
             throw new common_1.BadRequestException('Invalid uploader ID');
         }
         return this.documentModel
-            .find({ 'metadata.user_id': new mongoose_2.Types.ObjectId(uploaderId) })
-            .populate('metadata.user_id')
+            .find({ fileUploader: new mongoose_2.Types.ObjectId(uploaderId) })
+            .populate('metadata.user_id', 'firstname lastname email')
             .sort({ createdAt: -1 })
             .exec();
     }
     async findDocumentsByExtension(extension) {
         return this.documentModel
             .find({ extension: { $regex: extension, $options: 'i' } })
+            .populate('metadata.user_id', 'firstname lastname email')
             .sort({ createdAt: -1 })
             .exec();
     }
@@ -123,10 +119,12 @@ let DocumentService = DocumentService_1 = class DocumentService {
         if (!mongoose_2.Types.ObjectId.isValid(id)) {
             throw new common_1.BadRequestException('Invalid document ID');
         }
-        const updateData = { ...updateDocumentDto };
+        if (updateDocumentDto.metadata?.user_id && !mongoose_2.Types.ObjectId.isValid(updateDocumentDto.metadata.user_id.toString())) {
+            throw new common_1.BadRequestException('Invalid user ID in metadata');
+        }
         const document = await this.documentModel
-            .findByIdAndUpdate(id, updateData, { new: true })
-            .populate('metadata.user_id')
+            .findByIdAndUpdate(id, updateDocumentDto, { new: true })
+            .populate('metadata.user_id', 'firstname lastname email')
             .exec();
         if (!document) {
             throw new common_1.NotFoundException('Document not found');
@@ -139,7 +137,7 @@ let DocumentService = DocumentService_1 = class DocumentService {
         }
         const document = await this.documentModel
             .findByIdAndDelete(id)
-            .populate('metadata.user_id')
+            .populate('metadata.user_id', 'firstname lastname email')
             .exec();
         if (!document) {
             throw new common_1.NotFoundException('Document not found');
@@ -150,13 +148,9 @@ let DocumentService = DocumentService_1 = class DocumentService {
         if (!mongoose_2.Types.ObjectId.isValid(id)) {
             throw new common_1.BadRequestException('Invalid document ID');
         }
-        const castedMetadata = { ...metadata };
-        if (castedMetadata && castedMetadata.user_id && mongoose_2.Types.ObjectId.isValid(castedMetadata.user_id)) {
-            castedMetadata.user_id = new mongoose_2.Types.ObjectId(castedMetadata.user_id);
-        }
         const document = await this.documentModel
-            .findByIdAndUpdate(id, { $set: { metadata: castedMetadata } }, { new: true })
-            .populate('metadata.user_id')
+            .findByIdAndUpdate(id, { $set: { metadata } }, { new: true })
+            .populate('metadata.user_id', 'firstname lastname email')
             .exec();
         if (!document) {
             throw new common_1.NotFoundException('Document not found');
@@ -169,7 +163,7 @@ let DocumentService = DocumentService_1 = class DocumentService {
         }
         const document = await this.documentModel
             .findByIdAndUpdate(id, { rawTextFileId }, { new: true })
-            .populate('metadata.user_id')
+            .populate('metadata.user_id', 'firstname lastname email')
             .exec();
         if (!document) {
             throw new common_1.NotFoundException('Document not found');
@@ -177,78 +171,31 @@ let DocumentService = DocumentService_1 = class DocumentService {
         return document;
     }
     async submitOcrResult(documentId, extractedText, page) {
-        this.logger.log(`DocumentService - Processing OCR result for document: ${documentId}, page: ${page || 1}`);
-        this.logger.debug(`DocumentService - OCR parameters:`, {
-            documentId,
-            textLength: extractedText?.length || 0,
-            page,
-            hasPage: page !== undefined,
-            pageType: typeof page,
-        });
         if (!mongoose_2.Types.ObjectId.isValid(documentId)) {
             throw new common_1.BadRequestException('Invalid document ID');
         }
-        const originalDocument = await this.documentModel.findById(documentId).exec();
-        if (!originalDocument) {
-            throw new common_1.NotFoundException('Original document not found');
+        const existingDocument = await this.documentModel.findById(documentId).exec();
+        if (!existingDocument) {
+            throw new common_1.NotFoundException('Document not found');
         }
-        const currentPage = page || 1;
-        const existingPageDocument = await this.documentModel.findOne({
-            originalDocumentId: documentId,
-            pageNumber: currentPage,
-            isPageDocument: true
-        }).exec();
-        if (existingPageDocument) {
-            this.logger.log(`DocumentService - Updating existing page document for page ${currentPage}`);
-            const updatedDocument = await this.documentModel
-                .findByIdAndUpdate(existingPageDocument._id, {
-                $set: {
-                    raw_text: extractedText,
-                    ocrStatus: 'completed',
-                    'metadata.ocr.processedAt': new Date().toISOString(),
-                    'metadata.ocr.textLength': extractedText.length,
-                    'metadata.ocr.processingCompletedBy': 'ocr-service',
-                    'metadata.ocr.pageNumber': currentPage,
-                }
-            }, { new: true })
-                .populate('metadata.user_id')
-                .exec();
-            this.logger.log(`DocumentService - Updated page document: ${updatedDocument?._id} for page ${currentPage}`);
-            return updatedDocument;
+        const updateData = {
+            raw_text: extractedText,
+            ocrStatus: 'completed',
+            'metadata.ocr': {
+                ...existingDocument.metadata?.ocr,
+                processedAt: new Date().toISOString(),
+                textLength: extractedText.length,
+                processingCompletedBy: 'ocr-service',
+            },
+        };
+        const document = await this.documentModel
+            .findByIdAndUpdate(documentId, { $set: updateData }, { new: true })
+            .populate('metadata.user_id', 'firstname lastname email')
+            .exec();
+        if (!document) {
+            throw new common_1.NotFoundException('Document not found after update');
         }
-        else {
-            this.logger.log(`DocumentService - Creating new page document for page ${currentPage}`);
-            const pageDocument = new this.documentModel({
-                filename: `${originalDocument.filename}_page_${currentPage}`,
-                fileUrl: originalDocument.fileUrl,
-                extension: originalDocument.extension,
-                dataset: originalDocument.dataset,
-                originalDocumentId: new mongoose_2.Types.ObjectId(documentId),
-                pageNumber: currentPage,
-                isPageDocument: true,
-                raw_text: extractedText,
-                ocrStatus: 'completed',
-                metadata: {
-                    ...(originalDocument.metadata || {}),
-                    ocr: {
-                        processedAt: new Date().toISOString(),
-                        textLength: extractedText.length,
-                        processingCompletedBy: 'ocr-service',
-                        pageNumber: currentPage,
-                    }
-                }
-            });
-            const savedPageDocument = await pageDocument.save();
-            this.logger.log(`DocumentService - Created new page document: ${savedPageDocument._id} for page ${currentPage}`);
-            this.logger.debug(`DocumentService - Page document details:`, {
-                id: savedPageDocument._id,
-                filename: savedPageDocument.filename,
-                originalDocumentId: savedPageDocument.originalDocumentId,
-                pageNumber: savedPageDocument.pageNumber,
-                textLength: savedPageDocument.raw_text?.length,
-            });
-            return savedPageDocument;
-        }
+        return document;
     }
     async markOcrProcessing(documentId) {
         if (!mongoose_2.Types.ObjectId.isValid(documentId)) {
@@ -257,52 +204,26 @@ let DocumentService = DocumentService_1 = class DocumentService {
         const document = await this.documentModel
             .findByIdAndUpdate(documentId, {
             ocrStatus: 'processing',
-            raw_text: '',
-            'metadata.ocr.processingStartedAt': new Date().toISOString(),
-            'metadata.ocr.processedPages': [],
+            'ocrMetadata.processingStartedAt': new Date().toISOString()
         }, { new: true })
-            .populate('metadata.user_id')
+            .populate('metadata.user_id', 'firstname lastname email')
             .exec();
         if (!document) {
             throw new common_1.NotFoundException('Document not found');
         }
-        this.logger.log(`DocumentService - Marked document ${documentId} as processing and cleared existing OCR data`);
         return document;
     }
-    async resetOcrData(documentId) {
+    async markOcrFailed(documentId, error) {
         if (!mongoose_2.Types.ObjectId.isValid(documentId)) {
             throw new common_1.BadRequestException('Invalid document ID');
         }
         const document = await this.documentModel
             .findByIdAndUpdate(documentId, {
-            ocrStatus: 'pending',
-            raw_text: '',
-            $unset: { 'metadata.ocr': 1 }
+            ocrStatus: 'failed',
+            'ocrMetadata.error': error,
+            'ocrMetadata.failedAt': new Date().toISOString()
         }, { new: true })
-            .populate('metadata.user_id')
-            .exec();
-        if (!document) {
-            throw new common_1.NotFoundException('Document not found');
-        }
-        this.logger.log(`DocumentService - Reset OCR data for document ${documentId}`);
-        return document;
-    }
-    async reportOcrError(params) {
-        const { documentId, page, status, message } = params;
-        if (!mongoose_2.Types.ObjectId.isValid(documentId)) {
-            throw new common_1.BadRequestException('Invalid document ID');
-        }
-        const update = {
-            ocrStatus: status,
-            'metadata.ocr.error': message,
-            'metadata.ocr.failedAt': new Date().toISOString(),
-        };
-        if (page) {
-            update['metadata.ocr.page'] = page;
-        }
-        const document = await this.documentModel
-            .findByIdAndUpdate(documentId, { $set: update }, { new: true })
-            .populate('metadata.user_id')
+            .populate('metadata.user_id', 'firstname lastname email')
             .exec();
         if (!document) {
             throw new common_1.NotFoundException('Document not found');
@@ -316,7 +237,7 @@ let DocumentService = DocumentService_1 = class DocumentService {
         }
         return this.documentModel
             .find({ ocrStatus: status })
-            .populate('metadata.user_id')
+            .populate('metadata.user_id', 'firstname lastname email')
             .sort({ createdAt: -1 })
             .exec();
     }
@@ -327,37 +248,11 @@ let DocumentService = DocumentService_1 = class DocumentService {
             $or: [
                 { filename: searchRegex },
                 { extension: searchRegex },
-                { 'metadata.title': searchRegex },
-                { 'metadata.owner': searchRegex },
-                { 'metadata.username': searchRegex },
+                { 'metadata.tags': searchRegex },
+                { 'metadata.description': searchRegex },
             ]
         })
-            .populate('metadata.user_id')
-            .sort({ createdAt: -1 })
-            .exec();
-    }
-    async findPagesByOriginalDocument(originalDocumentId) {
-        if (!mongoose_2.Types.ObjectId.isValid(originalDocumentId)) {
-            throw new common_1.BadRequestException('Invalid original document ID');
-        }
-        return this.documentModel
-            .find({
-            originalDocumentId: new mongoose_2.Types.ObjectId(originalDocumentId),
-            isPageDocument: true
-        })
-            .populate('metadata.user_id')
-            .sort({ pageNumber: 1 })
-            .exec();
-    }
-    async findOriginalDocuments() {
-        return this.documentModel
-            .find({
-            $or: [
-                { isPageDocument: { $ne: true } },
-                { isPageDocument: { $exists: false } }
-            ]
-        })
-            .populate('metadata.user_id')
+            .populate('metadata.user_id', 'firstname lastname email')
             .sort({ createdAt: -1 })
             .exec();
     }
@@ -369,7 +264,7 @@ let DocumentService = DocumentService_1 = class DocumentService {
             { $limit: 10 }
         ]);
         const documentsByUploader = await this.documentModel.aggregate([
-            { $group: { _id: '$metadata.user_id', count: { $sum: 1 } } },
+            { $group: { _id: '$fileUploader', count: { $sum: 1 } } },
             { $sort: { count: -1 } },
             { $limit: 10 }
         ]);
@@ -385,28 +280,84 @@ let DocumentService = DocumentService_1 = class DocumentService {
             recentDocuments,
         };
     }
-    async getPresignedUrlForDocument(id, expires) {
+    async getPresignedUrlForDocument(id, exp) {
         if (!mongoose_2.Types.ObjectId.isValid(id)) {
             throw new common_1.BadRequestException('Invalid document ID');
         }
-        const doc = await this.documentModel.findById(id).exec();
-        if (!doc) {
+        const document = await this.documentModel.findById(id).exec();
+        if (!document) {
             throw new common_1.NotFoundException('Document not found');
         }
-        try {
-            const url = new URL(doc.fileUrl);
-            const pathParts = url.pathname.replace(/^\//, '').split('/');
-            const bucket = pathParts.shift();
-            const objectName = pathParts.join('/');
-            if (!bucket || !objectName) {
-                throw new Error('Invalid MinIO fileUrl format');
-            }
-            const signed = await this.minioService.getPresignedUrl(bucket, objectName, expires ?? 900);
-            return { url: signed };
+        return {
+            url: document.fileUrl,
+            expiresIn: exp || 3600,
+        };
+    }
+    async findPagesByOriginalDocument(originalDocumentId) {
+        if (!mongoose_2.Types.ObjectId.isValid(originalDocumentId)) {
+            throw new common_1.BadRequestException('Invalid document ID');
         }
-        catch (e) {
-            throw new common_1.BadRequestException(`Failed to create presigned URL: ${e.message}`);
+        return this.documentModel
+            .find({
+            originalDocumentId: new mongoose_2.Types.ObjectId(originalDocumentId),
+            isPageDocument: true
+        })
+            .populate('metadata.user_id', 'firstname lastname email')
+            .sort({ pageNumber: 1 })
+            .exec();
+    }
+    async findOriginalDocuments() {
+        return this.documentModel
+            .find({
+            $or: [
+                { isPageDocument: { $ne: true } },
+                { isPageDocument: { $exists: false } }
+            ]
+        })
+            .populate('metadata.user_id', 'firstname lastname email')
+            .sort({ createdAt: -1 })
+            .exec();
+    }
+    async reportOcrError(errorData) {
+        if (!mongoose_2.Types.ObjectId.isValid(errorData.documentId)) {
+            throw new common_1.BadRequestException('Invalid document ID');
         }
+        const document = await this.documentModel
+            .findByIdAndUpdate(errorData.documentId, {
+            ocrStatus: errorData.status || 'failed',
+            'metadata.ocr.error': errorData.error,
+            'metadata.ocr.failedAt': new Date().toISOString(),
+            ...(errorData.page && { 'metadata.ocr.failedPage': errorData.page }),
+        }, { new: true })
+            .populate('metadata.user_id', 'firstname lastname email')
+            .exec();
+        if (!document) {
+            throw new common_1.NotFoundException('Document not found');
+        }
+        return document;
+    }
+    async resetOcrData(id) {
+        if (!mongoose_2.Types.ObjectId.isValid(id)) {
+            throw new common_1.BadRequestException('Invalid document ID');
+        }
+        await this.documentModel.deleteMany({
+            originalDocumentId: new mongoose_2.Types.ObjectId(id),
+            isPageDocument: true
+        });
+        const document = await this.documentModel
+            .findByIdAndUpdate(id, {
+            $unset: {
+                raw_text: 1,
+                'metadata.ocr': 1
+            },
+            ocrStatus: 'pending'
+        }, { new: true })
+            .populate('metadata.user_id', 'firstname lastname email')
+            .exec();
+        if (!document) {
+            throw new common_1.NotFoundException('Document not found');
+        }
+        return document;
     }
 };
 exports.DocumentService = DocumentService;
@@ -414,7 +365,6 @@ exports.DocumentService = DocumentService = DocumentService_1 = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, mongoose_1.InjectModel)(document_schema_1.Document.name)),
     __metadata("design:paramtypes", [mongoose_2.Model,
-        ocr_service_1.OcrService,
-        minio_service_1.MinioService])
+        ocr_service_1.OcrService])
 ], DocumentService);
 //# sourceMappingURL=document.service.js.map
