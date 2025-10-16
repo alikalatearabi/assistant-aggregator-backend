@@ -112,6 +112,11 @@ let DocumentController = DocumentController_1 = class DocumentController {
         const exp = expires ? parseInt(expires, 10) : undefined;
         return this.documentService.getPresignedUrlForDocument(id, exp);
     }
+    async ensurePublicBucket() {
+        this.logger.log('Admin request: Ensuring public bucket access');
+        await this.minioService.ensurePublicAccess();
+        return { message: 'Bucket policy updated to allow public read access' };
+    }
 };
 exports.DocumentController = DocumentController;
 __decorate([
@@ -313,6 +318,19 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], DocumentController.prototype, "getPresignedUrl", null);
+__decorate([
+    (0, common_1.Post)('admin/ensure-public-bucket'),
+    (0, swagger_1.ApiExcludeEndpoint)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Ensure MinIO bucket has public read access' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Bucket policy updated',
+        schema: { type: 'object', properties: { message: { type: 'string' } } },
+    }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], DocumentController.prototype, "ensurePublicBucket", null);
 exports.DocumentController = DocumentController = DocumentController_1 = __decorate([
     (0, swagger_1.ApiTags)('documents'),
     (0, common_1.Controller)('documents'),

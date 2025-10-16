@@ -280,4 +280,18 @@ export class DocumentController {
     const exp = expires ? parseInt(expires, 10) : undefined;
     return this.documentService.getPresignedUrlForDocument(id, exp);
   }
+
+  @Post('admin/ensure-public-bucket')
+  @ApiExcludeEndpoint()
+  @ApiOperation({ summary: 'Ensure MinIO bucket has public read access' })
+  @ApiResponse({
+    status: 200,
+    description: 'Bucket policy updated',
+    schema: { type: 'object', properties: { message: { type: 'string' } } },
+  })
+  async ensurePublicBucket(): Promise<{ message: string }> {
+    this.logger.log('Admin request: Ensuring public bucket access');
+    await this.minioService.ensurePublicAccess();
+    return { message: 'Bucket policy updated to allow public read access' };
+  }
 }

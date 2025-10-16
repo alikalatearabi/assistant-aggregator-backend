@@ -40,4 +40,7 @@ export declare class DocumentController {
     getPresignedUrl(id: string, expires?: string): Promise<{
         url: string;
     }>;
+    ensurePublicBucket(): Promise<{
+        message: string;
+    }>;
 }

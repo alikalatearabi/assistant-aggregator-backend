@@ -31,6 +31,12 @@ export class MinioService {
     return this.client.presignedGetObject(bucket, objectName, expires);
   }
 
+  async ensurePublicAccess(bucket?: string): Promise<void> {
+    const targetBucket = bucket || this.getDefaultBucket();
+    this.logger.log(`Ensuring public access for bucket: ${targetBucket}`);
+    await this.ensureBucket(targetBucket);
+  }
+
   private getDefaultBucket(): string {
     return this.config.get<string>('MINIO_BUCKET') || 'assistant-aggregator';
   }
@@ -48,6 +54,27 @@ export class MinioService {
     const exists = await this.client.bucketExists(bucket).catch(() => false);
     if (!exists) {
       await this.client.makeBucket(bucket, 'us-east-1');
+      this.logger.log(`Created new bucket: ${bucket}`);
+    }
+
+    // Set public read policy for the bucket to allow external access
+    const publicReadPolicy = {
+      Version: '2012-10-17',
+      Statement: [
+        {
+          Effect: 'Allow',
+          Principal: { AWS: ['*'] },
+          Action: ['s3:GetObject'],
+          Resource: [`arn:aws:s3:::${bucket}/*`],
+        },
+      ],
+    };
+
+    try {
+      await this.client.setBucketPolicy(bucket, JSON.stringify(publicReadPolicy));
+      this.logger.log(`Set public read policy for bucket: ${bucket}`);
+    } catch (error) {
+      this.logger.error(`Failed to set bucket policy for ${bucket}:`, error.message);
     }
   }
 
