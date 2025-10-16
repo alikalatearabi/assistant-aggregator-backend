@@ -11,6 +11,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DocumentQueryDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
+const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
 class DocumentQueryDto {
     extension;
     metadataUserId;
@@ -26,6 +28,8 @@ __decorate([
         description: 'Filter by file extension',
         example: 'pdf',
     }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], DocumentQueryDto.prototype, "extension", void 0);
 __decorate([
@@ -33,6 +37,8 @@ __decorate([
         description: 'Filter by metadata.user_id (uploader)',
         example: '507f1f77bcf86cd799439012',
     }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], DocumentQueryDto.prototype, "metadataUserId", void 0);
 __decorate([
@@ -40,6 +46,8 @@ __decorate([
         description: 'Search in filename',
         example: 'report',
     }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], DocumentQueryDto.prototype, "filename", void 0);
 __decorate([
@@ -47,6 +55,8 @@ __decorate([
         description: 'Date from (ISO string)',
         example: '2023-01-01T00:00:00.000Z',
     }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], DocumentQueryDto.prototype, "dateFrom", void 0);
 __decorate([
@@ -54,6 +64,8 @@ __decorate([
         description: 'Date to (ISO string)',
         example: '2023-12-31T23:59:59.999Z',
     }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], DocumentQueryDto.prototype, "dateTo", void 0);
 __decorate([
@@ -62,6 +74,10 @@ __decorate([
         example: 1,
         minimum: 1,
     }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(1),
     __metadata("design:type", Number)
 ], DocumentQueryDto.prototype, "page", void 0);
 __decorate([
@@ -71,6 +87,11 @@ __decorate([
         minimum: 1,
         maximum: 100,
     }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(1),
+    (0, class_validator_1.Max)(100),
     __metadata("design:type", Number)
 ], DocumentQueryDto.prototype, "limit", void 0);
 //# sourceMappingURL=document-query.dto.js.map

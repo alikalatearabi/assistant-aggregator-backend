@@ -26,7 +26,7 @@ export class OcrService {
   ) {}
 
   async sendDocumentForOcr(ocrRequest: OcrRequest): Promise<OcrResponse> {
-    const baseUrl = this.configService.get<string>('OCR_API_URL_BASE') || 'http://78.39.182.65:8005';
+    const baseUrl = this.configService.get<string>('OCR_API_URL_BASE') || 'http://78.39.182.65:8000';
     const authUrl = `${baseUrl}/authorize`;
     const filesUrl = `${baseUrl}/files`;
     
