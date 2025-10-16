@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var DocumentController_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DocumentController = void 0;
 const common_1 = require("@nestjs/common");
@@ -23,36 +24,47 @@ const update_document_dto_1 = require("../dto/update-document.dto");
 const document_query_dto_1 = require("../dto/document-query.dto");
 const document_metadata_dto_1 = require("../dto/document-metadata.dto");
 const document_schema_1 = require("../schemas/document.schema");
-let DocumentController = class DocumentController {
+let DocumentController = DocumentController_1 = class DocumentController {
     documentService;
     minioService;
+    logger = new common_1.Logger(DocumentController_1.name);
     constructor(documentService, minioService) {
         this.documentService = documentService;
         this.minioService = minioService;
     }
     async createDocument(file, body) {
+        this.logger.log(`=== Starting document upload ===`);
+        this.logger.log(`Request body keys: ${Object.keys(body)}`);
+        this.logger.log(`File info: ${file ? `size=${file.size}, type=${file.mimetype}, originalname=${file.originalname}` : 'NO FILE'}`);
         if (!file || !body?.filename || !body?.extension) {
+            this.logger.error(`Validation failed - file: ${!!file}, filename: ${!!body?.filename}, extension: ${!!body?.extension}`);
             throw new common_2.BadRequestException('file, filename and extension are required');
         }
+        this.logger.log(`Processing file: ${body.filename}.${body.extension}`);
         let metadataParsed = undefined;
         if (typeof body?.metadata === 'string') {
             try {
                 metadataParsed = JSON.parse(body.metadata);
+                this.logger.log(`Parsed metadata from string: ${JSON.stringify(metadataParsed)}`);
             }
             catch (e) {
+                this.logger.error(`Failed to parse metadata JSON: ${e.message}`);
                 throw new common_2.BadRequestException('metadata must be a valid JSON string');
             }
         }
         else if (body?.metadata && typeof body.metadata === 'object') {
             metadataParsed = body.metadata;
+            this.logger.log(`Using metadata object: ${JSON.stringify(metadataParsed)}`);
         }
         const safeName = String(body.filename).replace(/\s+/g, '_');
         const objectName = `documents/${Date.now()}_${safeName}`;
+        this.logger.log(`Generated object name: ${objectName}`);
         const fileUrl = await this.minioService.uploadAndGetUrl({
             buffer: file.buffer,
             objectName,
             contentType: file.mimetype,
         });
+        this.logger.log(`Upload completed, fileUrl: ${fileUrl}`);
         const dto = {
             filename: body.filename,
             fileUrl,
@@ -60,7 +72,11 @@ let DocumentController = class DocumentController {
             rawTextFileId: body.rawTextFileId,
             metadata: metadataParsed,
         };
-        return this.documentService.createDocument(dto);
+        this.logger.log(`Creating document with DTO: ${JSON.stringify(dto)}`);
+        const result = await this.documentService.createDocument(dto);
+        this.logger.log(`Document created successfully with ID: ${result._id}`);
+        this.logger.log(`=== Document upload completed ===`);
+        return result;
     }
     async findAllDocuments(query) {
         return this.documentService.findAllDocuments(query);
@@ -297,7 +313,7 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], DocumentController.prototype, "getPresignedUrl", null);
-exports.DocumentController = DocumentController = __decorate([
+exports.DocumentController = DocumentController = DocumentController_1 = __decorate([
     (0, swagger_1.ApiTags)('documents'),
     (0, common_1.Controller)('documents'),
     __metadata("design:paramtypes", [document_service_1.DocumentService,

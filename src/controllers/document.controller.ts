@@ -9,6 +9,7 @@ import {
   Query,
   UploadedFile,
   UseInterceptors,
+  Logger,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -33,6 +34,8 @@ import { Document } from '../schemas/document.schema';
 @ApiTags('documents')
 @Controller('documents')
 export class DocumentController {
+  private readonly logger = new Logger(DocumentController.name);
+
   constructor(
     private readonly documentService: DocumentService,
     private readonly minioService: MinioService,
@@ -67,31 +70,44 @@ export class DocumentController {
     @UploadedFile() file: any,
     @Body() body: any,
   ): Promise<Document> {
+    this.logger.log(`=== Starting document upload ===`);
+    this.logger.log(`Request body keys: ${Object.keys(body)}`);
+    this.logger.log(`File info: ${file ? `size=${file.size}, type=${file.mimetype}, originalname=${file.originalname}` : 'NO FILE'}`);
+
     // Validate required fields from body
     if (!file || !body?.filename || !body?.extension) {
+      this.logger.error(`Validation failed - file: ${!!file}, filename: ${!!body?.filename}, extension: ${!!body?.extension}`);
       throw new BadRequestException('file, filename and extension are required');
     }
+
+    this.logger.log(`Processing file: ${body.filename}.${body.extension}`);
 
     // Parse metadata if it's a JSON string
     let metadataParsed: any = undefined;
     if (typeof body?.metadata === 'string') {
       try {
         metadataParsed = JSON.parse(body.metadata);
+        this.logger.log(`Parsed metadata from string: ${JSON.stringify(metadataParsed)}`);
       } catch (e) {
+        this.logger.error(`Failed to parse metadata JSON: ${e.message}`);
         throw new BadRequestException('metadata must be a valid JSON string');
       }
     } else if (body?.metadata && typeof body.metadata === 'object') {
       metadataParsed = body.metadata;
+      this.logger.log(`Using metadata object: ${JSON.stringify(metadataParsed)}`);
     }
 
     // Upload to MinIO and obtain a public URL
     const safeName = String(body.filename).replace(/\s+/g, '_');
     const objectName = `documents/${Date.now()}_${safeName}`;
+    this.logger.log(`Generated object name: ${objectName}`);
+    
     const fileUrl = await this.minioService.uploadAndGetUrl({
       buffer: file.buffer,
       objectName,
       contentType: file.mimetype,
     });
+    this.logger.log(`Upload completed, fileUrl: ${fileUrl}`);
 
     // Build DTO expected by service
     const dto: CreateDocumentDto = {
@@ -102,7 +118,12 @@ export class DocumentController {
       metadata: metadataParsed,
     } as any;
 
-    return this.documentService.createDocument(dto);
+    this.logger.log(`Creating document with DTO: ${JSON.stringify(dto)}`);
+    const result = await this.documentService.createDocument(dto);
+    this.logger.log(`Document created successfully with ID: ${result._id}`);
+    this.logger.log(`=== Document upload completed ===`);
+    
+    return result;
   }
 
   @Get()

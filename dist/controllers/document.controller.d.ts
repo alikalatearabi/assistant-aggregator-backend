@@ -7,6 +7,7 @@ import { Document } from '../schemas/document.schema';
 export declare class DocumentController {
     private readonly documentService;
     private readonly minioService;
+    private readonly logger;
     constructor(documentService: DocumentService, minioService: MinioService);
     createDocument(file: any, body: any): Promise<Document>;
     findAllDocuments(query: DocumentQueryDto): Promise<{
