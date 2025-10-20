@@ -8,95 +8,103 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ChatMessagesService = void 0;
 const common_1 = require("@nestjs/common");
 const crypto_1 = require("crypto");
 const chat_messages_gateway_1 = require("../gateways/chat-messages.gateway");
+const axios_1 = __importDefault(require("axios"));
 let ChatMessagesService = class ChatMessagesService {
     gateway;
     constructor(gateway) {
         this.gateway = gateway;
     }
-    async generateAnswer(req) {
-        const answer = `Answer for: ${req.query}`;
-        const retriever_resources = Array.from({ length: Math.max(1, req.inputs.contextCount) }).map((_, i) => ({
-            position: i,
-            dataset_id: 'dataset-demo',
-            dataset_name: 'Demo Dataset',
-            document_name: `Doc-${i + 1}`,
-            document_id: '507f1f77bcf86cd7994390' + String(10 + i),
-            segment_id: `seg-${i}`,
-            score: Math.max(0, 1 - i * 0.1),
-            content: `Snippet ${i + 1} related to ${req.query}`,
-        }));
-        const metadata = {
-            retriever_resources,
-            usage: { tokens: 42 },
+    async proxyToExternalApi(req) {
+        const loginUrl = 'https://test1.nlp-lab.ir/auth/login';
+        const username = 'kalate';
+        const password = '12';
+        const loginData = `grant_type=password&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&scope=&client_id=&client_secret=`;
+        const loginHeaders = {
+            'accept': 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded',
         };
-        return { answer, metadata };
-    }
-    async processBlocking(req) {
-        const taskId = (0, crypto_1.randomUUID)();
+        let token;
         try {
-            const { answer, metadata } = await this.generateAnswer(req);
-            return {
-                conversation_id: req.conversationId || 'unknown',
-                answer,
-                metadata,
-            };
+            const loginResp = await axios_1.default.post(loginUrl, loginData, { headers: loginHeaders });
+            token = loginResp.data.access_token;
         }
-        catch (e) {
+        catch (err) {
             return {
                 event: 'error',
                 error: {
-                    status: 500,
-                    code: 'INTERNAL_ERROR',
-                    message: e?.message || 'Unknown error',
+                    status: err?.response?.status || 500,
+                    code: 'LOGIN_ERROR',
+                    message: err?.response?.data?.detail || err?.message || 'Login failed',
                 },
-                taskId,
+                taskId: (0, crypto_1.randomUUID)(),
+            };
+        }
+        const chatUrl = 'https://test1.nlp-lab.ir/chat/';
+        const chatPayload = {
+            query: req.query,
+            inputs: {
+                similarity_threshold: req.inputs.similarityThreshold,
+                context_count: req.inputs.contextCount,
+            },
+            conversation_id: req.conversationId || '',
+            prior_messages: req.priorMessages || [],
+        };
+        const chatHeaders = {
+            'accept': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        };
+        try {
+            const chatResp = await axios_1.default.post(chatUrl, chatPayload, { headers: chatHeaders });
+            return chatResp.data;
+        }
+        catch (err) {
+            return {
+                event: 'error',
+                error: {
+                    status: err?.response?.status || 500,
+                    code: 'CHAT_ERROR',
+                    message: err?.response?.data?.detail || err?.message || 'Chat API failed',
+                },
+                taskId: (0, crypto_1.randomUUID)(),
             };
         }
     }
+    async processBlocking(req) {
+        return await this.proxyToExternalApi(req);
+    }
     async processStreaming(req) {
         const taskId = (0, crypto_1.randomUUID)();
-        try {
-            const chunks = [`Working on: ${req.query}`, ' ...', ' done.'];
-            for (const chunk of chunks) {
-                this.gateway.broadcast({
-                    event: 'message',
-                    taskId,
-                    conversation_id: req.conversationId || 'unknown',
-                    answer: chunk,
-                    metadata: {},
-                    created_at: new Date().toISOString(),
-                });
-                await new Promise((r) => setTimeout(r, 150));
-            }
-            const { answer, metadata } = await this.generateAnswer(req);
-            this.gateway.broadcast({
-                event: 'message_end',
-                taskId,
-                conversation_id: req.conversationId || 'unknown',
-                answer,
-                metadata,
-                created_at: new Date().toISOString(),
-            });
-            return { taskId };
-        }
-        catch (e) {
+        const result = await this.proxyToExternalApi(req);
+        if (result && typeof result === 'object' && 'event' in result && result.event === 'error') {
             this.gateway.broadcast({
                 event: 'error',
                 taskId,
                 conversation_id: req.conversationId || 'unknown',
                 answer: '',
-                status: 500,
-                code: 'INTERNAL_ERROR',
-                message: e?.message || 'Unknown error',
+                status: result.error.status,
+                code: result.error.code,
+                message: result.error.message,
                 created_at: new Date().toISOString(),
             });
-            return { taskId };
         }
+        else {
+            this.gateway.broadcast({
+                event: 'message_end',
+                taskId,
+                ...result,
+                created_at: new Date().toISOString(),
+            });
+        }
+        return { taskId };
     }
 };
 exports.ChatMessagesService = ChatMessagesService;
