@@ -75,6 +75,12 @@ export class OcrController {
   @ApiResponse({ status: 400, description: 'Invalid input data' })
   @ApiResponse({ status: 404, description: 'Document not found' })
   async reportOcrError(@Body() body: ReportOcrErrorDto): Promise<Document> {
+    // Log the incoming OCR error callback for visibility in app logs
+    this.logger.log(`OCR Error callback received for document: ${body?.document_id || 'N/A'}`);
+    this.logger.debug('OCR Error payload', { body });
+    // Also print to stdout so it appears in container logs immediately
+    console.log(`🔔 OCR error callback - documentId=${body?.document_id || 'N/A'} page=${body?.page || 'N/A'} status=${body?.status || 'N/A'} message=${body?.message || 'N/A'}`);
+
     return this.documentService.reportOcrError({
       documentId: body.document_id,
       error: body.message,
