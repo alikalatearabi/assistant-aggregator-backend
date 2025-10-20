@@ -3,6 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import FormData = require('form-data');
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, Types } from 'mongoose';
+import { Document, DocumentDocument } from '../schemas/document.schema';
 
 export interface OcrRequest {
   documentId: string;
@@ -24,6 +27,7 @@ export class OcrService {
   constructor(
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
+    @InjectModel(Document.name) private readonly documentModel: Model<DocumentDocument>,
   ) {}
 
   async sendDocumentForOcr(ocrRequest: OcrRequest): Promise<OcrResponse> {
@@ -33,6 +37,31 @@ export class OcrService {
     
     try {
       this.logger.log(`Sending document for OCR processing: ${ocrRequest.documentId}`);
+
+      // Best-effort: mark document OCR status as 'processing' in DB before sending
+      try {
+        if (Types.ObjectId.isValid(ocrRequest.documentId)) {
+          const updated = await this.documentModel.findByIdAndUpdate(
+            ocrRequest.documentId,
+            {
+              $set: {
+                ocrStatus: 'processing',
+                'ocrMetadata.processingStartedAt': new Date().toISOString(),
+                'metadata.ocr.processingStartedAt': new Date().toISOString(),
+              }
+            },
+            { new: true },
+          ).exec();
+
+          if (updated) {
+            this.logger.log(`Document ${ocrRequest.documentId} marked as OCR processing (started)`);
+          } else {
+            this.logger.warn(`Mark processing: no document found with id ${ocrRequest.documentId}`);
+          }
+        }
+      } catch (markErr) {
+        this.logger.warn(`Failed to mark document ${ocrRequest.documentId} as processing: ${markErr?.message || markErr}`);
+      }
       
       const username = this.configService.get<string>('OCR_USERNAME') || 'user1';
       const password = this.configService.get<string>('OCR_PASSWORD') || 'pass1';
@@ -90,17 +119,59 @@ export class OcrService {
       };
 
     } catch (error) {
+      const statusCode = error?.response?.status;
+      const responseBody = error?.response?.data || error?.response;
+      const errMsg = error?.message || String(error);
+
+      // Build a concise stored error message
+      const storedError = statusCode
+        ? `HTTP ${statusCode}: ${typeof responseBody === 'string' ? responseBody : JSON.stringify(responseBody)}`
+        : errMsg;
+
       this.logger.error(`Failed to send document for OCR processing: ${ocrRequest.documentId}`, {
-        error: error.message,
-        stack: error.stack,
-        response: error.response?.data,
-        status: error.response?.status,
+        error: errMsg,
+        stack: error?.stack,
+        response: responseBody,
+        status: statusCode,
       });
+
+      // Attempt to mark the document as failed in the database (best-effort)
+      try {
+        if (Types.ObjectId.isValid(ocrRequest.documentId)) {
+          const updated = await this.documentModel.findByIdAndUpdate(
+            ocrRequest.documentId,
+            {
+              $set: {
+                ocrStatus: 'failed',
+                'ocrMetadata.error': storedError,
+                'ocrMetadata.httpStatus': statusCode,
+                'ocrMetadata.response': responseBody,
+                'ocrMetadata.failedAt': new Date().toISOString(),
+                'metadata.ocr.error': storedError,
+                'metadata.ocr.httpStatus': statusCode,
+                'metadata.ocr.response': responseBody,
+                'metadata.ocr.failedAt': new Date().toISOString(),
+              }
+            },
+            { new: true },
+          ).exec();
+
+          if (updated) {
+            this.logger.log(`Document ${ocrRequest.documentId} marked as OCR failed`);
+          } else {
+            this.logger.warn(`Mark failed: no document found with id ${ocrRequest.documentId}`);
+          }
+        } else {
+          this.logger.warn(`Cannot mark OCR failed: invalid document id ${ocrRequest.documentId}`);
+        }
+      } catch (dbErr) {
+        this.logger.error(`Failed to mark document ${ocrRequest.documentId} as OCR failed: ${dbErr?.message || dbErr}`);
+      }
 
       // Don't throw the error - we want document creation to succeed even if OCR fails
       return {
         success: false,
-        message: `Failed to send document for OCR: ${error.message}`,
+        message: `Failed to send document for OCR: ${errMsg}`,
       };
     }
   }

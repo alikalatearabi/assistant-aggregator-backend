@@ -97,14 +97,41 @@ let ChatMessagesService = class ChatMessagesService {
             });
         }
         else {
+            const answer = result.answer;
+            const chunks = this.chunkText(answer, 20);
+            this.gateway.broadcast({
+                event: 'message_start',
+                taskId,
+                conversation_id: result.conversation_id,
+                metadata: result.metadata,
+                created_at: new Date().toISOString(),
+            });
+            for (let i = 0; i < chunks.length; i++) {
+                await new Promise(resolve => setTimeout(resolve, 150));
+                this.gateway.broadcast({
+                    event: 'message_chunk',
+                    taskId,
+                    conversation_id: result.conversation_id,
+                    chunk: chunks[i],
+                    created_at: new Date().toISOString(),
+                });
+            }
             this.gateway.broadcast({
                 event: 'message_end',
                 taskId,
-                ...result,
+                conversation_id: result.conversation_id,
+                history: result.history,
                 created_at: new Date().toISOString(),
             });
         }
         return { taskId };
+    }
+    chunkText(text, chunkSize) {
+        const chunks = [];
+        for (let i = 0; i < text.length; i += chunkSize) {
+            chunks.push(text.slice(i, i + chunkSize));
+        }
+        return chunks;
     }
 };
 exports.ChatMessagesService = ChatMessagesService;

@@ -234,8 +234,65 @@ export class DocumentService {
     if (!existingDocument) {
       throw new NotFoundException('Document not found');
     }
+    // If this payload is for a specific page, create/update a page document and
+    // append the page text to the original document. Keep the original marked
+    // as 'processing' while pages are being submitted.
+    if (page && Number.isInteger(page) && page > 0) {
+      // Upsert a page document for this page
+      const pageDocData: any = {
+        filename: `${existingDocument.filename}-page-${page}`,
+        fileUrl: existingDocument.fileUrl,
+        extension: existingDocument.extension,
+        isPageDocument: true,
+        originalDocumentId: new Types.ObjectId(documentId),
+        pageNumber: page,
+        raw_text: extractedText,
+        ocrStatus: 'completed',
+        metadata: {
+          ...existingDocument.metadata,
+          ocr: {
+            processedAt: new Date().toISOString(),
+            textLength: extractedText.length,
+            processingCompletedBy: 'ocr-service',
+          }
+        }
+      };
 
-    // Prepare update data with automatic metadata generation
+      const pageDocument = await this.documentModel
+        .findOneAndUpdate(
+          { originalDocumentId: new Types.ObjectId(documentId), pageNumber: page, isPageDocument: true },
+          { $set: pageDocData },
+          { upsert: true, new: true }
+        )
+        .populate('metadata.user_id', 'firstname lastname email')
+        .exec();
+
+      // Append the page text to the original document's raw_text (preserve existing)
+      const combinedText = [existingDocument.raw_text, extractedText].filter(Boolean).join('\n\n');
+
+      const updatedOriginal = await this.documentModel
+        .findByIdAndUpdate(
+          documentId,
+          {
+            $set: {
+              raw_text: combinedText,
+              ocrStatus: 'processing',
+              'metadata.ocr': {
+                ...existingDocument.metadata?.ocr,
+                processingStartedAt: existingDocument.metadata?.ocr?.processingStartedAt || new Date().toISOString(),
+                textLength: (existingDocument.raw_text?.length || 0) + extractedText.length,
+              }
+            }
+          },
+          { new: true }
+        )
+        .populate('metadata.user_id', 'firstname lastname email')
+        .exec();
+
+      return updatedOriginal as Document;
+    }
+
+    // No page provided: treat this as a full-document OCR result (complete)
     const updateData: any = {
       raw_text: extractedText,
       ocrStatus: 'completed',
@@ -247,7 +304,6 @@ export class DocumentService {
       },
     };
 
-    // Update the document
     const document = await this.documentModel
       .findByIdAndUpdate(
         documentId,
@@ -256,11 +312,11 @@ export class DocumentService {
       )
       .populate('metadata.user_id', 'firstname lastname email')
       .exec();
-    
+
     if (!document) {
       throw new NotFoundException('Document not found after update');
     }
-    
+
     return document;
   }
 

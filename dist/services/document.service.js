@@ -178,6 +178,46 @@ let DocumentService = DocumentService_1 = class DocumentService {
         if (!existingDocument) {
             throw new common_1.NotFoundException('Document not found');
         }
+        if (page && Number.isInteger(page) && page > 0) {
+            const pageDocData = {
+                filename: `${existingDocument.filename}-page-${page}`,
+                fileUrl: existingDocument.fileUrl,
+                extension: existingDocument.extension,
+                isPageDocument: true,
+                originalDocumentId: new mongoose_2.Types.ObjectId(documentId),
+                pageNumber: page,
+                raw_text: extractedText,
+                ocrStatus: 'completed',
+                metadata: {
+                    ...existingDocument.metadata,
+                    ocr: {
+                        processedAt: new Date().toISOString(),
+                        textLength: extractedText.length,
+                        processingCompletedBy: 'ocr-service',
+                    }
+                }
+            };
+            const pageDocument = await this.documentModel
+                .findOneAndUpdate({ originalDocumentId: new mongoose_2.Types.ObjectId(documentId), pageNumber: page, isPageDocument: true }, { $set: pageDocData }, { upsert: true, new: true })
+                .populate('metadata.user_id', 'firstname lastname email')
+                .exec();
+            const combinedText = [existingDocument.raw_text, extractedText].filter(Boolean).join('\n\n');
+            const updatedOriginal = await this.documentModel
+                .findByIdAndUpdate(documentId, {
+                $set: {
+                    raw_text: combinedText,
+                    ocrStatus: 'processing',
+                    'metadata.ocr': {
+                        ...existingDocument.metadata?.ocr,
+                        processingStartedAt: existingDocument.metadata?.ocr?.processingStartedAt || new Date().toISOString(),
+                        textLength: (existingDocument.raw_text?.length || 0) + extractedText.length,
+                    }
+                }
+            }, { new: true })
+                .populate('metadata.user_id', 'firstname lastname email')
+                .exec();
+            return updatedOriginal;
+        }
         const updateData = {
             raw_text: extractedText,
             ocrStatus: 'completed',

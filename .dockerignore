@@ -110,3 +110,4 @@ scripts/
 
 # MongoDB data
 mongo-init/
+dist/

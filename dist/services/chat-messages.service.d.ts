@@ -8,4 +8,5 @@ export declare class ChatMessagesService {
     processStreaming(req: ChatMessagesRequestDto): Promise<{
         taskId: string;
     }>;
+    private chunkText;
 }
