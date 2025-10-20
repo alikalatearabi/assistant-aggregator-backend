@@ -87,15 +87,50 @@ export class ChatMessagesService {
         created_at: new Date().toISOString(),
       });
     } else {
-      // Broadcast success event
+      // Simulate streaming by chunking the answer
+      const answer = result.answer;
+      const chunks = this.chunkText(answer, 20); // Chunk by ~20 characters
+
+      // Emit start event with metadata
+      this.gateway.broadcast({
+        event: 'message_start',
+        taskId,
+        conversation_id: result.conversation_id,
+        metadata: result.metadata,
+        created_at: new Date().toISOString(),
+      });
+
+      // Emit chunks progressively
+      for (let i = 0; i < chunks.length; i++) {
+        await new Promise(resolve => setTimeout(resolve, 150)); // Simulate streaming delay
+        this.gateway.broadcast({
+          event: 'message_chunk',
+          taskId,
+          conversation_id: result.conversation_id,
+          chunk: chunks[i],
+          created_at: new Date().toISOString(),
+        });
+      }
+
+      // Emit end event with history
       this.gateway.broadcast({
         event: 'message_end',
         taskId,
-        ...result,
+        conversation_id: result.conversation_id,
+        history: result.history,
         created_at: new Date().toISOString(),
       });
     }
 
     return { taskId };
+  }
+
+  // Helper method to chunk text
+  private chunkText(text: string, chunkSize: number): string[] {
+    const chunks: string[] = [];
+    for (let i = 0; i < text.length; i += chunkSize) {
+      chunks.push(text.slice(i, i + chunkSize));
+    }
+    return chunks;
   }
 }
