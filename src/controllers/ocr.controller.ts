@@ -20,7 +20,7 @@ export class OcrController {
   @ApiResponse({ status: 200, description: 'OCR result submitted successfully', type: Document })
   @ApiResponse({ status: 404, description: 'Document not found' })
   @ApiResponse({ status: 400, description: 'Bad Request - Invalid input data or document ID' })
-  async submitOcrResult(@Body() submitOcrResultDto: SubmitOcrResultDto): Promise<Document> {
+  async submitOcrResult(@Body() submitOcrResultDto: SubmitOcrResultDto): Promise<any> {
     this.logger.log(`OCR Submit - Received payload for document: ${submitOcrResultDto.documentId}`);
     this.logger.debug(`OCR Submit - Full payload:`, {
       documentId: submitOcrResultDto.documentId,
@@ -30,10 +30,23 @@ export class OcrController {
       has_page: submitOcrResultDto.page !== undefined,
     });
 
+    // If a page number is provided, create a page document separately
+    if (submitOcrResultDto.page && Number.isInteger(submitOcrResultDto.page) && submitOcrResultDto.page > 0) {
+      const pageDoc = await this.documentService.createPageDocument(
+        submitOcrResultDto.documentId.toString(),
+        submitOcrResultDto.page,
+        submitOcrResultDto.raw_text,
+        { processedBy: 'ocr-service' },
+      );
+
+      this.logger.log(`OCR Submit - Successfully stored page ${submitOcrResultDto.page} for document: ${submitOcrResultDto.documentId}`);
+      return pageDoc;
+    }
+
+    // No page provided: treat this as a full-document OCR result (complete)
     const result = await this.documentService.submitOcrResult(
       submitOcrResultDto.documentId.toString(),
       submitOcrResultDto.raw_text,
-      submitOcrResultDto.page,
     );
 
     this.logger.log(`OCR Submit - Successfully processed for document: ${submitOcrResultDto.documentId}`);

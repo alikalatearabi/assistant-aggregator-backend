@@ -224,6 +224,88 @@ export class DocumentService {
     return document;
   }
 
+  /**
+   * Create or update a page document for an original document.
+   * This will NOT append the page text to the original.raw_text.
+   * It will set the original's ocrStatus to 'processing' (best-effort) and
+   * return the page document.
+   */
+  async createPageDocument(
+    originalDocumentId: string,
+    pageNumber: number,
+    rawText: string,
+    opts: { processedBy?: string } = {},
+  ): Promise<Document | null> {
+    if (!Types.ObjectId.isValid(originalDocumentId)) {
+      this.logger.warn(`createPageDocument: invalid originalDocumentId ${originalDocumentId}`);
+      return null;
+    }
+
+    const originalIdObj = new Types.ObjectId(originalDocumentId);
+
+    const original = await this.documentModel.findById(originalIdObj).exec();
+    if (!original) {
+      this.logger.warn(`createPageDocument: original document not found ${originalDocumentId}`);
+      return null;
+    }
+
+    const processedAt = new Date().toISOString();
+
+    const pageFilter = {
+      originalDocumentId: originalIdObj,
+      pageNumber,
+      isPageDocument: true,
+    };
+
+    const pageUpdate = {
+      $set: {
+        originalDocumentId: originalIdObj,
+        pageNumber,
+        isPageDocument: true,
+        filename: original.filename,
+        fileUrl: original.fileUrl,
+        extension: original.extension,
+        raw_text: rawText,
+        ocrStatus: 'completed',
+        updatedAt: processedAt,
+        'metadata.ocr.processedAt': processedAt,
+        'metadata.ocr.textLength': rawText?.length ?? 0,
+        'metadata.ocr.processingCompletedBy': opts.processedBy ?? 'ocr-service',
+      },
+      $setOnInsert: {
+        createdAt: processedAt,
+      },
+    };
+
+    const pageDoc = await this.documentModel
+      .findOneAndUpdate(pageFilter, pageUpdate, { upsert: true, new: true, setDefaultsOnInsert: true })
+      .populate('metadata.user_id', 'firstname lastname email')
+      .exec();
+
+    // Best-effort: mark original as processing but DO NOT change original.raw_text
+    try {
+      await this.documentModel
+        .findByIdAndUpdate(
+          originalIdObj,
+          {
+            $set: {
+              ocrStatus: 'processing',
+              'metadata.ocr.processingStartedAt': original.metadata?.ocr?.processingStartedAt ?? processedAt,
+              updatedAt: processedAt,
+            },
+          },
+          { new: true },
+        )
+        .exec();
+    } catch (err) {
+      this.logger.warn(
+        `createPageDocument: failed to mark original ${originalDocumentId} as processing: ${err?.message || err}`,
+      );
+    }
+
+    return pageDoc as Document;
+  }
+
   async submitOcrResult(documentId: string, extractedText: string, page?: number): Promise<Document> {
     if (!Types.ObjectId.isValid(documentId)) {
       throw new BadRequestException('Invalid document ID');
@@ -354,8 +436,12 @@ export class DocumentService {
         documentId,
         { 
           ocrStatus: 'failed',
-          'ocrMetadata.error': error,
-          'ocrMetadata.failedAt': new Date().toISOString()
+          $set: {
+            'ocrMetadata.error': error,
+            'ocrMetadata.failedAt': new Date().toISOString(),
+            'metadata.ocr.error': error,
+            'metadata.ocr.failedAt': new Date().toISOString(),
+          }
         },
         { new: true }
       )

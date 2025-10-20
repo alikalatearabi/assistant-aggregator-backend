@@ -170,6 +170,62 @@ let DocumentService = DocumentService_1 = class DocumentService {
         }
         return document;
     }
+    async createPageDocument(originalDocumentId, pageNumber, rawText, opts = {}) {
+        if (!mongoose_2.Types.ObjectId.isValid(originalDocumentId)) {
+            this.logger.warn(`createPageDocument: invalid originalDocumentId ${originalDocumentId}`);
+            return null;
+        }
+        const originalIdObj = new mongoose_2.Types.ObjectId(originalDocumentId);
+        const original = await this.documentModel.findById(originalIdObj).exec();
+        if (!original) {
+            this.logger.warn(`createPageDocument: original document not found ${originalDocumentId}`);
+            return null;
+        }
+        const processedAt = new Date().toISOString();
+        const pageFilter = {
+            originalDocumentId: originalIdObj,
+            pageNumber,
+            isPageDocument: true,
+        };
+        const pageUpdate = {
+            $set: {
+                originalDocumentId: originalIdObj,
+                pageNumber,
+                isPageDocument: true,
+                filename: original.filename,
+                fileUrl: original.fileUrl,
+                extension: original.extension,
+                raw_text: rawText,
+                ocrStatus: 'completed',
+                updatedAt: processedAt,
+                'metadata.ocr.processedAt': processedAt,
+                'metadata.ocr.textLength': rawText?.length ?? 0,
+                'metadata.ocr.processingCompletedBy': opts.processedBy ?? 'ocr-service',
+            },
+            $setOnInsert: {
+                createdAt: processedAt,
+            },
+        };
+        const pageDoc = await this.documentModel
+            .findOneAndUpdate(pageFilter, pageUpdate, { upsert: true, new: true, setDefaultsOnInsert: true })
+            .populate('metadata.user_id', 'firstname lastname email')
+            .exec();
+        try {
+            await this.documentModel
+                .findByIdAndUpdate(originalIdObj, {
+                $set: {
+                    ocrStatus: 'processing',
+                    'metadata.ocr.processingStartedAt': original.metadata?.ocr?.processingStartedAt ?? processedAt,
+                    updatedAt: processedAt,
+                },
+            }, { new: true })
+                .exec();
+        }
+        catch (err) {
+            this.logger.warn(`createPageDocument: failed to mark original ${originalDocumentId} as processing: ${err?.message || err}`);
+        }
+        return pageDoc;
+    }
     async submitOcrResult(documentId, extractedText, page) {
         if (!mongoose_2.Types.ObjectId.isValid(documentId)) {
             throw new common_1.BadRequestException('Invalid document ID');
@@ -260,8 +316,12 @@ let DocumentService = DocumentService_1 = class DocumentService {
         const document = await this.documentModel
             .findByIdAndUpdate(documentId, {
             ocrStatus: 'failed',
-            'ocrMetadata.error': error,
-            'ocrMetadata.failedAt': new Date().toISOString()
+            $set: {
+                'ocrMetadata.error': error,
+                'ocrMetadata.failedAt': new Date().toISOString(),
+                'metadata.ocr.error': error,
+                'metadata.ocr.failedAt': new Date().toISOString(),
+            }
         }, { new: true })
             .populate('metadata.user_id', 'firstname lastname email')
             .exec();
