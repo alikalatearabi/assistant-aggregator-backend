@@ -335,4 +335,29 @@ export class DocumentController {
     this.logger.log('Request: Get all original documents');
     return this.documentService.findOriginalDocuments();
   }
+
+  @Get('originals-with-page-counts')
+  @ApiOperation({ summary: 'Get original documents with page counts (paginated)' })
+  @ApiQuery({ name: 'page', required: false, description: 'Page number', example: 1 })
+  @ApiQuery({ name: 'limit', required: false, description: 'Items per page', example: 50 })
+  @ApiResponse({
+    status: 200,
+    description: 'Original documents with page counts',
+    schema: {
+      type: 'object',
+      properties: {
+        documents: { type: 'array', items: { type: 'object' } },
+        total: { type: 'number' },
+        page: { type: 'number' },
+        limit: { type: 'number' },
+        totalPages: { type: 'number' },
+      }
+    }
+  })
+  async getOriginalsWithPageCounts(@Query('page') page?: string, @Query('limit') limit?: string) {
+    const p = page ? parseInt(page, 10) : undefined;
+    const l = limit ? parseInt(limit, 10) : undefined;
+    this.logger.log(`Request: Get originals with page counts - page=${p || 1} limit=${l || 50}`);
+    return this.documentService.findOriginalsWithPageCounts({ page: p, limit: l });
+  }
 }

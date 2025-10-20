@@ -565,6 +565,69 @@ export class DocumentService {
       .exec();
   }
 
+  /**
+   * Return original documents (not page documents) along with a count of their pages.
+   * Supports simple pagination via page & limit.
+   */
+  async findOriginalsWithPageCounts(opts: { page?: number; limit?: number } = {}): Promise<{
+    documents: Document[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }> {
+    const page = opts.page && opts.page > 0 ? Math.floor(opts.page) : 1;
+    const limit = opts.limit && opts.limit > 0 ? Math.floor(opts.limit) : 50;
+    const skip = (page - 1) * limit;
+
+    // Match originals (not page documents)
+    const match: any = {
+      $or: [
+        { isPageDocument: { $ne: true } },
+        { isPageDocument: { $exists: false } },
+      ],
+    };
+
+    // Total count of original documents for pagination
+    const total = await this.documentModel.countDocuments(match as any);
+    const totalPages = Math.ceil(total / limit);
+
+    // Aggregation: lookup pages and compute pageCount
+    const pipeline: any[] = [
+      { $match: match },
+      {
+        $lookup: {
+          from: this.documentModel.collection.name,
+          localField: '_id',
+          foreignField: 'originalDocumentId',
+          as: 'pages',
+        },
+      },
+      {
+        $addFields: {
+          pageCount: { $size: { $ifNull: ['$pages', []] } },
+        },
+      },
+      { $project: { pages: 0 } },
+      { $sort: { createdAt: -1 } },
+      { $skip: skip },
+      { $limit: limit },
+    ];
+
+    const aggResults = await this.documentModel.aggregate(pipeline).exec();
+
+    // Populate metadata.user_id on aggregation results
+    const populated = await this.documentModel.populate(aggResults, { path: 'metadata.user_id', select: 'firstname lastname email' });
+
+    return {
+      documents: populated as Document[],
+      total,
+      page,
+      limit,
+      totalPages,
+    };
+  }
+
   async reportOcrError(errorData: { documentId: string; error: string; page?: number; status?: string }): Promise<Document> {
     if (!Types.ObjectId.isValid(errorData.documentId)) {
       throw new BadRequestException('Invalid document ID');

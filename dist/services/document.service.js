@@ -418,6 +418,48 @@ let DocumentService = DocumentService_1 = class DocumentService {
             .sort({ createdAt: -1 })
             .exec();
     }
+    async findOriginalsWithPageCounts(opts = {}) {
+        const page = opts.page && opts.page > 0 ? Math.floor(opts.page) : 1;
+        const limit = opts.limit && opts.limit > 0 ? Math.floor(opts.limit) : 50;
+        const skip = (page - 1) * limit;
+        const match = {
+            $or: [
+                { isPageDocument: { $ne: true } },
+                { isPageDocument: { $exists: false } },
+            ],
+        };
+        const total = await this.documentModel.countDocuments(match);
+        const totalPages = Math.ceil(total / limit);
+        const pipeline = [
+            { $match: match },
+            {
+                $lookup: {
+                    from: this.documentModel.collection.name,
+                    localField: '_id',
+                    foreignField: 'originalDocumentId',
+                    as: 'pages',
+                },
+            },
+            {
+                $addFields: {
+                    pageCount: { $size: { $ifNull: ['$pages', []] } },
+                },
+            },
+            { $project: { pages: 0 } },
+            { $sort: { createdAt: -1 } },
+            { $skip: skip },
+            { $limit: limit },
+        ];
+        const aggResults = await this.documentModel.aggregate(pipeline).exec();
+        const populated = await this.documentModel.populate(aggResults, { path: 'metadata.user_id', select: 'firstname lastname email' });
+        return {
+            documents: populated,
+            total,
+            page,
+            limit,
+            totalPages,
+        };
+    }
     async reportOcrError(errorData) {
         if (!mongoose_2.Types.ObjectId.isValid(errorData.documentId)) {
             throw new common_1.BadRequestException('Invalid document ID');

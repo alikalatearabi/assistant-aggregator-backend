@@ -125,6 +125,12 @@ let DocumentController = DocumentController_1 = class DocumentController {
         this.logger.log('Request: Get all original documents');
         return this.documentService.findOriginalDocuments();
     }
+    async getOriginalsWithPageCounts(page, limit) {
+        const p = page ? parseInt(page, 10) : undefined;
+        const l = limit ? parseInt(limit, 10) : undefined;
+        this.logger.log(`Request: Get originals with page counts - page=${p || 1} limit=${l || 50}`);
+        return this.documentService.findOriginalsWithPageCounts({ page: p, limit: l });
+    }
 };
 exports.DocumentController = DocumentController;
 __decorate([
@@ -381,6 +387,31 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], DocumentController.prototype, "getOriginalDocuments", null);
+__decorate([
+    (0, common_1.Get)('originals-with-page-counts'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get original documents with page counts (paginated)' }),
+    (0, swagger_1.ApiQuery)({ name: 'page', required: false, description: 'Page number', example: 1 }),
+    (0, swagger_1.ApiQuery)({ name: 'limit', required: false, description: 'Items per page', example: 50 }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Original documents with page counts',
+        schema: {
+            type: 'object',
+            properties: {
+                documents: { type: 'array', items: { type: 'object' } },
+                total: { type: 'number' },
+                page: { type: 'number' },
+                limit: { type: 'number' },
+                totalPages: { type: 'number' },
+            }
+        }
+    }),
+    __param(0, (0, common_1.Query)('page')),
+    __param(1, (0, common_1.Query)('limit')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], DocumentController.prototype, "getOriginalsWithPageCounts", null);
 exports.DocumentController = DocumentController = DocumentController_1 = __decorate([
     (0, swagger_1.ApiTags)('documents'),
     (0, common_1.Controller)('documents'),

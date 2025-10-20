@@ -45,4 +45,11 @@ export declare class DocumentController {
     }>;
     getDocumentPages(id: string): Promise<Document[]>;
     getOriginalDocuments(): Promise<Document[]>;
+    getOriginalsWithPageCounts(page?: string, limit?: string): Promise<{
+        documents: Document[];
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    }>;
 }

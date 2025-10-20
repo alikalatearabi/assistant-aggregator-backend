@@ -47,6 +47,16 @@ export declare class DocumentService {
     getPresignedUrlForDocument(id: string, exp?: number): Promise<any>;
     findPagesByOriginalDocument(originalDocumentId: string): Promise<Document[]>;
     findOriginalDocuments(): Promise<Document[]>;
+    findOriginalsWithPageCounts(opts?: {
+        page?: number;
+        limit?: number;
+    }): Promise<{
+        documents: Document[];
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    }>;
     reportOcrError(errorData: {
         documentId: string;
         error: string;
