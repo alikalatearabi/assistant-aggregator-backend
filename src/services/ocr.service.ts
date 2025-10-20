@@ -55,8 +55,10 @@ export class OcrService {
 
           if (updated) {
             this.logger.log(`Document ${ocrRequest.documentId} marked as OCR processing (started)`);
+            console.log(`🟡 Document ${ocrRequest.documentId} marked as OCR processing`);
           } else {
             this.logger.warn(`Mark processing: no document found with id ${ocrRequest.documentId}`);
+            console.log(`⚠️  Could not find document ${ocrRequest.documentId} to mark as processing`);
           }
         }
       } catch (markErr) {
@@ -110,6 +112,10 @@ export class OcrService {
         data: response.data,
       });
 
+      console.log(`🟢 OCR processing started successfully for document ${ocrRequest.documentId}`);
+      console.log(`   Response status: ${response.status}`);
+      console.log(`   Request ID: ${response.data?.requestId || response.data?.id || 'N/A'}`);
+
       return {
         success: true,
         message: 'Document sent for OCR processing successfully',
@@ -127,6 +133,14 @@ export class OcrService {
       const storedError = statusCode
         ? `HTTP ${statusCode}: ${typeof responseBody === 'string' ? responseBody : JSON.stringify(responseBody)}`
         : errMsg;
+
+      // Enhanced console logging for OCR errors
+      console.log(`🔴 OCR ERROR for document ${ocrRequest.documentId}:`);
+      console.log(`   Status Code: ${statusCode || 'N/A'}`);
+      console.log(`   Error Message: ${errMsg}`);
+      console.log(`   Response Body:`, responseBody);
+      console.log(`   Stored Error: ${storedError}`);
+      console.log(`   Timestamp: ${new Date().toISOString()}`);
 
       this.logger.error(`Failed to send document for OCR processing: ${ocrRequest.documentId}`, {
         error: errMsg,
@@ -158,8 +172,10 @@ export class OcrService {
 
           if (updated) {
             this.logger.log(`Document ${ocrRequest.documentId} marked as OCR failed`);
+            console.log(`✅ Document ${ocrRequest.documentId} successfully marked as OCR failed in database`);
           } else {
             this.logger.warn(`Mark failed: no document found with id ${ocrRequest.documentId}`);
+            console.log(`⚠️  Could not find document ${ocrRequest.documentId} to mark as OCR failed`);
           }
         } else {
           this.logger.warn(`Cannot mark OCR failed: invalid document id ${ocrRequest.documentId}`);
