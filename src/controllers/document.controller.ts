@@ -356,7 +356,7 @@ export class DocumentController {
     return this.documentService.findOriginalsWithPageCounts({ page: p, limit: l });
   }
 
-  @Get(':id([0-9a-fA-F]{24})')
+  @Get('id/:id')
   @ApiExcludeEndpoint()
   async findDocumentById(@Param('id') id: string): Promise<Document> {
     return this.documentService.findDocumentById(id);
