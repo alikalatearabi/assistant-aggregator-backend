@@ -180,11 +180,6 @@ export class DocumentController {
     return this.documentService.findDocumentsByExtension(extension);
   }
 
-  @Get(':id')
-  @ApiExcludeEndpoint()
-  async findDocumentById(@Param('id') id: string): Promise<Document> {
-    return this.documentService.findDocumentById(id);
-  }
 
   @Patch(':id')
   @ApiOperation({
@@ -359,5 +354,11 @@ export class DocumentController {
     const l = limit ? parseInt(limit, 10) : undefined;
     this.logger.log(`Request: Get originals with page counts - page=${p || 1} limit=${l || 50}`);
     return this.documentService.findOriginalsWithPageCounts({ page: p, limit: l });
+  }
+
+  @Get(':id')
+  @ApiExcludeEndpoint()
+  async findDocumentById(@Param('id') id: string): Promise<Document> {
+    return this.documentService.findDocumentById(id);
   }
 }
