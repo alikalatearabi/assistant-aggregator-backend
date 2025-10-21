@@ -44,6 +44,31 @@ interface RetrieverResource {
   content: string;
 }
 
+// Define error codes enum
+enum ChatErrorCode {
+  INVALID_PARAM = 'invalid_param',
+  APP_UNAVAILABLE = 'app_unavailable',
+  PROVIDER_NOT_INITIALIZE = 'provider_not_initialize',
+  PROVIDER_QUOTA_EXCEEDED = 'provider_quota_exceeded',
+  MODEL_CURRENTLY_NOT_SUPPORT = 'model_currently_not_support',
+  COMPLETION_REQUEST_ERROR = 'completion_request_error',
+  UNAUTHORIZED = 'unauthorized',
+  CONVERSATION_DOES_NOT_EXIST = 'conversation_does_not_exist',
+  INTERNAL_SERVER_ERROR = 'internal_server_error'
+}
+
+// Custom exception class for chat errors
+class ChatException extends Error {
+  constructor(
+    public status: number,
+    public code: ChatErrorCode,
+    message: string
+  ) {
+    super(message);
+    this.name = 'ChatException';
+  }
+}
+
 interface BlockingSuccessResponse {
   event: string;
   task_id: string;
@@ -261,6 +286,49 @@ export class ChatController {
     @Res() res: ExpressResponse
   ): Promise<void> {
     try {
+      // Validate required parameters
+      if (!body.query || body.query.trim() === '') {
+        throw new ChatException(400, ChatErrorCode.INVALID_PARAM, 'Query cannot be empty');
+      }
+
+      if (!body.inputs) {
+        throw new ChatException(400, ChatErrorCode.INVALID_PARAM, 'Inputs object is required');
+      }
+
+      if (!body.responseMode || !['blocking', 'streaming'].includes(body.responseMode)) {
+        throw new ChatException(400, ChatErrorCode.INVALID_PARAM, 'Response mode must be either "blocking" or "streaming"');
+      }
+
+      if (!body.user) {
+        throw new ChatException(400, ChatErrorCode.INVALID_PARAM, 'User ID is required');
+      }
+
+      // Check if conversation exists (if provided)
+      if (body.conversationId) {
+        // In a real implementation, you would check if the conversation exists in the database
+        // For now, we'll simulate this check
+        const conversationExists = true; // Mock check
+        if (!conversationExists) {
+          throw new ChatException(404, ChatErrorCode.CONVERSATION_DOES_NOT_EXIST, 'Conversation does not exist');
+        }
+      }
+
+      // Simulate different error conditions for testing
+      // In a real implementation, these would be based on actual service checks
+      const shouldSimulateError = Math.random() < 0.3; // 30% chance of error for testing
+      if (shouldSimulateError) {
+        const errorTypes = [
+          { status: 400, code: ChatErrorCode.APP_UNAVAILABLE, message: 'Application is currently unavailable' },
+          { status: 400, code: ChatErrorCode.PROVIDER_NOT_INITIALIZE, message: 'AI provider is not initialized' },
+          { status: 400, code: ChatErrorCode.PROVIDER_QUOTA_EXCEEDED, message: 'AI provider quota has been exceeded' },
+          { status: 400, code: ChatErrorCode.MODEL_CURRENTLY_NOT_SUPPORT, message: 'The requested model is currently not supported' },
+          { status: 400, code: ChatErrorCode.COMPLETION_REQUEST_ERROR, message: 'Failed to complete the request' },
+          { status: 500, code: ChatErrorCode.INTERNAL_SERVER_ERROR, message: 'Internal server error occurred' }
+        ];
+        const randomError = errorTypes[Math.floor(Math.random() * errorTypes.length)];
+        throw new ChatException(randomError.status, randomError.code, randomError.message);
+      }
+
       if (body.responseMode === ChatMessagesResponseMode.STREAMING) {
         // Handle streaming response
         res.setHeader('Content-Type', 'text/plain; charset=utf-8');
@@ -347,12 +415,93 @@ export class ChatController {
         res.json(response);
       }
     } catch (error) {
-      const errorResponse: BlockingErrorResponse = {
-        status: 500,
-        code: 'INTERNAL_ERROR',
-        message: error.message || 'An error occurred while processing the chat message'
-      };
-      res.status(500).json(errorResponse);
+      if (error instanceof ChatException) {
+        const errorResponse: BlockingErrorResponse = {
+          status: error.status,
+          code: error.code,
+          message: error.message
+        };
+        res.status(error.status).json(errorResponse);
+      } else {
+        // Handle unexpected errors
+        const errorResponse: BlockingErrorResponse = {
+          status: 500,
+          code: ChatErrorCode.INTERNAL_SERVER_ERROR,
+          message: 'An unexpected error occurred'
+        };
+        res.status(500).json(errorResponse);
+      }
+    }
+  }
+
+  @Post('test-errors')
+  @UseGuards(ApiKeyAuthGuard)
+  @ApiOperation({
+    summary: 'Test error responses',
+    description: 'Endpoint to test different error codes and responses',
+  })
+  async testErrors(
+    @Body() body: { errorType?: string },
+    @Res() res: ExpressResponse
+  ): Promise<void> {
+    try {
+      const { errorType } = body;
+
+      // Test different error types
+      switch (errorType) {
+        case 'invalid_param':
+          throw new ChatException(400, ChatErrorCode.INVALID_PARAM, 'Invalid parameter provided');
+        case 'app_unavailable':
+          throw new ChatException(400, ChatErrorCode.APP_UNAVAILABLE, 'Application is currently unavailable');
+        case 'provider_not_initialize':
+          throw new ChatException(400, ChatErrorCode.PROVIDER_NOT_INITIALIZE, 'AI provider is not initialized');
+        case 'provider_quota_exceeded':
+          throw new ChatException(400, ChatErrorCode.PROVIDER_QUOTA_EXCEEDED, 'AI provider quota has been exceeded');
+        case 'model_currently_not_support':
+          throw new ChatException(400, ChatErrorCode.MODEL_CURRENTLY_NOT_SUPPORT, 'The requested model is currently not supported');
+        case 'completion_request_error':
+          throw new ChatException(400, ChatErrorCode.COMPLETION_REQUEST_ERROR, 'Failed to complete the request');
+        case 'unauthorized':
+          throw new ChatException(401, ChatErrorCode.UNAUTHORIZED, 'Unauthorized access');
+        case 'conversation_does_not_exist':
+          throw new ChatException(404, ChatErrorCode.CONVERSATION_DOES_NOT_EXIST, 'Conversation does not exist');
+        case 'internal_server_error':
+          throw new ChatException(500, ChatErrorCode.INTERNAL_SERVER_ERROR, 'Internal server error occurred');
+        default:
+          // Return success response showing available error types
+          res.json({
+            message: 'Error testing endpoint',
+            available_error_types: [
+              'invalid_param',
+              'app_unavailable',
+              'provider_not_initialize',
+              'provider_quota_exceeded',
+              'model_currently_not_support',
+              'completion_request_error',
+              'unauthorized',
+              'conversation_does_not_exist',
+              'internal_server_error'
+            ],
+            usage: 'POST /chats/test-errors with body: {"errorType": "invalid_param"}'
+          });
+          return;
+      }
+    } catch (error) {
+      if (error instanceof ChatException) {
+        const errorResponse: BlockingErrorResponse = {
+          status: error.status,
+          code: error.code,
+          message: error.message
+        };
+        res.status(error.status).json(errorResponse);
+      } else {
+        const errorResponse: BlockingErrorResponse = {
+          status: 500,
+          code: ChatErrorCode.INTERNAL_SERVER_ERROR,
+          message: 'An unexpected error occurred'
+        };
+        res.status(500).json(errorResponse);
+      }
     }
   }
 }

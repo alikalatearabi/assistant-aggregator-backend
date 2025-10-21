@@ -1,0 +1,206 @@
+{
+    "blocking": {
+        "success": [
+            {
+                "name": "event",
+                "type": "str"
+            },
+            {
+                "name": "task_id",
+                "type": "str"
+            },
+            {
+                "name": "id",
+                "type": "str"
+            },
+            {
+                "name": "message_id",
+                "type": "str"
+            },
+            {
+                "name": "conversation_id",
+                "type": "str"
+            },
+            {
+                "name": "mode",
+                "type": "str"
+            },
+            {
+                "name": "answer",
+                "type": "str"
+            },
+            {
+                "name": "metadata",
+                "type": "dict",
+                "required_fields": [
+                    {
+                        "name": "retriever_resources",
+                        "type": "list",
+                        "sub_type": "dict",
+                        "required_fields": [
+                            {
+                                "name": "position",
+                                "type": "int"
+                            },
+                            {
+                                "name": "dataset_id",
+                                "type": "str"
+                            },
+                            {
+                                "name": "dataset_name",
+                                "type": "str"
+                            },
+                            {
+                                "name": "document_id",
+                                "type": "str"
+                            },
+                            {
+                                "name": "document_name",
+                                "type": "str"
+                            },
+                            {
+                                "name": "segment_id",
+                                "type": "str"
+                            },
+                            {
+                                "name": "score",
+                                "type": "float"
+                            },
+                            {
+                                "name": "content",
+                                "type": "str"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "created_at",
+                "type": "int"
+            }
+        ],
+        "error": [
+            {
+                "name": "status",
+                "type": "int"
+            },
+            {
+                "name": "code",
+                "type": "str"
+            },
+            {
+                "name": "message",
+                "type": "str"
+            }
+        ]
+    },
+    "streaming": {
+        "message": [
+            {
+                "name": "event",
+                "type": "str"
+            },
+            {
+                "name": "task_id",
+                "type": "str"
+            },
+            {
+                "name": "message_id",
+                "type": "str"
+            },
+            {
+                "name": "conversation_id",
+                "type": "str"
+            },
+            {
+                "name": "answer",
+                "type": "str"
+            },
+            {
+                "name": "created_at",
+                "type": "int"
+            }
+        ],
+        "message_end": [
+            {
+                "name": "event",
+                "type": "str"
+            },
+            {
+                "name": "task_id",
+                "type": "str"
+            },
+            {
+                "name": "id",
+                "type": "str"
+            },
+            {
+                "name": "message_id",
+                "type": "str"
+            },
+            {
+                "name": "conversation_id",
+                "type": "str"
+            },
+            {
+                "name": "metadata",
+                "type": "dict",
+                "required_fields": [
+                    {
+                        "name": "retriever_resources",
+                        "type": "list",
+                        "sub_type": "dict",
+                        "required_fields": [
+                            {
+                                "name": "position",
+                                "type": "int"
+                            },
+                            {
+                                "name": "dataset_id",
+                                "type": "str"
+                            },
+                            {
+                                "name": "dataset_name",
+                                "type": "str"
+                            },
+                            {
+                                "name": "document_id",
+                                "type": "str"
+                            },
+                            {
+                                "name": "document_name",
+                                "type": "str"
+                            },
+                            {
+                                "name": "segment_id",
+                                "type": "str"
+                            },
+                            {
+                                "name": "score",
+                                "type": "float"
+                            },
+                            {
+                                "name": "content",
+                                "type": "str"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "error": [
+            {
+                "name": "status",
+                "type": "int"
+            },
+            {
+                "name": "code",
+                "type": "str"
+            },
+            {
+                "name": "message",
+                "type": "str"
+            }
+        ]
+    }
+}

@@ -1,0 +1,38 @@
+[
+    {
+        "status": 400,
+        "code": "invalid_param"
+    },
+    {
+        "status": 400,
+        "code": "app_unavailable"
+    },
+    {
+        "status": 400,
+        "code": "provider_not_initialize"
+    },
+    {
+        "status": 400,
+        "code": "provider_quota_exceeded"
+    },
+    {
+        "status": 400,
+        "code": "model_currently_not_support"
+    },
+    {
+        "status": 400,
+        "code": "completion_request_error"
+    },
+    {
+        "status": 401,
+        "code": "unauthorized"
+    },
+    {
+        "status": 404,
+        "code": "conversation_does_not_exist"
+    },
+    {
+        "status": 500,
+        "code": "internal_server_error"
+    }
+]

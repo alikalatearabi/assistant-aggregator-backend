@@ -71,6 +71,7 @@ __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Inputs object', type: ChatMessagesInputsDto }),
     (0, class_validator_1.ValidateNested)(),
     (0, class_transformer_1.Type)(() => ChatMessagesInputsDto),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", ChatMessagesInputsDto)
 ], ChatMessagesRequestDto.prototype, "inputs", void 0);
 __decorate([
@@ -81,6 +82,7 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'User ID', example: '507f1f77bcf86cd799439012' }),
     (0, class_validator_1.IsMongoId)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], ChatMessagesRequestDto.prototype, "user", void 0);
 __decorate([

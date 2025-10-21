@@ -38,7 +38,8 @@ export class ChatMessagesRequestDto {
   @ApiProperty({ description: 'Inputs object', type: ChatMessagesInputsDto })
   @ValidateNested()
   @Type(() => ChatMessagesInputsDto)
-  inputs: ChatMessagesInputsDto;
+  @IsOptional()
+  inputs?: ChatMessagesInputsDto;
 
   @ApiProperty({ description: 'Response mode', enum: ChatMessagesResponseMode, example: ChatMessagesResponseMode.BLOCKING })
   @IsEnum(ChatMessagesResponseMode)
@@ -46,7 +47,8 @@ export class ChatMessagesRequestDto {
 
   @ApiProperty({ description: 'User ID', example: '507f1f77bcf86cd799439012' })
   @IsMongoId()
-  user: string;
+  @IsOptional()
+  user?: string;
 
   @ApiPropertyOptional({ description: 'Conversation ID (optional, will create new chat if not provided)', example: '507f1f77bcf86cd799439011' })
   @IsMongoId()

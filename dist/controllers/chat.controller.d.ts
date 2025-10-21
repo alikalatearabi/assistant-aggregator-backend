@@ -37,4 +37,7 @@ export declare class ChatController {
     removeMessageFromChat(id: string, messageId: string): Promise<Chat>;
     deleteChat(id: string): Promise<Chat>;
     chatMessages(body: ChatMessagesRequestDto, req: any, res: ExpressResponse): Promise<void>;
+    testErrors(body: {
+        errorType?: string;
+    }, res: ExpressResponse): Promise<void>;
 }

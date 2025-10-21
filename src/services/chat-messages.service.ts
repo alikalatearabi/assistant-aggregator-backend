@@ -38,8 +38,8 @@ export class ChatMessagesService {
     const chatPayload = {
       query: req.query,
       inputs: {
-        similarity_threshold: req.inputs.similarityThreshold,
-        context_count: req.inputs.contextCount,
+        similarity_threshold: req.inputs?.similarityThreshold ?? 0.8,
+        context_count: req.inputs?.contextCount ?? 5,
       },
       conversation_id: req.conversationId || '',
       prior_messages: req.priorMessages || [],
