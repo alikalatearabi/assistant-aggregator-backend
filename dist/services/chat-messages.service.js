@@ -8,17 +8,22 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
+var ChatMessagesService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ChatMessagesService = void 0;
 const common_1 = require("@nestjs/common");
 const crypto_1 = require("crypto");
 const chat_messages_gateway_1 = require("../gateways/chat-messages.gateway");
 const axios_1 = __importDefault(require("axios"));
-let ChatMessagesService = class ChatMessagesService {
+let ChatMessagesService = ChatMessagesService_1 = class ChatMessagesService {
     gateway;
+    logger = new common_1.Logger(ChatMessagesService_1.name);
     constructor(gateway) {
         this.gateway = gateway;
     }
@@ -64,6 +69,7 @@ let ChatMessagesService = class ChatMessagesService {
         };
         try {
             const chatResp = await axios_1.default.post(chatUrl, chatPayload, { headers: chatHeaders });
+            this.logger.log(`Proxied chat request successfully for conversation ID: ${chatResp.data || 'new'}`);
             return chatResp.data;
         }
         catch (err) {
@@ -85,6 +91,7 @@ let ChatMessagesService = class ChatMessagesService {
         const taskId = (0, crypto_1.randomUUID)();
         const result = await this.proxyToExternalApi(req);
         if (result && typeof result === 'object' && 'event' in result && result.event === 'error') {
+            const timestamp = new Date().toISOString();
             this.gateway.broadcast({
                 event: 'error',
                 taskId,
@@ -93,35 +100,46 @@ let ChatMessagesService = class ChatMessagesService {
                 status: result.error.status,
                 code: result.error.code,
                 message: result.error.message,
-                created_at: new Date().toISOString(),
+                created_at: timestamp,
+                date: timestamp,
+                createdAt: timestamp,
             });
         }
         else {
             const answer = result.answer;
             const chunks = this.chunkText(answer, 20);
+            const startTs = new Date().toISOString();
             this.gateway.broadcast({
                 event: 'message_start',
                 taskId,
                 conversation_id: result.conversation_id,
                 metadata: result.metadata,
-                created_at: new Date().toISOString(),
+                created_at: startTs,
+                date: startTs,
+                createdAt: startTs,
             });
             for (let i = 0; i < chunks.length; i++) {
                 await new Promise(resolve => setTimeout(resolve, 150));
+                const chunkTs = new Date().toISOString();
                 this.gateway.broadcast({
                     event: 'message_chunk',
                     taskId,
                     conversation_id: result.conversation_id,
                     chunk: chunks[i],
-                    created_at: new Date().toISOString(),
+                    created_at: chunkTs,
+                    date: chunkTs,
+                    createdAt: chunkTs,
                 });
             }
+            const endTs = new Date().toISOString();
             this.gateway.broadcast({
                 event: 'message_end',
                 taskId,
                 conversation_id: result.conversation_id,
                 history: result.history,
-                created_at: new Date().toISOString(),
+                created_at: endTs,
+                date: endTs,
+                createdAt: endTs,
             });
         }
         return { taskId };
@@ -135,8 +153,9 @@ let ChatMessagesService = class ChatMessagesService {
     }
 };
 exports.ChatMessagesService = ChatMessagesService;
-exports.ChatMessagesService = ChatMessagesService = __decorate([
+exports.ChatMessagesService = ChatMessagesService = ChatMessagesService_1 = __decorate([
     (0, common_1.Injectable)(),
+    __param(0, (0, common_1.Inject)((0, common_1.forwardRef)(() => chat_messages_gateway_1.ChatMessagesGateway))),
     __metadata("design:paramtypes", [chat_messages_gateway_1.ChatMessagesGateway])
 ], ChatMessagesService);
 //# sourceMappingURL=chat-messages.service.js.map

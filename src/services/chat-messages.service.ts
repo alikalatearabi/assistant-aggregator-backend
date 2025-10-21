@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { ChatMessagesGateway } from '../gateways/chat-messages.gateway';
 import { ChatMessagesRequestDto, ChatMessageAnswerResponseDto, ChatMessagesErrorDto, RetrieverResourceDto } from '../dto/chat-messages.dto';
@@ -6,7 +6,8 @@ import axios from 'axios';
 
 @Injectable()
 export class ChatMessagesService {
-  constructor(private readonly gateway: ChatMessagesGateway) {}
+  private readonly logger = new Logger(ChatMessagesService.name);
+  constructor(@Inject(forwardRef(() => ChatMessagesGateway)) private readonly gateway: ChatMessagesGateway) {}
 
   private async proxyToExternalApi(req: ChatMessagesRequestDto): Promise<any> {
     const loginUrl = 'https://test1.nlp-lab.ir/auth/login';
@@ -50,6 +51,7 @@ export class ChatMessagesService {
     };
     try {
       const chatResp = await axios.post(chatUrl, chatPayload, { headers: chatHeaders });
+      this.logger.log(`Proxied chat request successfully for conversation ID: ${chatResp.data || 'new'}`);
       return chatResp.data;
     } catch (err) {
       return {
@@ -76,6 +78,7 @@ export class ChatMessagesService {
 
     if (result && typeof result === 'object' && 'event' in result && result.event === 'error') {
       // Broadcast error event
+      const timestamp = new Date().toISOString();
       this.gateway.broadcast({
         event: 'error',
         taskId,
@@ -84,7 +87,10 @@ export class ChatMessagesService {
         status: result.error.status,
         code: result.error.code,
         message: result.error.message,
-        created_at: new Date().toISOString(),
+        created_at: timestamp,
+        // Convenience aliases for clients expecting different keys
+        date: timestamp,
+        createdAt: timestamp,
       });
     } else {
       // Simulate streaming by chunking the answer
@@ -92,33 +98,42 @@ export class ChatMessagesService {
       const chunks = this.chunkText(answer, 20); // Chunk by ~20 characters
 
       // Emit start event with metadata
+      const startTs = new Date().toISOString();
       this.gateway.broadcast({
         event: 'message_start',
         taskId,
         conversation_id: result.conversation_id,
         metadata: result.metadata,
-        created_at: new Date().toISOString(),
+        created_at: startTs,
+        date: startTs,
+        createdAt: startTs,
       });
 
       // Emit chunks progressively
       for (let i = 0; i < chunks.length; i++) {
         await new Promise(resolve => setTimeout(resolve, 150)); // Simulate streaming delay
+        const chunkTs = new Date().toISOString();
         this.gateway.broadcast({
           event: 'message_chunk',
           taskId,
           conversation_id: result.conversation_id,
           chunk: chunks[i],
-          created_at: new Date().toISOString(),
+          created_at: chunkTs,
+          date: chunkTs,
+          createdAt: chunkTs,
         });
       }
 
       // Emit end event with history
+      const endTs = new Date().toISOString();
       this.gateway.broadcast({
         event: 'message_end',
         taskId,
         conversation_id: result.conversation_id,
         history: result.history,
-        created_at: new Date().toISOString(),
+        created_at: endTs,
+        date: endTs,
+        createdAt: endTs,
       });
     }
 

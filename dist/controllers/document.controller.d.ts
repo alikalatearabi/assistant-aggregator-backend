@@ -32,7 +32,6 @@ export declare class DocumentController {
     searchDocuments(searchTerm: string): Promise<Document[]>;
     findDocumentsByUploader(uploaderId: string): Promise<Document[]>;
     findDocumentsByExtension(extension: string): Promise<Document[]>;
-    findDocumentById(id: string): Promise<Document>;
     updateDocument(id: string, updateDocumentDto: UpdateDocumentDto): Promise<Document>;
     updateDocumentMetadata(id: string, metadata: DocumentMetadataDto): Promise<Document>;
     updateRawTextFileId(id: string, rawTextFileId: string): Promise<Document>;
@@ -52,4 +51,5 @@ export declare class DocumentController {
         limit: number;
         totalPages: number;
     }>;
+    findDocumentById(id: string): Promise<Document>;
 }

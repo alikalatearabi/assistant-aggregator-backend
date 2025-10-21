@@ -93,9 +93,6 @@ let DocumentController = DocumentController_1 = class DocumentController {
     async findDocumentsByExtension(extension) {
         return this.documentService.findDocumentsByExtension(extension);
     }
-    async findDocumentById(id) {
-        return this.documentService.findDocumentById(id);
-    }
     async updateDocument(id, updateDocumentDto) {
         return this.documentService.updateDocument(id, updateDocumentDto);
     }
@@ -130,6 +127,9 @@ let DocumentController = DocumentController_1 = class DocumentController {
         const l = limit ? parseInt(limit, 10) : undefined;
         this.logger.log(`Request: Get originals with page counts - page=${p || 1} limit=${l || 50}`);
         return this.documentService.findOriginalsWithPageCounts({ page: p, limit: l });
+    }
+    async findDocumentById(id) {
+        return this.documentService.findDocumentById(id);
     }
 };
 exports.DocumentController = DocumentController;
@@ -228,14 +228,6 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], DocumentController.prototype, "findDocumentsByExtension", null);
-__decorate([
-    (0, common_1.Get)(':id'),
-    (0, swagger_1.ApiExcludeEndpoint)(),
-    __param(0, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], DocumentController.prototype, "findDocumentById", null);
 __decorate([
     (0, common_1.Patch)(':id'),
     (0, swagger_1.ApiOperation)({
@@ -412,6 +404,14 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], DocumentController.prototype, "getOriginalsWithPageCounts", null);
+__decorate([
+    (0, common_1.Get)('id/:id'),
+    (0, swagger_1.ApiExcludeEndpoint)(),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], DocumentController.prototype, "findDocumentById", null);
 exports.DocumentController = DocumentController = DocumentController_1 = __decorate([
     (0, swagger_1.ApiTags)('documents'),
     (0, common_1.Controller)('documents'),
