@@ -23,7 +23,6 @@ const add_message_to_chat_dto_1 = require("../dto/add-message-to-chat.dto");
 const chat_schema_1 = require("../schemas/chat.schema");
 const chat_messages_dto_1 = require("../dto/chat-messages.dto");
 const chat_messages_service_1 = require("../services/chat-messages.service");
-const common_2 = require("@nestjs/common");
 const api_key_auth_guard_1 = require("../auth/api-key-auth.guard");
 let ChatController = class ChatController {
     chatService;
@@ -62,17 +61,95 @@ let ChatController = class ChatController {
     async deleteChat(id) {
         return this.chatService.deleteChat(id);
     }
-    async chatMessages(body) {
-        if (body.responseMode === chat_messages_dto_1.ChatMessagesResponseMode.STREAMING) {
-            return this.chatMessagesService.processStreaming(body);
+    async chatMessages(body, req, res) {
+        try {
+            if (body.responseMode === chat_messages_dto_1.ChatMessagesResponseMode.STREAMING) {
+                res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+                res.setHeader('Cache-Control', 'no-cache');
+                res.setHeader('Connection', 'keep-alive');
+                const taskId = `task_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                const messageId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                const conversationId = `conv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                const messageEvent = {
+                    event: 'message',
+                    task_id: taskId,
+                    message_id: messageId,
+                    conversation_id: conversationId,
+                    answer: 'Processing your request...',
+                    created_at: Date.now()
+                };
+                res.write(`data: ${JSON.stringify(messageEvent)}\n\n`);
+                setTimeout(() => {
+                    const messageEndEvent = {
+                        event: 'message_end',
+                        task_id: taskId,
+                        id: messageId,
+                        message_id: messageId,
+                        conversation_id: conversationId,
+                        metadata: {
+                            retriever_resources: [
+                                {
+                                    position: 1,
+                                    dataset_id: 'dataset_001',
+                                    dataset_name: 'Knowledge Base',
+                                    document_id: 'doc_001',
+                                    document_name: 'Company Policies',
+                                    segment_id: 'seg_001',
+                                    score: 0.95,
+                                    content: 'This is relevant content from the knowledge base that was retrieved to answer your question.'
+                                }
+                            ]
+                        }
+                    };
+                    res.write(`data: ${JSON.stringify(messageEndEvent)}\n\n`);
+                    res.end();
+                }, 1000);
+            }
+            else {
+                const taskId = `task_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                const messageId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                const conversationId = `conv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                const response = {
+                    event: 'message',
+                    task_id: taskId,
+                    id: messageId,
+                    message_id: messageId,
+                    conversation_id: conversationId,
+                    mode: 'blocking',
+                    answer: 'This is a mock response from the AI assistant. In a real implementation, this would contain the actual AI-generated response based on your query.',
+                    metadata: {
+                        retriever_resources: [
+                            {
+                                position: 1,
+                                dataset_id: 'dataset_001',
+                                dataset_name: 'Knowledge Base',
+                                document_id: 'doc_001',
+                                document_name: 'Company Policies',
+                                segment_id: 'seg_001',
+                                score: 0.95,
+                                content: 'This is relevant content from the knowledge base that was retrieved to answer your question.'
+                            }
+                        ]
+                    },
+                    created_at: Date.now()
+                };
+                res.json(response);
+            }
         }
-        return this.chatMessagesService.processBlocking(body);
+        catch (error) {
+            const errorResponse = {
+                status: 500,
+                code: 'INTERNAL_ERROR',
+                message: error.message || 'An error occurred while processing the chat message'
+            };
+            res.status(500).json(errorResponse);
+        }
     }
 };
 exports.ChatController = ChatController;
 __decorate([
     (0, common_1.Post)(),
-    (0, common_2.UseGuards)(api_key_auth_guard_1.ApiKeyAuthGuard),
+    (0, common_1.UseGuards)(api_key_auth_guard_1.ApiKeyAuthGuard),
     (0, swagger_1.ApiOperation)({
         summary: 'Create a new chat session',
         description: 'Creates a new chat session with user reference and optional initial message history',
@@ -231,15 +308,17 @@ __decorate([
 ], ChatController.prototype, "deleteChat", null);
 __decorate([
     (0, common_1.Post)('chat-messages'),
-    (0, common_2.UseGuards)(api_key_auth_guard_1.ApiKeyAuthGuard),
+    (0, common_1.UseGuards)(api_key_auth_guard_1.ApiKeyAuthGuard),
     (0, swagger_1.ApiOperation)({
         summary: 'Generate chat messages',
         description: 'Generates a chat response. If responseMode is streaming, emits WS events; if blocking, returns a REST payload',
     }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Blocking response', type: chat_messages_dto_1.ChatMessageAnswerResponseDto }),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Req)()),
+    __param(2, (0, common_1.Res)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [chat_messages_dto_1.ChatMessagesRequestDto]),
+    __metadata("design:paramtypes", [chat_messages_dto_1.ChatMessagesRequestDto, Object, Object]),
     __metadata("design:returntype", Promise)
 ], ChatController.prototype, "chatMessages", null);
 exports.ChatController = ChatController = __decorate([

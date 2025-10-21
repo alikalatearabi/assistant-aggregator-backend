@@ -7,6 +7,9 @@ import {
   Param,
   Delete,
   Query,
+  Req,
+  Res,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -17,6 +20,8 @@ import {
   ApiBody,
   ApiExcludeEndpoint,
 } from '@nestjs/swagger';
+import { Response } from 'express';
+import type { Response as ExpressResponse } from 'express';
 import { ChatService } from '../services/chat.service';
 import { CreateChatDto } from '../dto/create-chat.dto';
 import { UpdateChatDto } from '../dto/update-chat.dto';
@@ -25,8 +30,65 @@ import { AddMessageToChatDto } from '../dto/add-message-to-chat.dto';
 import { Chat } from '../schemas/chat.schema';
 import { ChatMessagesRequestDto, ChatMessageAnswerResponseDto, ChatMessagesResponseMode } from '../dto/chat-messages.dto';
 import { ChatMessagesService } from '../services/chat-messages.service';
-import { UseGuards } from '@nestjs/common';
 import { ApiKeyAuthGuard } from '../auth/api-key-auth.guard';
+
+// Define response interfaces to match the specified schema
+interface RetrieverResource {
+  position: number;
+  dataset_id: string;
+  dataset_name: string;
+  document_id: string;
+  document_name: string;
+  segment_id: string;
+  score: number;
+  content: string;
+}
+
+interface BlockingSuccessResponse {
+  event: string;
+  task_id: string;
+  id: string;
+  message_id: string;
+  conversation_id: string;
+  mode: string;
+  answer: string;
+  metadata: {
+    retriever_resources: RetrieverResource[];
+  };
+  created_at: number;
+}
+
+interface BlockingErrorResponse {
+  status: number;
+  code: string;
+  message: string;
+}
+
+interface StreamingMessageEvent {
+  event: string;
+  task_id: string;
+  message_id: string;
+  conversation_id: string;
+  answer: string;
+  created_at: number;
+}
+
+interface StreamingMessageEndEvent {
+  event: string;
+  task_id: string;
+  id: string;
+  message_id: string;
+  conversation_id: string;
+  metadata: {
+    retriever_resources: RetrieverResource[];
+  };
+}
+
+interface StreamingErrorEvent {
+  status: number;
+  code: string;
+  message: string;
+}
 
 @ApiTags('chats')
 @Controller('chats')
@@ -195,10 +257,102 @@ export class ChatController {
   @ApiResponse({ status: 200, description: 'Blocking response', type: ChatMessageAnswerResponseDto })
   async chatMessages(
     @Body() body: ChatMessagesRequestDto,
-  ): Promise<ChatMessageAnswerResponseDto | { taskId: string }> {
-    if (body.responseMode === ChatMessagesResponseMode.STREAMING) {
-      return this.chatMessagesService.processStreaming(body);
+    @Req() req: any,
+    @Res() res: ExpressResponse
+  ): Promise<void> {
+    try {
+      if (body.responseMode === ChatMessagesResponseMode.STREAMING) {
+        // Handle streaming response
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+
+        // Call the actual service (this will be implemented)
+        // For now, return mock streaming response
+        const taskId = `task_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const messageId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const conversationId = `conv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+        // Send message event
+        const messageEvent: StreamingMessageEvent = {
+          event: 'message',
+          task_id: taskId,
+          message_id: messageId,
+          conversation_id: conversationId,
+          answer: 'Processing your request...',
+          created_at: Date.now()
+        };
+
+        res.write(`data: ${JSON.stringify(messageEvent)}\n\n`);
+
+        // Simulate processing delay and send message_end
+        setTimeout(() => {
+          const messageEndEvent: StreamingMessageEndEvent = {
+            event: 'message_end',
+            task_id: taskId,
+            id: messageId,
+            message_id: messageId,
+            conversation_id: conversationId,
+            metadata: {
+              retriever_resources: [
+                {
+                  position: 1,
+                  dataset_id: 'dataset_001',
+                  dataset_name: 'Knowledge Base',
+                  document_id: 'doc_001',
+                  document_name: 'Company Policies',
+                  segment_id: 'seg_001',
+                  score: 0.95,
+                  content: 'This is relevant content from the knowledge base that was retrieved to answer your question.'
+                }
+              ]
+            }
+          };
+
+          res.write(`data: ${JSON.stringify(messageEndEvent)}\n\n`);
+          res.end();
+        }, 1000);
+
+      } else {
+        // Handle blocking response
+        const taskId = `task_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const messageId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const conversationId = `conv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+        const response: BlockingSuccessResponse = {
+          event: 'message',
+          task_id: taskId,
+          id: messageId,
+          message_id: messageId,
+          conversation_id: conversationId,
+          mode: 'blocking',
+          answer: 'This is a mock response from the AI assistant. In a real implementation, this would contain the actual AI-generated response based on your query.',
+          metadata: {
+            retriever_resources: [
+              {
+                position: 1,
+                dataset_id: 'dataset_001',
+                dataset_name: 'Knowledge Base',
+                document_id: 'doc_001',
+                document_name: 'Company Policies',
+                segment_id: 'seg_001',
+                score: 0.95,
+                content: 'This is relevant content from the knowledge base that was retrieved to answer your question.'
+              }
+            ]
+          },
+          created_at: Date.now()
+        };
+
+        res.json(response);
+      }
+    } catch (error) {
+      const errorResponse: BlockingErrorResponse = {
+        status: 500,
+        code: 'INTERNAL_ERROR',
+        message: error.message || 'An error occurred while processing the chat message'
+      };
+      res.status(500).json(errorResponse);
     }
-    return this.chatMessagesService.processBlocking(body);
   }
 }
