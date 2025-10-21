@@ -303,6 +303,11 @@ export class ChatController {
         throw new ChatException(400, ChatErrorCode.INVALID_PARAM, 'User ID is required');
       }
 
+      // Validate that the user_id in the request matches the authenticated user
+      if (body.user !== req.user.id) {
+        throw new ChatException(401, ChatErrorCode.UNAUTHORIZED, 'User ID does not match the authenticated API key');
+      }
+
       // Check if conversation exists (if provided)
       if (body.conversationId) {
         // In a real implementation, you would check if the conversation exists in the database
@@ -442,6 +447,7 @@ export class ChatController {
   })
   async testErrors(
     @Body() body: { errorType?: string },
+    @Req() req: any,
     @Res() res: ExpressResponse
   ): Promise<void> {
     try {

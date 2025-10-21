@@ -97,6 +97,9 @@ let ChatController = class ChatController {
             if (!body.user) {
                 throw new ChatException(400, ChatErrorCode.INVALID_PARAM, 'User ID is required');
             }
+            if (body.user !== req.user.id) {
+                throw new ChatException(401, ChatErrorCode.UNAUTHORIZED, 'User ID does not match the authenticated API key');
+            }
             if (body.conversationId) {
                 const conversationExists = true;
                 if (!conversationExists) {
@@ -208,7 +211,7 @@ let ChatController = class ChatController {
             }
         }
     }
-    async testErrors(body, res) {
+    async testErrors(body, req, res) {
         try {
             const { errorType } = body;
             switch (errorType) {
@@ -452,9 +455,10 @@ __decorate([
         description: 'Endpoint to test different error codes and responses',
     }),
     __param(0, (0, common_1.Body)()),
-    __param(1, (0, common_1.Res)()),
+    __param(1, (0, common_1.Req)()),
+    __param(2, (0, common_1.Res)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object, Object, Object]),
     __metadata("design:returntype", Promise)
 ], ChatController.prototype, "testErrors", null);
 exports.ChatController = ChatController = __decorate([
