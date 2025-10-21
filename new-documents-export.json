@@ -1,0 +1,574 @@
+[
+  {
+    "_id": "68f7635512e2e40ea5d0d48c",
+    "filename": "5001-قانون ارتقاء سلامت نظام اداری و مقابله با فساد.pdf",
+    "objectKey": "68f7635512e2e40ea5d0d48c/5001-قانون_ارتقاء_سلامت_نظام_اداری_و_مقابله_با_فساد.pdf",
+    "bucket": "assistant-aggregator",
+    "fileUrl": "http://185.149.192.130:9000/assistant-aggregator/68f7635512e2e40ea5d0d48c/5001-%D9%82%D8%A7%D9%86%D9%88%D9%86_%D8%A7%D8%B1%D8%AA%D9%82%D8%A7%D8%A1_%D8%B3%D9%84%D8%A7%D9%85%D8%AA_%D9%86%D8%B8%D8%A7%D9%85_%D8%A7%D8%AF%D8%A7%D8%B1%DB%8C_%D9%88_%D9%85%D9%82%D8%A7%D8%A8%D9%84%D9%87_%D8%A8%D8%A7_%D9%81%D8%B3%D8%A7%D8%AF.pdf",
+    "mimeType": "application/pdf",
+    "size": 140069,
+    "checksum": "86863a03a842a078992bdb1d3337df8687733461fab2ea952ff47d7ac603a79a",
+    "extension": "pdf",
+    "ocrStatus": "pending",
+    "createdAt": "2025-10-21T10:41:25.337Z",
+    "updatedAt": "2025-10-21T10:41:28.712Z",
+    "downloadInstructions": {
+      "method": "presigned-url",
+      "endpoint": "GET /documents/{document_id}/presigned-url",
+      "example": "curl \"http://your-backend-url/documents/68f7635512e2e40ea5d0d48c/presigned-url?expires=3600\"",
+      "description": "Use your backend endpoint to generate a temporary download URL. Replace {document_id} with this document's _id.",
+      "manualConstruction": {
+        "baseUrl": "http://your-company-minio-endpoint:port",
+        "bucket": "assistant-aggregator",
+        "objectKey": "68f7635512e2e40ea5d0d48c/5001-قانون_ارتقاء_سلامت_نظام_اداری_و_مقابله_با_فساد.pdf",
+        "note": "If you have MinIO credentials, you can generate presigned URLs manually using the MinIO SDK or AWS SDK."
+      }
+    }
+  },
+  {
+    "_id": "68f7635912e2e40ea5d0d48d",
+    "filename": "5002-قانون آیین نامه مالی محاسباتی و معاملاتی دیوان محاسبات کشور.pdf",
+    "objectKey": "68f7635912e2e40ea5d0d48d/5002-قانون_آیین_نامه_مالی_محاسباتی_و_معاملاتی_دیوان_محاسبات_کشور.pdf",
+    "bucket": "assistant-aggregator",
+    "fileUrl": "http://185.149.192.130:9000/assistant-aggregator/68f7635912e2e40ea5d0d48d/5002-%D9%82%D8%A7%D9%86%D9%88%D9%86_%D8%A2%DB%8C%DB%8C%D9%86_%D9%86%D8%A7%D9%85%D9%87_%D9%85%D8%A7%D9%84%DB%8C_%D9%85%D8%AD%D8%A7%D8%B3%D8%A8%D8%A7%D8%AA%DB%8C_%D9%88_%D9%85%D8%B9%D8%A7%D9%85%D9%84%D8%A7%D8%AA%DB%8C_%D8%AF%DB%8C%D9%88%D8%A7%D9%86_%D9%85%D8%AD%D8%A7%D8%B3%D8%A8%D8%A7%D8%AA_%DA%A9%D8%B4%D9%88%D8%B1.pdf",
+    "mimeType": "application/pdf",
+    "size": 123525,
+    "checksum": "1810ed1e3d255b95a3f08908980340a3c323497bfc6437446350f75a81c7fa77",
+    "extension": "pdf",
+    "ocrStatus": "pending",
+    "createdAt": "2025-10-21T10:41:29.532Z",
+    "updatedAt": "2025-10-21T10:41:32.651Z",
+    "downloadInstructions": {
+      "method": "presigned-url",
+      "endpoint": "GET /documents/{document_id}/presigned-url",
+      "example": "curl \"http://your-backend-url/documents/68f7635912e2e40ea5d0d48d/presigned-url?expires=3600\"",
+      "description": "Use your backend endpoint to generate a temporary download URL. Replace {document_id} with this document's _id.",
+      "manualConstruction": {
+        "baseUrl": "http://your-company-minio-endpoint:port",
+        "bucket": "assistant-aggregator",
+        "objectKey": "68f7635912e2e40ea5d0d48d/5002-قانون_آیین_نامه_مالی_محاسباتی_و_معاملاتی_دیوان_محاسبات_کشور.pdf",
+        "note": "If you have MinIO credentials, you can generate presigned URLs manually using the MinIO SDK or AWS SDK."
+      }
+    }
+  },
+  {
+    "_id": "68f7635d12e2e40ea5d0d48e",
+    "filename": "5003-قانون برگزاری مناقصات.pdf",
+    "objectKey": "68f7635d12e2e40ea5d0d48e/5003-قانون_برگزاری_مناقصات.pdf",
+    "bucket": "assistant-aggregator",
+    "fileUrl": "http://185.149.192.130:9000/assistant-aggregator/68f7635d12e2e40ea5d0d48e/5003-%D9%82%D8%A7%D9%86%D9%88%D9%86_%D8%A8%D8%B1%DA%AF%D8%B2%D8%A7%D8%B1%DB%8C_%D9%85%D9%86%D8%A7%D9%82%D8%B5%D8%A7%D8%AA.pdf",
+    "mimeType": "application/pdf",
+    "size": 144322,
+    "checksum": "e1d6e133df5744ea5e17b9fb1240c33c820d04ca7a0b41e7dd5e5870b2c280c3",
+    "extension": "pdf",
+    "ocrStatus": "pending",
+    "createdAt": "2025-10-21T10:41:33.526Z",
+    "updatedAt": "2025-10-21T10:41:36.959Z",
+    "downloadInstructions": {
+      "method": "presigned-url",
+      "endpoint": "GET /documents/{document_id}/presigned-url",
+      "example": "curl \"http://your-backend-url/documents/68f7635d12e2e40ea5d0d48e/presigned-url?expires=3600\"",
+      "description": "Use your backend endpoint to generate a temporary download URL. Replace {document_id} with this document's _id.",
+      "manualConstruction": {
+        "baseUrl": "http://your-company-minio-endpoint:port",
+        "bucket": "assistant-aggregator",
+        "objectKey": "68f7635d12e2e40ea5d0d48e/5003-قانون_برگزاری_مناقصات.pdf",
+        "note": "If you have MinIO credentials, you can generate presigned URLs manually using the MinIO SDK or AWS SDK."
+      }
+    }
+  },
+  {
+    "_id": "68f7636112e2e40ea5d0d48f",
+    "filename": "5004-قانون بهبود محیط کار.pdf",
+    "objectKey": "68f7636112e2e40ea5d0d48f/5004-قانون_بهبود_محیط_کار.pdf",
+    "bucket": "assistant-aggregator",
+    "fileUrl": "http://185.149.192.130:9000/assistant-aggregator/68f7636112e2e40ea5d0d48f/5004-%D9%82%D8%A7%D9%86%D9%88%D9%86_%D8%A8%D9%87%D8%A8%D9%88%D8%AF_%D9%85%D8%AD%DB%8C%D8%B7_%DA%A9%D8%A7%D8%B1.pdf",
+    "mimeType": "application/pdf",
+    "size": 195599,
+    "checksum": "2c508759fdf96dadf91a0effc56817e79c5d72e77571513849fa55718bb0475f",
+    "extension": "pdf",
+    "ocrStatus": "pending",
+    "createdAt": "2025-10-21T10:41:37.736Z",
+    "updatedAt": "2025-10-21T10:41:41.718Z",
+    "downloadInstructions": {
+      "method": "presigned-url",
+      "endpoint": "GET /documents/{document_id}/presigned-url",
+      "example": "curl \"http://your-backend-url/documents/68f7636112e2e40ea5d0d48f/presigned-url?expires=3600\"",
+      "description": "Use your backend endpoint to generate a temporary download URL. Replace {document_id} with this document's _id.",
+      "manualConstruction": {
+        "baseUrl": "http://your-company-minio-endpoint:port",
+        "bucket": "assistant-aggregator",
+        "objectKey": "68f7636112e2e40ea5d0d48f/5004-قانون_بهبود_محیط_کار.pdf",
+        "note": "If you have MinIO credentials, you can generate presigned URLs manually using the MinIO SDK or AWS SDK."
+      }
+    }
+  },
+  {
+    "_id": "68f7636612e2e40ea5d0d490",
+    "filename": "5005-قانون جامع خدمات_ رساني به ايثارگران.pdf",
+    "objectKey": "68f7636612e2e40ea5d0d490/5005-قانون_جامع_خدمات__رساني_به_ايثارگران.pdf",
+    "bucket": "assistant-aggregator",
+    "fileUrl": "http://185.149.192.130:9000/assistant-aggregator/68f7636612e2e40ea5d0d490/5005-%D9%82%D8%A7%D9%86%D9%88%D9%86_%D8%AC%D8%A7%D9%85%D8%B9_%D8%AE%D8%AF%D9%85%D8%A7%D8%AA__%D8%B1%D8%B3%D8%A7%D9%86%D9%8A_%D8%A8%D9%87_%D8%A7%D9%8A%D8%AB%D8%A7%D8%B1%DA%AF%D8%B1%D8%A7%D9%86.pdf",
+    "mimeType": "application/pdf",
+    "size": 354458,
+    "checksum": "dbf7dcea17e8da3304b0e3690bbf4c0ab0c259b8302bd80b30eea878816d906e",
+    "extension": "pdf",
+    "ocrStatus": "pending",
+    "createdAt": "2025-10-21T10:41:42.536Z",
+    "updatedAt": "2025-10-21T10:41:46.800Z",
+    "downloadInstructions": {
+      "method": "presigned-url",
+      "endpoint": "GET /documents/{document_id}/presigned-url",
+      "example": "curl \"http://your-backend-url/documents/68f7636612e2e40ea5d0d490/presigned-url?expires=3600\"",
+      "description": "Use your backend endpoint to generate a temporary download URL. Replace {document_id} with this document's _id.",
+      "manualConstruction": {
+        "baseUrl": "http://your-company-minio-endpoint:port",
+        "bucket": "assistant-aggregator",
+        "objectKey": "68f7636612e2e40ea5d0d490/5005-قانون_جامع_خدمات__رساني_به_ايثارگران.pdf",
+        "note": "If you have MinIO credentials, you can generate presigned URLs manually using the MinIO SDK or AWS SDK."
+      }
+    }
+  },
+  {
+    "_id": "68f7636b12e2e40ea5d0d491",
+    "filename": "5006-قانون رسيدگی به تخلفات اداری.pdf",
+    "objectKey": "68f7636b12e2e40ea5d0d491/5006-قانون_رسيدگی_به_تخلفات_اداری.pdf",
+    "bucket": "assistant-aggregator",
+    "fileUrl": "http://185.149.192.130:9000/assistant-aggregator/68f7636b12e2e40ea5d0d491/5006-%D9%82%D8%A7%D9%86%D9%88%D9%86_%D8%B1%D8%B3%D9%8A%D8%AF%DA%AF%DB%8C_%D8%A8%D9%87_%D8%AA%D8%AE%D9%84%D9%81%D8%A7%D8%AA_%D8%A7%D8%AF%D8%A7%D8%B1%DB%8C.pdf",
+    "mimeType": "application/pdf",
+    "size": 87779,
+    "checksum": "b88b4a552257ca1a058f5f2010007e1b4dfa21202bac123085d80b8aaca6f122",
+    "extension": "pdf",
+    "ocrStatus": "pending",
+    "createdAt": "2025-10-21T10:41:47.555Z",
+    "updatedAt": "2025-10-21T10:41:50.522Z",
+    "downloadInstructions": {
+      "method": "presigned-url",
+      "endpoint": "GET /documents/{document_id}/presigned-url",
+      "example": "curl \"http://your-backend-url/documents/68f7636b12e2e40ea5d0d491/presigned-url?expires=3600\"",
+      "description": "Use your backend endpoint to generate a temporary download URL. Replace {document_id} with this document's _id.",
+      "manualConstruction": {
+        "baseUrl": "http://your-company-minio-endpoint:port",
+        "bucket": "assistant-aggregator",
+        "objectKey": "68f7636b12e2e40ea5d0d491/5006-قانون_رسيدگی_به_تخلفات_اداری.pdf",
+        "note": "If you have MinIO credentials, you can generate presigned URLs manually using the MinIO SDK or AWS SDK."
+      }
+    }
+  },
+  {
+    "_id": "68f7636f12e2e40ea5d0d492",
+    "filename": "5007-قانون محاسبات عمومی کشور.pdf",
+    "objectKey": "68f7636f12e2e40ea5d0d492/5007-قانون_محاسبات_عمومی_کشور.pdf",
+    "bucket": "assistant-aggregator",
+    "fileUrl": "http://185.149.192.130:9000/assistant-aggregator/68f7636f12e2e40ea5d0d492/5007-%D9%82%D8%A7%D9%86%D9%88%D9%86_%D9%85%D8%AD%D8%A7%D8%B3%D8%A8%D8%A7%D8%AA_%D8%B9%D9%85%D9%88%D9%85%DB%8C_%DA%A9%D8%B4%D9%88%D8%B1.pdf",
+    "mimeType": "application/pdf",
+    "size": 286994,
+    "checksum": "6aa6583d44d1610ba0a0ccbdc0e5576f20c614f716f8e2be6fd333c9c77ef525",
+    "extension": "pdf",
+    "ocrStatus": "pending",
+    "createdAt": "2025-10-21T10:41:51.342Z",
+    "updatedAt": "2025-10-21T10:41:55.745Z",
+    "downloadInstructions": {
+      "method": "presigned-url",
+      "endpoint": "GET /documents/{document_id}/presigned-url",
+      "example": "curl \"http://your-backend-url/documents/68f7636f12e2e40ea5d0d492/presigned-url?expires=3600\"",
+      "description": "Use your backend endpoint to generate a temporary download URL. Replace {document_id} with this document's _id.",
+      "manualConstruction": {
+        "baseUrl": "http://your-company-minio-endpoint:port",
+        "bucket": "assistant-aggregator",
+        "objectKey": "68f7636f12e2e40ea5d0d492/5007-قانون_محاسبات_عمومی_کشور.pdf",
+        "note": "If you have MinIO credentials, you can generate presigned URLs manually using the MinIO SDK or AWS SDK."
+      }
+    }
+  },
+  {
+    "_id": "68f7637412e2e40ea5d0d493",
+    "filename": "5008-ضوابط اجرايي بودجه سال 1400 كل كشور.pdf",
+    "objectKey": "68f7637412e2e40ea5d0d493/5008-ضوابط_اجرايي_بودجه_سال_1400_كل_كشور.pdf",
+    "bucket": "assistant-aggregator",
+    "fileUrl": "http://185.149.192.130:9000/assistant-aggregator/68f7637412e2e40ea5d0d493/5008-%D8%B6%D9%88%D8%A7%D8%A8%D8%B7_%D8%A7%D8%AC%D8%B1%D8%A7%D9%8A%D9%8A_%D8%A8%D9%88%D8%AF%D8%AC%D9%87_%D8%B3%D8%A7%D9%84_1400_%D9%83%D9%84_%D9%83%D8%B4%D9%88%D8%B1.pdf",
+    "mimeType": "application/pdf",
+    "size": 151089,
+    "checksum": "b84ffb2b7ed486ab7689e892fba2195a148f3e7f404dd16c7c1b39414d6afd16",
+    "extension": "pdf",
+    "ocrStatus": "pending",
+    "createdAt": "2025-10-21T10:41:56.564Z",
+    "updatedAt": "2025-10-21T10:42:00.002Z",
+    "downloadInstructions": {
+      "method": "presigned-url",
+      "endpoint": "GET /documents/{document_id}/presigned-url",
+      "example": "curl \"http://your-backend-url/documents/68f7637412e2e40ea5d0d493/presigned-url?expires=3600\"",
+      "description": "Use your backend endpoint to generate a temporary download URL. Replace {document_id} with this document's _id.",
+      "manualConstruction": {
+        "baseUrl": "http://your-company-minio-endpoint:port",
+        "bucket": "assistant-aggregator",
+        "objectKey": "68f7637412e2e40ea5d0d493/5008-ضوابط_اجرايي_بودجه_سال_1400_كل_كشور.pdf",
+        "note": "If you have MinIO credentials, you can generate presigned URLs manually using the MinIO SDK or AWS SDK."
+      }
+    }
+  },
+  {
+    "_id": "68f7637812e2e40ea5d0d494",
+    "filename": "5009-ضوابط اجرايی بودجه سال 1401 كل كشور.pdf",
+    "objectKey": "68f7637812e2e40ea5d0d494/5009-ضوابط_اجرايی_بودجه_سال_1401_كل_كشور.pdf",
+    "bucket": "assistant-aggregator",
+    "fileUrl": "http://185.149.192.130:9000/assistant-aggregator/68f7637812e2e40ea5d0d494/5009-%D8%B6%D9%88%D8%A7%D8%A8%D8%B7_%D8%A7%D8%AC%D8%B1%D8%A7%D9%8A%DB%8C_%D8%A8%D9%88%D8%AF%D8%AC%D9%87_%D8%B3%D8%A7%D9%84_1401_%D9%83%D9%84_%D9%83%D8%B4%D9%88%D8%B1.pdf",
+    "mimeType": "application/pdf",
+    "size": 150047,
+    "checksum": "411ad8c66b0005720d48acd71b1615e68a416d0d31fca414c725669c78fa4ef2",
+    "extension": "pdf",
+    "ocrStatus": "pending",
+    "createdAt": "2025-10-21T10:42:00.715Z",
+    "updatedAt": "2025-10-21T10:42:04.141Z",
+    "downloadInstructions": {
+      "method": "presigned-url",
+      "endpoint": "GET /documents/{document_id}/presigned-url",
+      "example": "curl \"http://your-backend-url/documents/68f7637812e2e40ea5d0d494/presigned-url?expires=3600\"",
+      "description": "Use your backend endpoint to generate a temporary download URL. Replace {document_id} with this document's _id.",
+      "manualConstruction": {
+        "baseUrl": "http://your-company-minio-endpoint:port",
+        "bucket": "assistant-aggregator",
+        "objectKey": "68f7637812e2e40ea5d0d494/5009-ضوابط_اجرايی_بودجه_سال_1401_كل_كشور.pdf",
+        "note": "If you have MinIO credentials, you can generate presigned URLs manually using the MinIO SDK or AWS SDK."
+      }
+    }
+  },
+  {
+    "_id": "68f7637c12e2e40ea5d0d495",
+    "filename": "5010-ضوابط اجرايی بودجه سال 1402 كل كشور.pdf",
+    "objectKey": "68f7637c12e2e40ea5d0d495/5010-ضوابط_اجرايی_بودجه_سال_1402_كل_كشور.pdf",
+    "bucket": "assistant-aggregator",
+    "fileUrl": "http://185.149.192.130:9000/assistant-aggregator/68f7637c12e2e40ea5d0d495/5010-%D8%B6%D9%88%D8%A7%D8%A8%D8%B7_%D8%A7%D8%AC%D8%B1%D8%A7%D9%8A%DB%8C_%D8%A8%D9%88%D8%AF%D8%AC%D9%87_%D8%B3%D8%A7%D9%84_1402_%D9%83%D9%84_%D9%83%D8%B4%D9%88%D8%B1.pdf",
+    "mimeType": "application/pdf",
+    "size": 158998,
+    "checksum": "1a1044b90fab1b56a0953824d04e70960d4ce09c1f225de44f34c4591efcab8f",
+    "extension": "pdf",
+    "ocrStatus": "pending",
+    "createdAt": "2025-10-21T10:42:04.859Z",
+    "updatedAt": "2025-10-21T10:42:08.083Z",
+    "downloadInstructions": {
+      "method": "presigned-url",
+      "endpoint": "GET /documents/{document_id}/presigned-url",
+      "example": "curl \"http://your-backend-url/documents/68f7637c12e2e40ea5d0d495/presigned-url?expires=3600\"",
+      "description": "Use your backend endpoint to generate a temporary download URL. Replace {document_id} with this document's _id.",
+      "manualConstruction": {
+        "baseUrl": "http://your-company-minio-endpoint:port",
+        "bucket": "assistant-aggregator",
+        "objectKey": "68f7637c12e2e40ea5d0d495/5010-ضوابط_اجرايی_بودجه_سال_1402_كل_كشور.pdf",
+        "note": "If you have MinIO credentials, you can generate presigned URLs manually using the MinIO SDK or AWS SDK."
+      }
+    }
+  },
+  {
+    "_id": "68f7638012e2e40ea5d0d496",
+    "filename": "5011-ضوابط اجرايی بودجه سال 1403 كل كشور.pdf",
+    "objectKey": "68f7638012e2e40ea5d0d496/5011-ضوابط_اجرايی_بودجه_سال_1403_كل_كشور.pdf",
+    "bucket": "assistant-aggregator",
+    "fileUrl": "http://185.149.192.130:9000/assistant-aggregator/68f7638012e2e40ea5d0d496/5011-%D8%B6%D9%88%D8%A7%D8%A8%D8%B7_%D8%A7%D8%AC%D8%B1%D8%A7%D9%8A%DB%8C_%D8%A8%D9%88%D8%AF%D8%AC%D9%87_%D8%B3%D8%A7%D9%84_1403_%D9%83%D9%84_%D9%83%D8%B4%D9%88%D8%B1.pdf",
+    "mimeType": "application/pdf",
+    "size": 172852,
+    "checksum": "1c4589bb54c0291ec99e455524430041a136acdf325b472c63f7dece744dd947",
+    "extension": "pdf",
+    "ocrStatus": "pending",
+    "createdAt": "2025-10-21T10:42:08.851Z",
+    "updatedAt": "2025-10-21T10:42:13.050Z",
+    "downloadInstructions": {
+      "method": "presigned-url",
+      "endpoint": "GET /documents/{document_id}/presigned-url",
+      "example": "curl \"http://your-backend-url/documents/68f7638012e2e40ea5d0d496/presigned-url?expires=3600\"",
+      "description": "Use your backend endpoint to generate a temporary download URL. Replace {document_id} with this document's _id.",
+      "manualConstruction": {
+        "baseUrl": "http://your-company-minio-endpoint:port",
+        "bucket": "assistant-aggregator",
+        "objectKey": "68f7638012e2e40ea5d0d496/5011-ضوابط_اجرايی_بودجه_سال_1403_كل_كشور.pdf",
+        "note": "If you have MinIO credentials, you can generate presigned URLs manually using the MinIO SDK or AWS SDK."
+      }
+    }
+  },
+  {
+    "_id": "68f7638512e2e40ea5d0d497",
+    "filename": "5012-ضوابط اجرايی بودجه سال 1404 كل كشور.pdf",
+    "objectKey": "68f7638512e2e40ea5d0d497/5012-ضوابط_اجرايی_بودجه_سال_1404_كل_كشور.pdf",
+    "bucket": "assistant-aggregator",
+    "fileUrl": "http://185.149.192.130:9000/assistant-aggregator/68f7638512e2e40ea5d0d497/5012-%D8%B6%D9%88%D8%A7%D8%A8%D8%B7_%D8%A7%D8%AC%D8%B1%D8%A7%D9%8A%DB%8C_%D8%A8%D9%88%D8%AF%D8%AC%D9%87_%D8%B3%D8%A7%D9%84_1404_%D9%83%D9%84_%D9%83%D8%B4%D9%88%D8%B1.pdf",
+    "mimeType": "application/pdf",
+    "size": 5184060,
+    "checksum": "f5d5a427f97a8cbdaff2507447d47aad514e2555af8391413ccbf36f8ab5bdce",
+    "extension": "pdf",
+    "ocrStatus": "pending",
+    "createdAt": "2025-10-21T10:42:13.870Z",
+    "updatedAt": "2025-10-21T10:42:38.445Z",
+    "downloadInstructions": {
+      "method": "presigned-url",
+      "endpoint": "GET /documents/{document_id}/presigned-url",
+      "example": "curl \"http://your-backend-url/documents/68f7638512e2e40ea5d0d497/presigned-url?expires=3600\"",
+      "description": "Use your backend endpoint to generate a temporary download URL. Replace {document_id} with this document's _id.",
+      "manualConstruction": {
+        "baseUrl": "http://your-company-minio-endpoint:port",
+        "bucket": "assistant-aggregator",
+        "objectKey": "68f7638512e2e40ea5d0d497/5012-ضوابط_اجرايی_بودجه_سال_1404_كل_كشور.pdf",
+        "note": "If you have MinIO credentials, you can generate presigned URLs manually using the MinIO SDK or AWS SDK."
+      }
+    }
+  },
+  {
+    "_id": "68f7639f12e2e40ea5d0d498",
+    "filename": "5013-قانون رفع موانع تولید.pdf",
+    "objectKey": "68f7639f12e2e40ea5d0d498/5013-قانون_رفع_موانع_تولید.pdf",
+    "bucket": "assistant-aggregator",
+    "fileUrl": "http://185.149.192.130:9000/assistant-aggregator/68f7639f12e2e40ea5d0d498/5013-%D9%82%D8%A7%D9%86%D9%88%D9%86_%D8%B1%D9%81%D8%B9_%D9%85%D9%88%D8%A7%D9%86%D8%B9_%D8%AA%D9%88%D9%84%DB%8C%D8%AF.pdf",
+    "mimeType": "application/pdf",
+    "size": 296433,
+    "checksum": "33b90ed6406bffd647929c3ec1920a586948bf75ca954abbf1fd066794bd9060",
+    "extension": "pdf",
+    "ocrStatus": "pending",
+    "createdAt": "2025-10-21T10:42:39.264Z",
+    "updatedAt": "2025-10-21T10:42:43.229Z",
+    "downloadInstructions": {
+      "method": "presigned-url",
+      "endpoint": "GET /documents/{document_id}/presigned-url",
+      "example": "curl \"http://your-backend-url/documents/68f7639f12e2e40ea5d0d498/presigned-url?expires=3600\"",
+      "description": "Use your backend endpoint to generate a temporary download URL. Replace {document_id} with this document's _id.",
+      "manualConstruction": {
+        "baseUrl": "http://your-company-minio-endpoint:port",
+        "bucket": "assistant-aggregator",
+        "objectKey": "68f7639f12e2e40ea5d0d498/5013-قانون_رفع_موانع_تولید.pdf",
+        "note": "If you have MinIO credentials, you can generate presigned URLs manually using the MinIO SDK or AWS SDK."
+      }
+    }
+  },
+  {
+    "_id": "68f763a412e2e40ea5d0d499",
+    "filename": "5014-قانون کار.pdf",
+    "objectKey": "68f763a412e2e40ea5d0d499/5014-قانون_کار.pdf",
+    "bucket": "assistant-aggregator",
+    "fileUrl": "http://185.149.192.130:9000/assistant-aggregator/68f763a412e2e40ea5d0d499/5014-%D9%82%D8%A7%D9%86%D9%88%D9%86_%DA%A9%D8%A7%D8%B1.pdf",
+    "mimeType": "application/pdf",
+    "size": 324072,
+    "checksum": "1bb926368c1cda8b1c19c8f368810a721e77e031f275de31e272a6686e0347a0",
+    "extension": "pdf",
+    "ocrStatus": "pending",
+    "createdAt": "2025-10-21T10:42:44.076Z",
+    "updatedAt": "2025-10-21T10:42:48.010Z",
+    "downloadInstructions": {
+      "method": "presigned-url",
+      "endpoint": "GET /documents/{document_id}/presigned-url",
+      "example": "curl \"http://your-backend-url/documents/68f763a412e2e40ea5d0d499/presigned-url?expires=3600\"",
+      "description": "Use your backend endpoint to generate a temporary download URL. Replace {document_id} with this document's _id.",
+      "manualConstruction": {
+        "baseUrl": "http://your-company-minio-endpoint:port",
+        "bucket": "assistant-aggregator",
+        "objectKey": "68f763a412e2e40ea5d0d499/5014-قانون_کار.pdf",
+        "note": "If you have MinIO credentials, you can generate presigned URLs manually using the MinIO SDK or AWS SDK."
+      }
+    }
+  },
+  {
+    "_id": "68f763a812e2e40ea5d0d49a",
+    "filename": "5015-قانون مالیات بر ارزش افزوده.pdf",
+    "objectKey": "68f763a812e2e40ea5d0d49a/5015-قانون_مالیات_بر_ارزش_افزوده.pdf",
+    "bucket": "assistant-aggregator",
+    "fileUrl": "http://185.149.192.130:9000/assistant-aggregator/68f763a812e2e40ea5d0d49a/5015-%D9%82%D8%A7%D9%86%D9%88%D9%86_%D9%85%D8%A7%D9%84%DB%8C%D8%A7%D8%AA_%D8%A8%D8%B1_%D8%A7%D8%B1%D8%B2%D8%B4_%D8%A7%D9%81%D8%B2%D9%88%D8%AF%D9%87.pdf",
+    "mimeType": "application/pdf",
+    "size": 1888373,
+    "checksum": "db1075442edf4bad39a0594db06f9bb26f1bee43f657538af8a5326766babbb6",
+    "extension": "pdf",
+    "ocrStatus": "pending",
+    "createdAt": "2025-10-21T10:42:48.787Z",
+    "updatedAt": "2025-10-21T10:42:59.641Z",
+    "downloadInstructions": {
+      "method": "presigned-url",
+      "endpoint": "GET /documents/{document_id}/presigned-url",
+      "example": "curl \"http://your-backend-url/documents/68f763a812e2e40ea5d0d49a/presigned-url?expires=3600\"",
+      "description": "Use your backend endpoint to generate a temporary download URL. Replace {document_id} with this document's _id.",
+      "manualConstruction": {
+        "baseUrl": "http://your-company-minio-endpoint:port",
+        "bucket": "assistant-aggregator",
+        "objectKey": "68f763a812e2e40ea5d0d49a/5015-قانون_مالیات_بر_ارزش_افزوده.pdf",
+        "note": "If you have MinIO credentials, you can generate presigned URLs manually using the MinIO SDK or AWS SDK."
+      }
+    }
+  },
+  {
+    "_id": "68f763b412e2e40ea5d0d49b",
+    "filename": "5016-قانون برنامه پنجساله هفتم پيشرفت جمهوری اسلامی ايران.pdf",
+    "objectKey": "68f763b412e2e40ea5d0d49b/5016-قانون_برنامه_پنجساله_هفتم_پيشرفت_جمهوری_اسلامی_ايران.pdf",
+    "bucket": "assistant-aggregator",
+    "fileUrl": "http://185.149.192.130:9000/assistant-aggregator/68f763b412e2e40ea5d0d49b/5016-%D9%82%D8%A7%D9%86%D9%88%D9%86_%D8%A8%D8%B1%D9%86%D8%A7%D9%85%D9%87_%D9%BE%D9%86%D8%AC%D8%B3%D8%A7%D9%84%D9%87_%D9%87%D9%81%D8%AA%D9%85_%D9%BE%D9%8A%D8%B4%D8%B1%D9%81%D8%AA_%D8%AC%D9%85%D9%87%D9%88%D8%B1%DB%8C_%D8%A7%D8%B3%D9%84%D8%A7%D9%85%DB%8C_%D8%A7%D9%8A%D8%B1%D8%A7%D9%86.pdf",
+    "mimeType": "application/pdf",
+    "size": 5537719,
+    "checksum": "33243f8c2ef158dd66630fa63081d3f5c172219acd2eff8af57b918a12b934c7",
+    "extension": "pdf",
+    "ocrStatus": "pending",
+    "createdAt": "2025-10-21T10:43:00.564Z",
+    "updatedAt": "2025-10-21T10:43:26.163Z",
+    "downloadInstructions": {
+      "method": "presigned-url",
+      "endpoint": "GET /documents/{document_id}/presigned-url",
+      "example": "curl \"http://your-backend-url/documents/68f763b412e2e40ea5d0d49b/presigned-url?expires=3600\"",
+      "description": "Use your backend endpoint to generate a temporary download URL. Replace {document_id} with this document's _id.",
+      "manualConstruction": {
+        "baseUrl": "http://your-company-minio-endpoint:port",
+        "bucket": "assistant-aggregator",
+        "objectKey": "68f763b412e2e40ea5d0d49b/5016-قانون_برنامه_پنجساله_هفتم_پيشرفت_جمهوری_اسلامی_ايران.pdf",
+        "note": "If you have MinIO credentials, you can generate presigned URLs manually using the MinIO SDK or AWS SDK."
+      }
+    }
+  },
+  {
+    "_id": "68f763cf12e2e40ea5d0d49c",
+    "filename": "5017-قانون بودجه سال 1404کل کشور.pdf",
+    "objectKey": "68f763cf12e2e40ea5d0d49c/5017-قانون_بودجه_سال_1404کل_کشور.pdf",
+    "bucket": "assistant-aggregator",
+    "fileUrl": "http://185.149.192.130:9000/assistant-aggregator/68f763cf12e2e40ea5d0d49c/5017-%D9%82%D8%A7%D9%86%D9%88%D9%86_%D8%A8%D9%88%D8%AF%D8%AC%D9%87_%D8%B3%D8%A7%D9%84_1404%DA%A9%D9%84_%DA%A9%D8%B4%D9%88%D8%B1.pdf",
+    "mimeType": "application/pdf",
+    "size": 20596670,
+    "checksum": "ecc9073191aa09cda45fe3f2744cdb1f52b3044ee6d27acf24a1a249f0870fe7",
+    "extension": "pdf",
+    "ocrStatus": "pending",
+    "createdAt": "2025-10-21T10:43:27.086Z",
+    "updatedAt": "2025-10-21T10:44:50.641Z",
+    "downloadInstructions": {
+      "method": "presigned-url",
+      "endpoint": "GET /documents/{document_id}/presigned-url",
+      "example": "curl \"http://your-backend-url/documents/68f763cf12e2e40ea5d0d49c/presigned-url?expires=3600\"",
+      "description": "Use your backend endpoint to generate a temporary download URL. Replace {document_id} with this document's _id.",
+      "manualConstruction": {
+        "baseUrl": "http://your-company-minio-endpoint:port",
+        "bucket": "assistant-aggregator",
+        "objectKey": "68f763cf12e2e40ea5d0d49c/5017-قانون_بودجه_سال_1404کل_کشور.pdf",
+        "note": "If you have MinIO credentials, you can generate presigned URLs manually using the MinIO SDK or AWS SDK."
+      }
+    }
+  },
+  {
+    "_id": "68f7642312e2e40ea5d0d49d",
+    "filename": "5018-قانون بيمه همگانی خدمات درمانی كشور.pdf",
+    "objectKey": "68f7642312e2e40ea5d0d49d/5018-قانون_بيمه_همگانی_خدمات_درمانی_كشور.pdf",
+    "bucket": "assistant-aggregator",
+    "fileUrl": "http://185.149.192.130:9000/assistant-aggregator/68f7642312e2e40ea5d0d49d/5018-%D9%82%D8%A7%D9%86%D9%88%D9%86_%D8%A8%D9%8A%D9%85%D9%87_%D9%87%D9%85%DA%AF%D8%A7%D9%86%DB%8C_%D8%AE%D8%AF%D9%85%D8%A7%D8%AA_%D8%AF%D8%B1%D9%85%D8%A7%D9%86%DB%8C_%D9%83%D8%B4%D9%88%D8%B1.pdf",
+    "mimeType": "application/pdf",
+    "size": 111504,
+    "checksum": "1746677e7720fb44a66d8679e084edb657197521b9a06ef64a79c0a09c09f26c",
+    "extension": "pdf",
+    "ocrStatus": "pending",
+    "createdAt": "2025-10-21T10:44:51.606Z",
+    "updatedAt": "2025-10-21T10:44:55.716Z",
+    "downloadInstructions": {
+      "method": "presigned-url",
+      "endpoint": "GET /documents/{document_id}/presigned-url",
+      "example": "curl \"http://your-backend-url/documents/68f7642312e2e40ea5d0d49d/presigned-url?expires=3600\"",
+      "description": "Use your backend endpoint to generate a temporary download URL. Replace {document_id} with this document's _id.",
+      "manualConstruction": {
+        "baseUrl": "http://your-company-minio-endpoint:port",
+        "bucket": "assistant-aggregator",
+        "objectKey": "68f7642312e2e40ea5d0d49d/5018-قانون_بيمه_همگانی_خدمات_درمانی_كشور.pdf",
+        "note": "If you have MinIO credentials, you can generate presigned URLs manually using the MinIO SDK or AWS SDK."
+      }
+    }
+  },
+  {
+    "_id": "68f7642812e2e40ea5d0d49e",
+    "filename": "5019-قانون ديوان محاسبات كشور.pdf",
+    "objectKey": "68f7642812e2e40ea5d0d49e/5019-قانون_ديوان_محاسبات_كشور.pdf",
+    "bucket": "assistant-aggregator",
+    "fileUrl": "http://185.149.192.130:9000/assistant-aggregator/68f7642812e2e40ea5d0d49e/5019-%D9%82%D8%A7%D9%86%D9%88%D9%86_%D8%AF%D9%8A%D9%88%D8%A7%D9%86_%D9%85%D8%AD%D8%A7%D8%B3%D8%A8%D8%A7%D8%AA_%D9%83%D8%B4%D9%88%D8%B1.pdf",
+    "mimeType": "application/pdf",
+    "size": 125179,
+    "checksum": "4a8f721eccb2e66a1bc593805ee1543917f0997443c0ec8b49282ec4212e9b78",
+    "extension": "pdf",
+    "ocrStatus": "pending",
+    "createdAt": "2025-10-21T10:44:56.478Z",
+    "updatedAt": "2025-10-21T10:44:59.755Z",
+    "downloadInstructions": {
+      "method": "presigned-url",
+      "endpoint": "GET /documents/{document_id}/presigned-url",
+      "example": "curl \"http://your-backend-url/documents/68f7642812e2e40ea5d0d49e/presigned-url?expires=3600\"",
+      "description": "Use your backend endpoint to generate a temporary download URL. Replace {document_id} with this document's _id.",
+      "manualConstruction": {
+        "baseUrl": "http://your-company-minio-endpoint:port",
+        "bucket": "assistant-aggregator",
+        "objectKey": "68f7642812e2e40ea5d0d49e/5019-قانون_ديوان_محاسبات_كشور.pdf",
+        "note": "If you have MinIO credentials, you can generate presigned URLs manually using the MinIO SDK or AWS SDK."
+      }
+    }
+  },
+  {
+    "_id": "68f7642c12e2e40ea5d0d49f",
+    "filename": "5020-قانون مديريت خدمات كشوری.pdf",
+    "objectKey": "68f7642c12e2e40ea5d0d49f/5020-قانون_مديريت_خدمات_كشوری.pdf",
+    "bucket": "assistant-aggregator",
+    "fileUrl": "http://185.149.192.130:9000/assistant-aggregator/68f7642c12e2e40ea5d0d49f/5020-%D9%82%D8%A7%D9%86%D9%88%D9%86_%D9%85%D8%AF%D9%8A%D8%B1%D9%8A%D8%AA_%D8%AE%D8%AF%D9%85%D8%A7%D8%AA_%D9%83%D8%B4%D9%88%D8%B1%DB%8C.pdf",
+    "mimeType": "application/pdf",
+    "size": 5047331,
+    "checksum": "8ba856d3800436a522975600127f2c3cef195e97bcc148add6b614ef75663c3a",
+    "extension": "pdf",
+    "ocrStatus": "pending",
+    "createdAt": "2025-10-21T10:45:00.676Z",
+    "updatedAt": "2025-10-21T10:45:24.230Z",
+    "downloadInstructions": {
+      "method": "presigned-url",
+      "endpoint": "GET /documents/{document_id}/presigned-url",
+      "example": "curl \"http://your-backend-url/documents/68f7642c12e2e40ea5d0d49f/presigned-url?expires=3600\"",
+      "description": "Use your backend endpoint to generate a temporary download URL. Replace {document_id} with this document's _id.",
+      "manualConstruction": {
+        "baseUrl": "http://your-company-minio-endpoint:port",
+        "bucket": "assistant-aggregator",
+        "objectKey": "68f7642c12e2e40ea5d0d49f/5020-قانون_مديريت_خدمات_كشوری.pdf",
+        "note": "If you have MinIO credentials, you can generate presigned URLs manually using the MinIO SDK or AWS SDK."
+      }
+    }
+  },
+  {
+    "_id": "68f7644512e2e40ea5d0d4a0",
+    "filename": "5021-قانون اساسی جمهوری اسلامی ايران.pdf",
+    "objectKey": "68f7644512e2e40ea5d0d4a0/5021-قانون_اساسی_جمهوری_اسلامی_ايران.pdf",
+    "bucket": "assistant-aggregator",
+    "fileUrl": "http://185.149.192.130:9000/assistant-aggregator/68f7644512e2e40ea5d0d4a0/5021-%D9%82%D8%A7%D9%86%D9%88%D9%86_%D8%A7%D8%B3%D8%A7%D8%B3%DB%8C_%D8%AC%D9%85%D9%87%D9%88%D8%B1%DB%8C_%D8%A7%D8%B3%D9%84%D8%A7%D9%85%DB%8C_%D8%A7%D9%8A%D8%B1%D8%A7%D9%86.pdf",
+    "mimeType": "application/pdf",
+    "size": 335362,
+    "checksum": "45dc22671548ed8b2ba2240f2b0e4c01a64fe93a6bce5e8b09eea85771d4ab00",
+    "extension": "pdf",
+    "ocrStatus": "pending",
+    "createdAt": "2025-10-21T10:45:25.047Z",
+    "updatedAt": "2025-10-21T10:45:29.144Z",
+    "downloadInstructions": {
+      "method": "presigned-url",
+      "endpoint": "GET /documents/{document_id}/presigned-url",
+      "example": "curl \"http://your-backend-url/documents/68f7644512e2e40ea5d0d4a0/presigned-url?expires=3600\"",
+      "description": "Use your backend endpoint to generate a temporary download URL. Replace {document_id} with this document's _id.",
+      "manualConstruction": {
+        "baseUrl": "http://your-company-minio-endpoint:port",
+        "bucket": "assistant-aggregator",
+        "objectKey": "68f7644512e2e40ea5d0d4a0/5021-قانون_اساسی_جمهوری_اسلامی_ايران.pdf",
+        "note": "If you have MinIO credentials, you can generate presigned URLs manually using the MinIO SDK or AWS SDK."
+      }
+    }
+  },
+  {
+    "_id": "68f7644a12e2e40ea5d0d4a1",
+    "filename": "5022-قانون بودجه سال 1403 کل کشور.pdf",
+    "objectKey": "68f7644a12e2e40ea5d0d4a1/5022-قانون_بودجه_سال_1403_کل_کشور.pdf",
+    "bucket": "assistant-aggregator",
+    "fileUrl": "http://185.149.192.130:9000/assistant-aggregator/68f7644a12e2e40ea5d0d4a1/5022-%D9%82%D8%A7%D9%86%D9%88%D9%86_%D8%A8%D9%88%D8%AF%D8%AC%D9%87_%D8%B3%D8%A7%D9%84_1403_%DA%A9%D9%84_%DA%A9%D8%B4%D9%88%D8%B1.pdf",
+    "mimeType": "application/pdf",
+    "size": 46103526,
+    "checksum": "fffa3a16a499384c35716ea4d4d617462193808d9f4b0a85afbfafc563be62d3",
+    "extension": "pdf",
+    "ocrStatus": "pending",
+    "createdAt": "2025-10-21T10:45:30.066Z",
+    "updatedAt": "2025-10-21T10:48:35.966Z",
+    "downloadInstructions": {
+      "method": "presigned-url",
+      "endpoint": "GET /documents/{document_id}/presigned-url",
+      "example": "curl \"http://your-backend-url/documents/68f7644a12e2e40ea5d0d4a1/presigned-url?expires=3600\"",
+      "description": "Use your backend endpoint to generate a temporary download URL. Replace {document_id} with this document's _id.",
+      "manualConstruction": {
+        "baseUrl": "http://your-company-minio-endpoint:port",
+        "bucket": "assistant-aggregator",
+        "objectKey": "68f7644a12e2e40ea5d0d4a1/5022-قانون_بودجه_سال_1403_کل_کشور.pdf",
+        "note": "If you have MinIO credentials, you can generate presigned URLs manually using the MinIO SDK or AWS SDK."
+      }
+    }
+  }
+]
