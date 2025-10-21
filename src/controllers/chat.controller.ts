@@ -291,10 +291,6 @@ export class ChatController {
         throw new ChatException(400, ChatErrorCode.INVALID_PARAM, 'Query cannot be empty');
       }
 
-      if (!body.inputs) {
-        throw new ChatException(400, ChatErrorCode.INVALID_PARAM, 'Inputs object is required');
-      }
-
       if (!body.responseMode || !['blocking', 'streaming'].includes(body.responseMode)) {
         throw new ChatException(400, ChatErrorCode.INVALID_PARAM, 'Response mode must be either "blocking" or "streaming"');
       }
@@ -316,22 +312,6 @@ export class ChatController {
         if (!conversationExists) {
           throw new ChatException(404, ChatErrorCode.CONVERSATION_DOES_NOT_EXIST, 'Conversation does not exist');
         }
-      }
-
-      // Simulate different error conditions for testing
-      // In a real implementation, these would be based on actual service checks
-      const shouldSimulateError = Math.random() < 0.3; // 30% chance of error for testing
-      if (shouldSimulateError) {
-        const errorTypes = [
-          { status: 400, code: ChatErrorCode.APP_UNAVAILABLE, message: 'Application is currently unavailable' },
-          { status: 400, code: ChatErrorCode.PROVIDER_NOT_INITIALIZE, message: 'AI provider is not initialized' },
-          { status: 400, code: ChatErrorCode.PROVIDER_QUOTA_EXCEEDED, message: 'AI provider quota has been exceeded' },
-          { status: 400, code: ChatErrorCode.MODEL_CURRENTLY_NOT_SUPPORT, message: 'The requested model is currently not supported' },
-          { status: 400, code: ChatErrorCode.COMPLETION_REQUEST_ERROR, message: 'Failed to complete the request' },
-          { status: 500, code: ChatErrorCode.INTERNAL_SERVER_ERROR, message: 'Internal server error occurred' }
-        ];
-        const randomError = errorTypes[Math.floor(Math.random() * errorTypes.length)];
-        throw new ChatException(randomError.status, randomError.code, randomError.message);
       }
 
       if (body.responseMode === ChatMessagesResponseMode.STREAMING) {
@@ -417,7 +397,7 @@ export class ChatController {
           created_at: Date.now()
         };
 
-        res.json(response);
+        res.status(200).json(response);
       }
     } catch (error) {
       if (error instanceof ChatException) {
