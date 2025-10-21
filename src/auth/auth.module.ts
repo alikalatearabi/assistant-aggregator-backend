@@ -7,6 +7,8 @@ import { AuthService } from '../services/auth.service';
 import { AuthController } from '../controllers/auth.controller';
 import { JwtStrategy } from './jwt.strategy';
 import { LocalStrategy } from './local.strategy';
+import { ApiKeyStrategy } from './api-key.strategy';
+import { ApiKeyAuthGuard } from './api-key-auth.guard';
 import { User, UserSchema } from '../schemas/user.schema';
 
 @Module({
@@ -24,8 +26,8 @@ import { User, UserSchema } from '../schemas/user.schema';
     }),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
   ],
-  providers: [AuthService, JwtStrategy, LocalStrategy],
+  providers: [AuthService, JwtStrategy, LocalStrategy, ApiKeyStrategy, ApiKeyAuthGuard],
   controllers: [AuthController],
-  exports: [AuthService],
+  exports: [AuthService, ApiKeyAuthGuard],
 })
 export class AuthModule {}

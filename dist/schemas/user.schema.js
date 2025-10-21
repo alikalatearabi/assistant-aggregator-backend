@@ -37,6 +37,7 @@ let User = class User {
     organizationLevel;
     password;
     isActive;
+    apiKey;
     role;
     createdAt;
     updatedAt;
@@ -116,6 +117,15 @@ __decorate([
     (0, mongoose_1.Prop)({ default: true }),
     __metadata("design:type", Boolean)
 ], User.prototype, "isActive", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'API key for programmatic access (optional)',
+        example: 'sk_live_abcdefghijklmnop',
+        writeOnly: true,
+    }),
+    (0, mongoose_1.Prop)({ required: false, unique: true, sparse: true }),
+    __metadata("design:type", String)
+], User.prototype, "apiKey", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: 'User role in the system',

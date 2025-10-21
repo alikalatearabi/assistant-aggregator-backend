@@ -23,6 +23,7 @@ export declare class User {
     organizationLevel: OrganizationLevel;
     password: string;
     isActive: boolean;
+    apiKey?: string;
     role: UserRole;
     createdAt: Date;
     updatedAt: Date;

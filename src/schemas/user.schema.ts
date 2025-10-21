@@ -91,6 +91,14 @@ export class User {
   isActive: boolean;
 
   @ApiProperty({
+    description: 'API key for programmatic access (optional)',
+    example: 'sk_live_abcdefghijklmnop',
+    writeOnly: true,
+  })
+  @Prop({ required: false, unique: true, sparse: true })
+  apiKey?: string;
+
+  @ApiProperty({
     description: 'User role in the system',
     enum: UserRole,
     example: UserRole.USER,

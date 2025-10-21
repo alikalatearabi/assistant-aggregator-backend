@@ -160,6 +160,15 @@ let AuthService = class AuthService {
     async findById(id) {
         return this.userModel.findById(id);
     }
+    async findByApiKey(apiKey) {
+        return this.userModel.findOne({ apiKey });
+    }
+    async createApiKeyForUser(userId) {
+        const crypto = await import('crypto');
+        const apiKey = 'sk_' + crypto.randomBytes(24).toString('hex');
+        await this.userModel.findByIdAndUpdate(userId, { apiKey });
+        return apiKey;
+    }
 };
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([

@@ -23,6 +23,8 @@ const add_message_to_chat_dto_1 = require("../dto/add-message-to-chat.dto");
 const chat_schema_1 = require("../schemas/chat.schema");
 const chat_messages_dto_1 = require("../dto/chat-messages.dto");
 const chat_messages_service_1 = require("../services/chat-messages.service");
+const common_2 = require("@nestjs/common");
+const api_key_auth_guard_1 = require("../auth/api-key-auth.guard");
 let ChatController = class ChatController {
     chatService;
     chatMessagesService;
@@ -70,6 +72,7 @@ let ChatController = class ChatController {
 exports.ChatController = ChatController;
 __decorate([
     (0, common_1.Post)(),
+    (0, common_2.UseGuards)(api_key_auth_guard_1.ApiKeyAuthGuard),
     (0, swagger_1.ApiOperation)({
         summary: 'Create a new chat session',
         description: 'Creates a new chat session with user reference and optional initial message history',
@@ -228,6 +231,7 @@ __decorate([
 ], ChatController.prototype, "deleteChat", null);
 __decorate([
     (0, common_1.Post)('chat-messages'),
+    (0, common_2.UseGuards)(api_key_auth_guard_1.ApiKeyAuthGuard),
     (0, swagger_1.ApiOperation)({
         summary: 'Generate chat messages',
         description: 'Generates a chat response. If responseMode is streaming, emits WS events; if blocking, returns a REST payload',

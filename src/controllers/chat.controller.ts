@@ -25,6 +25,8 @@ import { AddMessageToChatDto } from '../dto/add-message-to-chat.dto';
 import { Chat } from '../schemas/chat.schema';
 import { ChatMessagesRequestDto, ChatMessageAnswerResponseDto, ChatMessagesResponseMode } from '../dto/chat-messages.dto';
 import { ChatMessagesService } from '../services/chat-messages.service';
+import { UseGuards } from '@nestjs/common';
+import { ApiKeyAuthGuard } from '../auth/api-key-auth.guard';
 
 @ApiTags('chats')
 @Controller('chats')
@@ -35,6 +37,7 @@ export class ChatController {
   ) {}
 
   @Post()
+  @UseGuards(ApiKeyAuthGuard)
   @ApiOperation({
     summary: 'Create a new chat session',
     description: 'Creates a new chat session with user reference and optional initial message history',
@@ -184,6 +187,7 @@ export class ChatController {
   }
 
   @Post('chat-messages')
+  @UseGuards(ApiKeyAuthGuard)
   @ApiOperation({
     summary: 'Generate chat messages',
     description: 'Generates a chat response. If responseMode is streaming, emits WS events; if blocking, returns a REST payload',

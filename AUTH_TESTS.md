@@ -130,3 +130,24 @@ Potential areas for test expansion:
 - Rate limiting test scenarios
 - JWT token expiration testing
 - More comprehensive edge cases
+
+## API Key Usage
+
+You can protect REST endpoints with an API key assigned to a user. The server accepts the API key via the `Authorization` header using one of these formats:
+- `Authorization: Bearer <api_key>`
+- `Authorization: Api-Key <api_key>`
+- Or via the `x-api-key` header
+
+To create an API key for a user during development, use the provided script:
+
+```bash
+node scripts/create-api-key-for-user.js --email user@example.com
+```
+
+Then call protected endpoints like this:
+
+```bash
+curl -H "Authorization: Bearer sk_..." -X POST https://your-api.example.com/chats/chat-messages -d '{...}'
+```
+
+The `chat-messages` endpoint was updated to require the API key as an example. Add `@UseGuards(ApiKeyAuthGuard)` to other controllers to protect them.

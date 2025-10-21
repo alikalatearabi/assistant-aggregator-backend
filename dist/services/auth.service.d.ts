@@ -12,4 +12,6 @@ export declare class AuthService {
     login(loginDto: LoginDto): Promise<AuthResponseDto>;
     validateUser(email: string, password: string): Promise<any>;
     findById(id: string): Promise<User | null>;
+    findByApiKey(apiKey: string): Promise<User | null>;
+    createApiKeyForUser(userId: string): Promise<string>;
 }

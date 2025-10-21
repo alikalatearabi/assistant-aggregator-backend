@@ -139,4 +139,20 @@ export class AuthService {
   async findById(id: string): Promise<User | null> {
     return this.userModel.findById(id);
   }
+
+  async findByApiKey(apiKey: string): Promise<User | null> {
+    return this.userModel.findOne({ apiKey });
+  }
+
+  /**
+   * Create and assign an API key for a user.
+   * Returns the generated key.
+   */
+  async createApiKeyForUser(userId: string): Promise<string> {
+    const crypto = await import('crypto');
+    const apiKey = 'sk_' + crypto.randomBytes(24).toString('hex');
+
+    await this.userModel.findByIdAndUpdate(userId, { apiKey });
+    return apiKey;
+  }
 }
