@@ -39,5 +39,5 @@ export declare class ChatController {
     chatMessages(body: ChatMessagesRequestDto, req: any, res: ExpressResponse): Promise<void>;
     testErrors(body: {
         errorType?: string;
-    }, req: any, res: ExpressResponse): Promise<void>;
+    }, res: ExpressResponse): Promise<void>;
 }

@@ -14,5 +14,4 @@
 No error found.
 
 ⚠ WARNINGS (FYI):
-[WARNING]: (test_blocking_response_mode) Error with status=[None], code=[unknown] not found in error list.
-[WARNING]: (test_missing_conversation_id) Error with status=[None], code=[unknown] not found in error list.
+No warning found.

@@ -5,7 +5,7 @@ import httpx
 from typing import Literal, List, Dict
 
 API_URL = os.getenv("API_URL")
-API_KEY = os.getenv("API_KEY")
+API_KEY = os.getenv("API_KEY") 
 USER_ID = os.getenv("USER_ID")
 QUERY = os.getenv("QUERY", "سلام")
 DEBUG_LOG_ENABLED = os.getenv("DEBUG_LOG_ENABLED", "true").lower() == "true"
