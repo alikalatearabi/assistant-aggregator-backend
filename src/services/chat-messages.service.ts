@@ -77,36 +77,38 @@ export class ChatMessagesService {
     const result = await this.proxyToExternalApi(req);
 
     if (result && typeof result === 'object' && 'event' in result && result.event === 'error') {
-      // Broadcast error event
+      // Broadcast error event with new format
       const timestamp = new Date().toISOString();
       this.gateway.broadcast({
         event: 'error',
         taskId,
         conversation_id: req.conversationId || 'unknown',
         answer: '',
-        status: result.error.status,
-        code: result.error.code,
-        message: result.error.message,
+        history: [],
+        metadata: {
+          error: {
+            status: result.error.status,
+            code: result.error.code,
+            message: result.error.message
+          }
+        },
         created_at: timestamp,
-        // Convenience aliases for clients expecting different keys
-        date: timestamp,
-        createdAt: timestamp,
       });
     } else {
       // Simulate streaming by chunking the answer
       const answer = result.answer;
       const chunks = this.chunkText(answer, 20); // Chunk by ~20 characters
 
-      // Emit start event with metadata
+      // Emit start event with new format
       const startTs = new Date().toISOString();
       this.gateway.broadcast({
         event: 'message_start',
         taskId,
         conversation_id: result.conversation_id,
-        metadata: result.metadata,
+        answer: '',
+        history: result.history || [],
+        metadata: result.metadata || {},
         created_at: startTs,
-        date: startTs,
-        createdAt: startTs,
       });
 
       // Emit chunks progressively
@@ -117,23 +119,23 @@ export class ChatMessagesService {
           event: 'message_chunk',
           taskId,
           conversation_id: result.conversation_id,
-          chunk: chunks[i],
+          answer: chunks.slice(0, i + 1).join(''), // Accumulated answer so far
+          history: result.history || [],
+          metadata: result.metadata || {},
           created_at: chunkTs,
-          date: chunkTs,
-          createdAt: chunkTs,
         });
       }
 
-      // Emit end event with history
+      // Emit end event with complete new format
       const endTs = new Date().toISOString();
       this.gateway.broadcast({
         event: 'message_end',
         taskId,
         conversation_id: result.conversation_id,
-        history: result.history,
+        answer: result.answer,
+        history: result.history || [],
+        metadata: result.metadata || {},
         created_at: endTs,
-        date: endTs,
-        createdAt: endTs,
       });
     }
 

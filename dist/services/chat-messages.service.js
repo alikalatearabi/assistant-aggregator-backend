@@ -97,12 +97,15 @@ let ChatMessagesService = ChatMessagesService_1 = class ChatMessagesService {
                 taskId,
                 conversation_id: req.conversationId || 'unknown',
                 answer: '',
-                status: result.error.status,
-                code: result.error.code,
-                message: result.error.message,
+                history: [],
+                metadata: {
+                    error: {
+                        status: result.error.status,
+                        code: result.error.code,
+                        message: result.error.message
+                    }
+                },
                 created_at: timestamp,
-                date: timestamp,
-                createdAt: timestamp,
             });
         }
         else {
@@ -113,10 +116,10 @@ let ChatMessagesService = ChatMessagesService_1 = class ChatMessagesService {
                 event: 'message_start',
                 taskId,
                 conversation_id: result.conversation_id,
-                metadata: result.metadata,
+                answer: '',
+                history: result.history || [],
+                metadata: result.metadata || {},
                 created_at: startTs,
-                date: startTs,
-                createdAt: startTs,
             });
             for (let i = 0; i < chunks.length; i++) {
                 await new Promise(resolve => setTimeout(resolve, 150));
@@ -125,10 +128,10 @@ let ChatMessagesService = ChatMessagesService_1 = class ChatMessagesService {
                     event: 'message_chunk',
                     taskId,
                     conversation_id: result.conversation_id,
-                    chunk: chunks[i],
+                    answer: chunks.slice(0, i + 1).join(''),
+                    history: result.history || [],
+                    metadata: result.metadata || {},
                     created_at: chunkTs,
-                    date: chunkTs,
-                    createdAt: chunkTs,
                 });
             }
             const endTs = new Date().toISOString();
@@ -136,10 +139,10 @@ let ChatMessagesService = ChatMessagesService_1 = class ChatMessagesService {
                 event: 'message_end',
                 taskId,
                 conversation_id: result.conversation_id,
-                history: result.history,
+                answer: result.answer,
+                history: result.history || [],
+                metadata: result.metadata || {},
                 created_at: endTs,
-                date: endTs,
-                createdAt: endTs,
             });
         }
         return { taskId };
