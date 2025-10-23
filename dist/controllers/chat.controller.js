@@ -116,71 +116,13 @@ let ChatController = class ChatController {
                 res.setHeader('Connection', 'keep-alive');
                 res.setHeader('Access-Control-Allow-Origin', '*');
                 res.setHeader('Access-Control-Allow-Headers', 'Cache-Control');
-                const taskId = `task_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-                const messageId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-                const conversationId = `conv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-                const messageEvent = {
-                    event: 'message',
-                    task_id: taskId,
-                    message_id: messageId,
-                    conversation_id: conversationId,
-                    answer: 'Processing your request...',
-                    created_at: Date.now()
-                };
-                res.write(`data: ${JSON.stringify(messageEvent)}\n\n`);
-                const messageEndEvent = {
-                    event: 'message_end',
-                    task_id: taskId,
-                    id: messageId,
-                    message_id: messageId,
-                    conversation_id: conversationId,
-                    metadata: {
-                        retriever_resources: [
-                            {
-                                position: 1,
-                                dataset_id: 'dataset_001',
-                                dataset_name: 'Knowledge Base',
-                                document_id: 'doc_001',
-                                document_name: 'Company Policies',
-                                segment_id: 'seg_001',
-                                score: 0.95,
-                                content: 'This is relevant content from the knowledge base that was retrieved to answer your question.'
-                            }
-                        ]
-                    }
-                };
-                res.write(`data: ${JSON.stringify(messageEndEvent)}\n\n`);
+                const result = await this.chatMessagesService.processStreaming(body);
+                res.write(`data: ${JSON.stringify({ event: 'task_created', taskId: result.taskId })}\n\n`);
                 res.end();
             }
             else {
-                const taskId = `task_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-                const messageId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-                const conversationId = `conv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-                const response = {
-                    event: 'message',
-                    task_id: taskId,
-                    id: messageId,
-                    message_id: messageId,
-                    conversation_id: conversationId,
-                    mode: 'blocking',
-                    answer: 'This is a mock response from the AI assistant. In a real implementation, this would contain the actual AI-generated response based on your query.',
-                    metadata: {
-                        retriever_resources: [
-                            {
-                                position: 1,
-                                dataset_id: 'dataset_001',
-                                dataset_name: 'Knowledge Base',
-                                document_id: 'doc_001',
-                                document_name: 'Company Policies',
-                                segment_id: 'seg_001',
-                                score: 0.95,
-                                content: 'This is relevant content from the knowledge base that was retrieved to answer your question.'
-                            }
-                        ]
-                    },
-                    created_at: Date.now()
-                };
-                res.status(200).json(response);
+                const result = await this.chatMessagesService.processBlocking(body);
+                res.status(200).json(result);
             }
         }
         catch (error) {

@@ -4,6 +4,7 @@ import { Message } from './message.schema';
 export type ChatDocument = Chat & MongoDocument;
 export declare class Chat {
     _id: Types.ObjectId;
+    title: string;
     user: Types.ObjectId | User;
     conversationHistory: Types.ObjectId[] | Message[];
     createdAt: Date;

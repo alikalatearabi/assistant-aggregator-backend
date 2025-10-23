@@ -55,7 +55,7 @@ async function seedUserWithApiKey() {
     const hashedPassword = await bcrypt.hash(userToSeed.password, saltRounds);
 
     // Generate API key (same format as createApiKeyForUser)
-    const apiKey = 'sk_' + crypto.randomBytes(24).toString('hex');
+    const apiKey = 'sk_9c30f5fd1bd5b69db561a4de84ca2b64bed7f89e2b1894da'
 
     // Create the user with API key
     const userDoc = {

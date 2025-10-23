@@ -17,6 +17,13 @@ export class Chat {
   _id: Types.ObjectId;
 
   @ApiProperty({
+    description: 'Chat title',
+    example: 'گفتگوی جدید',
+  })
+  @Prop({ type: String, default: 'گفتگوی جدید' })
+  title: string;
+
+  @ApiProperty({
     description: 'User who owns this chat session',
     type: String,
     example: '507f1f77bcf86cd799439012',

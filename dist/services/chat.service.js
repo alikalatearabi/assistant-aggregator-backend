@@ -36,6 +36,7 @@ let ChatService = class ChatService {
         const createdChat = new this.chatModel({
             ...createChatDto,
             user: new mongoose_2.Types.ObjectId(createChatDto.user.toString()),
+            title: createChatDto.title || 'گفتگوی جدید',
             conversationHistory: createChatDto.conversationHistory?.map(id => new mongoose_2.Types.ObjectId(id.toString())) || [],
         });
         return createdChat.save();

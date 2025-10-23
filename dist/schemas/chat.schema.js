@@ -15,6 +15,7 @@ const mongoose_2 = require("mongoose");
 const swagger_1 = require("@nestjs/swagger");
 let Chat = class Chat {
     _id;
+    title;
     user;
     conversationHistory;
     createdAt;
@@ -28,6 +29,14 @@ __decorate([
     }),
     __metadata("design:type", mongoose_2.Types.ObjectId)
 ], Chat.prototype, "_id", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Chat title',
+        example: 'گفتگوی جدید',
+    }),
+    (0, mongoose_1.Prop)({ type: String, default: 'گفتگوی جدید' }),
+    __metadata("design:type", String)
+], Chat.prototype, "title", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: 'User who owns this chat session',

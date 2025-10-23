@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsMongoId, IsArray, IsOptional } from 'class-validator';
+import { IsMongoId, IsArray, IsOptional, IsString } from 'class-validator';
 import { Types } from 'mongoose';
 
 export class CreateChatDto {
@@ -9,6 +9,14 @@ export class CreateChatDto {
   })
   @IsMongoId()
   readonly user: string | Types.ObjectId;
+
+  @ApiPropertyOptional({
+    description: 'Chat title (defaults to "گفتگوی جدید" if not provided)',
+    example: 'گفتگوی جدید',
+  })
+  @IsString()
+  @IsOptional()
+  readonly title?: string;
 
   @ApiPropertyOptional({
     description: 'Array of message IDs for initial conversation history',

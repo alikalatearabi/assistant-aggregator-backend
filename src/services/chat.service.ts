@@ -30,6 +30,7 @@ export class ChatService {
     const createdChat = new this.chatModel({
       ...createChatDto,
       user: new Types.ObjectId(createChatDto.user.toString()),
+      title: createChatDto.title || 'گفتگوی جدید', // Use provided title or default
       conversationHistory: createChatDto.conversationHistory?.map(id => new Types.ObjectId(id.toString())) || [],
     });
     

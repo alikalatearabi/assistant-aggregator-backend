@@ -1,5 +1,5 @@
 # Build stage
-FROM node:18-alpine AS builder
+FROM node:20-bullseye-slim AS builder
 
 WORKDIR /usr/src/app
 
@@ -7,7 +7,13 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Install all dependencies (including dev dependencies for building)
-RUN npm ci
+# Ensure a modern npm is available and make npm installs more resilient to transient network issues
+RUN corepack enable && \
+	npm i -g npm@11.6.2 --no-progress --no-audit && \
+	npm config set fetch-retries 5 && \
+	npm config set fetch-retry-mintimeout 20000 && \
+	npm config set fetch-retry-maxtimeout 120000 && \
+	npm ci --no-audit --no-fund
 
 # Copy source code
 COPY . .
@@ -16,7 +22,7 @@ COPY . .
 RUN npm run build
 
 # Production stage
-FROM node:18-alpine AS production
+FROM node:20-bullseye-slim AS production
 
 WORKDIR /usr/src/app
 
@@ -24,7 +30,12 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Install only production dependencies
-RUN npm ci --only=production && npm cache clean --force
+RUN corepack enable && \
+	npm i -g npm@11.6.2 --no-progress --no-audit && \
+	npm config set fetch-retries 5 && \
+	npm config set fetch-retry-mintimeout 20000 && \
+	npm config set fetch-retry-maxtimeout 120000 && \
+	npm ci --only=production --no-audit --no-fund && npm cache clean --force
 
 # Copy built application from builder stage
 COPY --from=builder /usr/src/app/dist ./dist

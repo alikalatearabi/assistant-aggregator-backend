@@ -14,6 +14,7 @@ const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
 class CreateChatDto {
     user;
+    title;
     conversationHistory;
 }
 exports.CreateChatDto = CreateChatDto;
@@ -25,6 +26,15 @@ __decorate([
     (0, class_validator_1.IsMongoId)(),
     __metadata("design:type", Object)
 ], CreateChatDto.prototype, "user", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Chat title (defaults to "گفتگوی جدید" if not provided)',
+        example: 'گفتگوی جدید',
+    }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateChatDto.prototype, "title", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({
         description: 'Array of message IDs for initial conversation history',
