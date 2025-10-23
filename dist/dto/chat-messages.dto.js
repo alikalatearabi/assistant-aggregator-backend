@@ -185,7 +185,9 @@ __decorate([
 class ChatMessageAnswerResponseDto {
     conversation_id;
     answer;
+    history;
     metadata;
+    created_at;
 }
 exports.ChatMessageAnswerResponseDto = ChatMessageAnswerResponseDto;
 __decorate([
@@ -197,9 +199,17 @@ __decorate([
     __metadata("design:type", String)
 ], ChatMessageAnswerResponseDto.prototype, "answer", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Conversation history', type: [PriorMessageDto] }),
+    __metadata("design:type", Array)
+], ChatMessageAnswerResponseDto.prototype, "history", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ description: 'Metadata', type: ChatMessagesMetadataDto }),
     __metadata("design:type", Object)
 ], ChatMessageAnswerResponseDto.prototype, "metadata", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Creation timestamp' }),
+    __metadata("design:type", String)
+], ChatMessageAnswerResponseDto.prototype, "created_at", void 0);
 class ChatMessagesErrorDto {
     status;
     code;

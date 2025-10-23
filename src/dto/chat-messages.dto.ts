@@ -129,8 +129,14 @@ export class ChatMessageAnswerResponseDto {
   @ApiProperty({ description: 'Answer content' })
   answer: string;
 
+  @ApiProperty({ description: 'Conversation history', type: [PriorMessageDto] })
+  history: PriorMessageDto[];
+
   @ApiProperty({ description: 'Metadata', type: ChatMessagesMetadataDto })
   metadata: ChatMessagesMetadataDto & { retriever_resources?: RetrieverResourceDto[] };
+
+  @ApiProperty({ description: 'Creation timestamp' })
+  created_at: string;
 }
 
 export class ChatMessagesErrorDto {

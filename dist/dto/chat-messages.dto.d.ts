@@ -37,9 +37,11 @@ export declare class RetrieverResourceDto {
 export declare class ChatMessageAnswerResponseDto {
     conversation_id: string;
     answer: string;
+    history: PriorMessageDto[];
     metadata: ChatMessagesMetadataDto & {
         retriever_resources?: RetrieverResourceDto[];
     };
+    created_at: string;
 }
 export declare class ChatMessagesErrorDto {
     status: number;

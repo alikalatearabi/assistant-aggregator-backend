@@ -399,6 +399,7 @@ export class ChatController {
           }
         }
         
+        // Return the external API response directly to frontend
         res.status(200).json(result);
       }
     } catch (error) {
