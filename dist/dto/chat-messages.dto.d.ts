@@ -1,6 +1,6 @@
 export declare class ChatMessagesInputsDto {
-    similarityThreshold?: string;
-    contextCount?: number;
+    similarityThreshold: string;
+    contextCount: number;
 }
 export declare enum ChatMessagesResponseMode {
     STREAMING = "streaming",
@@ -12,7 +12,7 @@ export declare class PriorMessageDto {
 }
 export declare class ChatMessagesRequestDto {
     query: string;
-    inputs?: ChatMessagesInputsDto;
+    inputs: ChatMessagesInputsDto;
     responseMode?: ChatMessagesResponseMode;
     response_mode?: ChatMessagesResponseMode;
     user?: string;

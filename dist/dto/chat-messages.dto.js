@@ -19,16 +19,15 @@ class ChatMessagesInputsDto {
 }
 exports.ChatMessagesInputsDto = ChatMessagesInputsDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Similarity threshold (as string)', example: '0.8', required: false }),
+    (0, swagger_1.ApiProperty)({ description: 'Similarity threshold (as string)', example: '0.8', required: true }),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], ChatMessagesInputsDto.prototype, "similarityThreshold", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Number of context items to retrieve', example: 5, required: false }),
+    (0, swagger_1.ApiProperty)({ description: 'Number of context items to retrieve', example: 5, required: true }),
     (0, class_validator_1.IsInt)(),
     (0, class_validator_1.Min)(0),
-    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
 ], ChatMessagesInputsDto.prototype, "contextCount", void 0);
 var ChatMessagesResponseMode;
@@ -70,10 +69,10 @@ __decorate([
     __metadata("design:type", String)
 ], ChatMessagesRequestDto.prototype, "query", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Inputs object', type: ChatMessagesInputsDto }),
+    (0, swagger_1.ApiProperty)({ description: 'Inputs object', type: ChatMessagesInputsDto, required: true }),
     (0, class_validator_1.ValidateNested)(),
     (0, class_transformer_1.Type)(() => ChatMessagesInputsDto),
-    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", ChatMessagesInputsDto)
 ], ChatMessagesRequestDto.prototype, "inputs", void 0);
 __decorate([

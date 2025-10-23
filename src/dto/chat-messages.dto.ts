@@ -3,16 +3,15 @@ import { IsArray, IsBoolean, IsEnum, IsMongoId, IsNotEmpty, IsObject, IsOptional
 import { Type } from 'class-transformer';
 
 export class ChatMessagesInputsDto {
-  @ApiProperty({ description: 'Similarity threshold (as string)', example: '0.8', required: false })
+  @ApiProperty({ description: 'Similarity threshold (as string)', example: '0.8', required: true })
   @IsString()
-  @IsOptional()
-  similarityThreshold?: string;
+  @IsNotEmpty()
+  similarityThreshold: string;
 
-  @ApiProperty({ description: 'Number of context items to retrieve', example: 5, required: false })
+  @ApiProperty({ description: 'Number of context items to retrieve', example: 5, required: true })
   @IsInt()
   @Min(0)
-  @IsOptional()
-  contextCount?: number;
+  contextCount: number;
 }
 
 export enum ChatMessagesResponseMode {
@@ -36,11 +35,11 @@ export class ChatMessagesRequestDto {
   @IsNotEmpty()
   query: string;
 
-  @ApiProperty({ description: 'Inputs object', type: ChatMessagesInputsDto })
+  @ApiProperty({ description: 'Inputs object', type: ChatMessagesInputsDto, required: true })
   @ValidateNested()
   @Type(() => ChatMessagesInputsDto)
-  @IsOptional()
-  inputs?: ChatMessagesInputsDto;
+  @IsNotEmpty()
+  inputs: ChatMessagesInputsDto;
 
   @ApiProperty({ description: 'Response mode', enum: ChatMessagesResponseMode, example: ChatMessagesResponseMode.BLOCKING, required: false })
   @IsEnum(ChatMessagesResponseMode)
