@@ -41,8 +41,8 @@ RUN corepack enable && \
 COPY --from=builder /usr/src/app/dist ./dist
 
 # Create non-root user for security
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nestjs -u 1001
+RUN groupadd -g 1001 nodejs
+RUN useradd -r -u 1001 -g nodejs nestjs
 
 # Change ownership of the app directory
 RUN chown -R nestjs:nodejs /usr/src/app
