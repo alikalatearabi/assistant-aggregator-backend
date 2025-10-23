@@ -23,6 +23,7 @@ const add_message_to_chat_dto_1 = require("../dto/add-message-to-chat.dto");
 const chat_schema_1 = require("../schemas/chat.schema");
 const chat_messages_dto_1 = require("../dto/chat-messages.dto");
 const chat_messages_service_1 = require("../services/chat-messages.service");
+const message_service_1 = require("../services/message.service");
 const api_key_auth_guard_1 = require("../auth/api-key-auth.guard");
 var ChatErrorCode;
 (function (ChatErrorCode) {
@@ -49,9 +50,11 @@ class ChatException extends Error {
 let ChatController = class ChatController {
     chatService;
     chatMessagesService;
-    constructor(chatService, chatMessagesService) {
+    messageService;
+    constructor(chatService, chatMessagesService, messageService) {
         this.chatService = chatService;
         this.chatMessagesService = chatMessagesService;
+        this.messageService = messageService;
     }
     async createChat(createChatDto) {
         return this.chatService.createChat(createChatDto);
@@ -110,6 +113,15 @@ let ChatController = class ChatController {
                     throw new ChatException(404, ChatErrorCode.CONVERSATION_DOES_NOT_EXIST, 'Conversation does not exist');
                 }
             }
+            const userMessage = await this.messageService.createMessage({
+                category: 'user_input',
+                text: body.query,
+                date: new Date().toISOString(),
+                score: 0
+            });
+            if (body.conversationId) {
+                await this.chatService.addMessageToChat(body.conversationId, userMessage._id.toString());
+            }
             if (responseMode === chat_messages_dto_1.ChatMessagesResponseMode.STREAMING) {
                 res.setHeader('Content-Type', 'text/event-stream');
                 res.setHeader('Cache-Control', 'no-cache');
@@ -122,6 +134,17 @@ let ChatController = class ChatController {
             }
             else {
                 const result = await this.chatMessagesService.processBlocking(body);
+                if (result && result.answer) {
+                    const assistantMessage = await this.messageService.createMessage({
+                        category: 'assistant_response',
+                        text: result.answer,
+                        date: new Date().toISOString(),
+                        score: 0
+                    });
+                    if (body.conversationId) {
+                        await this.chatService.addMessageToChat(body.conversationId, assistantMessage._id.toString());
+                    }
+                }
                 res.status(200).json(result);
             }
         }
@@ -397,6 +420,7 @@ exports.ChatController = ChatController = __decorate([
     (0, swagger_1.ApiTags)('chats'),
     (0, common_1.Controller)('chats'),
     __metadata("design:paramtypes", [chat_service_1.ChatService,
-        chat_messages_service_1.ChatMessagesService])
+        chat_messages_service_1.ChatMessagesService,
+        message_service_1.MessageService])
 ], ChatController);
 //# sourceMappingURL=chat.controller.js.map

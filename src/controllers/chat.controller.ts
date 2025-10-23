@@ -30,6 +30,7 @@ import { AddMessageToChatDto } from '../dto/add-message-to-chat.dto';
 import { Chat } from '../schemas/chat.schema';
 import { ChatMessagesRequestDto, ChatMessageAnswerResponseDto, ChatMessagesResponseMode } from '../dto/chat-messages.dto';
 import { ChatMessagesService } from '../services/chat-messages.service';
+import { MessageService } from '../services/message.service';
 import { ApiKeyAuthGuard } from '../auth/api-key-auth.guard';
 
 // Define response interfaces to match the specified schema
@@ -121,6 +122,7 @@ export class ChatController {
   constructor(
     private readonly chatService: ChatService,
     private readonly chatMessagesService: ChatMessagesService,
+    private readonly messageService: MessageService,
   ) {}
 
   @Post()
@@ -347,6 +349,19 @@ export class ChatController {
       //   throw new ChatException(randomError.status, randomError.code, randomError.message);
       // }
 
+      // Create user message record
+      const userMessage = await this.messageService.createMessage({
+        category: 'user_input',
+        text: body.query,
+        date: new Date().toISOString(),
+        score: 0
+      });
+
+      // Add user message to chat if conversationId is provided
+      if (body.conversationId) {
+        await this.chatService.addMessageToChat(body.conversationId, userMessage._id.toString());
+      }
+
       if (responseMode === ChatMessagesResponseMode.STREAMING) {
         // Handle streaming response
         res.setHeader('Content-Type', 'text/event-stream');
@@ -357,12 +372,33 @@ export class ChatController {
 
         // Call the actual service to process streaming request
         const result = await this.chatMessagesService.processStreaming(body);
+        
+        // Note: For streaming, the actual response will be sent via WebSocket
+        // We'll create the assistant message when the streaming completes
+        // This is handled in the ChatMessagesGateway
+        
         res.write(`data: ${JSON.stringify({ event: 'task_created', taskId: result.taskId })}\n\n`);
         res.end();
 
       } else {
         // Handle blocking response - call the actual service
         const result = await this.chatMessagesService.processBlocking(body);
+        
+        // Create assistant message record from the result
+        if (result && result.answer) {
+          const assistantMessage = await this.messageService.createMessage({
+            category: 'assistant_response',
+            text: result.answer,
+            date: new Date().toISOString(),
+            score: 0
+          });
+
+          // Add assistant message to chat if conversationId is provided
+          if (body.conversationId) {
+            await this.chatService.addMessageToChat(body.conversationId, assistantMessage._id.toString());
+          }
+        }
+        
         res.status(200).json(result);
       }
     } catch (error) {

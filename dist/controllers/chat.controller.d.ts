@@ -7,10 +7,12 @@ import { AddMessageToChatDto } from '../dto/add-message-to-chat.dto';
 import { Chat } from '../schemas/chat.schema';
 import { ChatMessagesRequestDto } from '../dto/chat-messages.dto';
 import { ChatMessagesService } from '../services/chat-messages.service';
+import { MessageService } from '../services/message.service';
 export declare class ChatController {
     private readonly chatService;
     private readonly chatMessagesService;
-    constructor(chatService: ChatService, chatMessagesService: ChatMessagesService);
+    private readonly messageService;
+    constructor(chatService: ChatService, chatMessagesService: ChatMessagesService, messageService: MessageService);
     createChat(createChatDto: CreateChatDto): Promise<Chat>;
     findAllChats(query: ChatQueryDto): Promise<{
         chats: Chat[];
