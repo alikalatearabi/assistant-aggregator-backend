@@ -13,6 +13,7 @@ export declare class PriorMessageDto {
 export declare class ChatMessagesRequestDto {
     query: string;
     inputs: ChatMessagesInputsDto;
+    think_level: string;
     responseMode?: ChatMessagesResponseMode;
     response_mode?: ChatMessagesResponseMode;
     user?: string;

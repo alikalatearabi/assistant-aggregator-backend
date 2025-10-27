@@ -1,4 +1,14 @@
 import { Document as MongoDocument, Types } from 'mongoose';
+export declare class RetrieverResource {
+    position: number;
+    dataset_id: string;
+    dataset_name: string;
+    document_id: string;
+    document_name: string;
+    segment_id: string;
+    score: number;
+    content: string;
+}
 export type MessageDocument = Message & MongoDocument;
 export declare class Message {
     _id: Types.ObjectId;
@@ -8,6 +18,7 @@ export declare class Message {
     score: number;
     createdAt: Date;
     updatedAt: Date;
+    retrieverResources?: RetrieverResource[];
 }
 export declare const MessageSchema: import("mongoose").Schema<Message, import("mongoose").Model<Message, any, any, any, MongoDocument<unknown, any, Message, any, {}> & Message & Required<{
     _id: Types.ObjectId;

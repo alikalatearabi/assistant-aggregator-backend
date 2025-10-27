@@ -11,6 +11,8 @@ const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
 const config_1 = require("@nestjs/config");
 const axios_1 = require("@nestjs/axios");
+const nest_winston_1 = require("nest-winston");
+const logger_config_1 = require("./config/logger.config");
 const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
 const user_schema_1 = require("./schemas/user.schema");
@@ -42,6 +44,7 @@ exports.AppModule = AppModule = __decorate([
                 isGlobal: true,
                 envFilePath: '.env',
             }),
+            nest_winston_1.WinstonModule.forRoot(logger_config_1.loggerConfig),
             axios_1.HttpModule,
             mongoose_1.MongooseModule.forRootAsync({
                 imports: [config_1.ConfigModule],

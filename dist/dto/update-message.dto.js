@@ -12,11 +12,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateMessageDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
+const create_message_dto_1 = require("./create-message.dto");
 class UpdateMessageDto {
     category;
     text;
     date;
     score;
+    retrieverResources;
 }
 exports.UpdateMessageDto = UpdateMessageDto;
 __decorate([
@@ -59,4 +62,15 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
 ], UpdateMessageDto.prototype, "score", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Retriever resources (sources used to generate the answer)',
+        type: [create_message_dto_1.RetrieverResourceDto],
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => create_message_dto_1.RetrieverResourceDto),
+    __metadata("design:type", Array)
+], UpdateMessageDto.prototype, "retrieverResources", void 0);
 //# sourceMappingURL=update-message.dto.js.map

@@ -1,5 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsOptional, IsDateString, IsNumber, Min, Max } from 'class-validator';
+import { IsString, IsOptional, IsDateString, IsNumber, Min, Max, IsArray, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+import { RetrieverResourceDto } from './create-message.dto';
 
 export class UpdateMessageDto {
   @ApiPropertyOptional({
@@ -37,4 +39,14 @@ export class UpdateMessageDto {
   @Max(1.0)
   @IsOptional()
   readonly score?: number;
+
+  @ApiPropertyOptional({
+    description: 'Retriever resources (sources used to generate the answer)',
+    type: [RetrieverResourceDto],
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => RetrieverResourceDto)
+  readonly retrieverResources?: RetrieverResourceDto[];
 }

@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
+import { WinstonModule } from 'nest-winston';
+import { loggerConfig } from './config/logger.config';
 import { AppController, UserController } from './app.controller';
 import { AppService } from './app.service';
 import { User, UserSchema } from './schemas/user.schema';
@@ -30,6 +32,7 @@ import { AuthModule } from './auth/auth.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
+    WinstonModule.forRoot(loggerConfig),
     HttpModule,
     MongooseModule.forRootAsync({
       imports: [ConfigModule],

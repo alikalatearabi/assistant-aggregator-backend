@@ -9,14 +9,67 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreateMessageDto = void 0;
+exports.CreateMessageDto = exports.RetrieverResourceDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
+class RetrieverResourceDto {
+    position;
+    dataset_id;
+    dataset_name;
+    document_id;
+    document_name;
+    segment_id;
+    score;
+    content;
+}
+exports.RetrieverResourceDto = RetrieverResourceDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Position in ranking', example: 1 }),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], RetrieverResourceDto.prototype, "position", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Dataset ID', example: '001' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], RetrieverResourceDto.prototype, "dataset_id", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Dataset name', example: 'وزارت' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], RetrieverResourceDto.prototype, "dataset_name", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Document ID', example: '1221' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], RetrieverResourceDto.prototype, "document_id", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Document name', example: 'آیین نامه نحوه تأسیس واحد های پژوهشی در دانشگاه ها' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], RetrieverResourceDto.prototype, "document_name", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Segment ID', example: '6eb1f935-3646-43f6-a18b-ff935e6ed59f' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], RetrieverResourceDto.prototype, "segment_id", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Similarity score', example: 0.6027078628540039 }),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], RetrieverResourceDto.prototype, "score", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Content snippet', example: 'آیین نامه نحوه تأسیس واحد های پژوهشی در دانشگاه ها...' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], RetrieverResourceDto.prototype, "content", void 0);
 class CreateMessageDto {
     category;
     text;
     date;
     score;
+    retrieverResources;
 }
 exports.CreateMessageDto = CreateMessageDto;
 __decorate([
@@ -59,4 +112,15 @@ __decorate([
     (0, class_validator_1.Max)(1.0),
     __metadata("design:type", Number)
 ], CreateMessageDto.prototype, "score", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Retriever resources (sources used to generate the answer)',
+        type: [RetrieverResourceDto],
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => RetrieverResourceDto),
+    __metadata("design:type", Array)
+], CreateMessageDto.prototype, "retrieverResources", void 0);
 //# sourceMappingURL=create-message.dto.js.map
