@@ -290,6 +290,7 @@ let ChatMessagesService = ChatMessagesService_1 = class ChatMessagesService {
             }
             const endTs = new Date().toISOString();
             const retrieverResources = result.metadata?.retriever_resources || [];
+            let chatId = req.conversationId || '';
             try {
                 const assistantMessage = await this.messageService.createMessage({
                     category: 'assistant_response',
@@ -300,11 +301,26 @@ let ChatMessagesService = ChatMessagesService_1 = class ChatMessagesService {
                 });
                 if (req.conversationId) {
                     await this.chatService.addMessageToChat(req.conversationId, assistantMessage._id.toString());
+                    chatId = req.conversationId;
+                }
+                else {
+                    const userMessage = await this.messageService.createMessage({
+                        category: 'user_input',
+                        text: req.query,
+                        date: new Date().toISOString(),
+                        score: 0
+                    });
+                    const newChat = await this.chatService.createChat({
+                        title: req.query.substring(0, 50) + (req.query.length > 50 ? '...' : ''),
+                        user: req.user,
+                        conversationHistory: [userMessage._id.toString(), assistantMessage._id.toString()]
+                    });
+                    chatId = newChat._id.toString();
                 }
                 this.logger.info('=== STREAMING ASSISTANT MESSAGE SAVED ===', {
                     taskId,
                     messageId: assistantMessage._id.toString(),
-                    conversationId: req.conversationId,
+                    conversationId: chatId,
                     retrieverResourcesCount: retrieverResources.length
                 });
             }
@@ -312,13 +328,13 @@ let ChatMessagesService = ChatMessagesService_1 = class ChatMessagesService {
                 this.logger.error('=== FAILED TO SAVE STREAMING ASSISTANT MESSAGE ===', {
                     taskId,
                     error: saveError?.message,
-                    conversationId: req.conversationId
+                    conversationId: req.conversationId || 'new_chat_creation_failed'
                 });
             }
             this.gateway.broadcast({
                 event: 'message_end',
                 taskId,
-                conversation_id: result.conversation_id,
+                conversation_id: chatId,
                 answer: result.answer,
                 history: result.history || [],
                 metadata: result.metadata || {},
