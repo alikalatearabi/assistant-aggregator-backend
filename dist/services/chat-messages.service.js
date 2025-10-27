@@ -264,33 +264,6 @@ let ChatMessagesService = ChatMessagesService_1 = class ChatMessagesService {
         }
         else {
             let chatId = req.conversationId || '';
-            if (!req.conversationId) {
-                try {
-                    const userMessage = await this.messageService.createMessage({
-                        category: 'user_input',
-                        text: req.query,
-                        date: new Date().toISOString(),
-                        score: 0
-                    });
-                    const newChat = await this.chatService.createChat({
-                        title: req.query.substring(0, 50) + (req.query.length > 50 ? '...' : ''),
-                        user: req.user,
-                        conversationHistory: [userMessage._id.toString()]
-                    });
-                    chatId = newChat._id.toString();
-                    this.logger.info('=== NEW CHAT CREATED FOR STREAMING ===', {
-                        taskId,
-                        chatId,
-                        userId: req.user
-                    });
-                }
-                catch (error) {
-                    this.logger.error('=== FAILED TO CREATE CHAT FOR STREAMING ===', {
-                        taskId,
-                        error: error?.message
-                    });
-                }
-            }
             const answer = result.answer;
             const chunks = this.chunkText(answer, 20);
             const startTs = new Date().toISOString();

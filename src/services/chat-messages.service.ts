@@ -278,40 +278,8 @@ export class ChatMessagesService {
         created_at: timestamp,
       });
     } else {
-      // Create chat and user message first if conversationId is not provided
+      // Use the chatId provided by the controller (which handles chat creation)
       let chatId: string = req.conversationId || '';
-      
-      if (!req.conversationId) {
-        try {
-          // Create user message first
-          const userMessage = await this.messageService.createMessage({
-            category: 'user_input',
-            text: req.query,
-            date: new Date().toISOString(),
-            score: 0
-          });
-
-          // Create new chat with user message
-          const newChat = await this.chatService.createChat({
-            title: req.query.substring(0, 50) + (req.query.length > 50 ? '...' : ''),
-            user: req.user!,
-            conversationHistory: [userMessage._id.toString()]
-          });
-
-          chatId = newChat._id.toString();
-          
-          this.logger.info('=== NEW CHAT CREATED FOR STREAMING ===', {
-            taskId,
-            chatId,
-            userId: req.user
-          });
-        } catch (error) {
-          this.logger.error('=== FAILED TO CREATE CHAT FOR STREAMING ===', {
-            taskId,
-            error: error?.message
-          });
-        }
-      }
       
       // Simulate streaming by chunking the answer
       const answer = result.answer;
