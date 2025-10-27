@@ -109,7 +109,7 @@ export class ChatService {
     
     // If userId is provided, add user validation to the query
     if (userId) {
-      query.where('user').equals(userId);
+      query.where('user').equals(new Types.ObjectId(userId));
     }
 
     const chat = await query

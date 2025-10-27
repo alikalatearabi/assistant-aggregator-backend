@@ -88,7 +88,7 @@ let ChatService = class ChatService {
         }
         const query = this.chatModel.findById(id);
         if (userId) {
-            query.where('user').equals(userId);
+            query.where('user').equals(new mongoose_2.Types.ObjectId(userId));
         }
         const chat = await query
             .populate('user', 'firstname lastname email')
