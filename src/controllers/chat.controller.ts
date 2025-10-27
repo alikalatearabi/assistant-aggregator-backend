@@ -362,9 +362,20 @@ export class ChatController {
         score: 0
       });
 
-      // Add user message to chat if conversationId is provided
+      let chatId: string;
+
       if (body.conversationId) {
+        // Add user message to existing chat
         await this.chatService.addMessageToChat(body.conversationId, userMessage._id.toString());
+        chatId = body.conversationId;
+      } else {
+        // Create new chat and add user message
+        const newChat = await this.chatService.createChat({
+          user: body.user,
+          title: body.query.substring(0, 50) + (body.query.length > 50 ? '...' : ''), // Auto-generate title from query
+          conversationHistory: [userMessage._id.toString()]
+        });
+        chatId = newChat._id.toString();
       }
 
       if (responseMode === ChatMessagesResponseMode.STREAMING) {
@@ -375,14 +386,20 @@ export class ChatController {
         res.setHeader('Access-Control-Allow-Origin', '*');
         res.setHeader('Access-Control-Allow-Headers', 'Cache-Control');
 
+        // Update the request body to include the chatId for streaming
+        const streamingBody = {
+          ...body,
+          conversationId: chatId
+        };
+
         // Call the actual service to process streaming request
-        const result = await this.chatMessagesService.processStreaming(body);
+        const result = await this.chatMessagesService.processStreaming(streamingBody);
         
         // Note: For streaming, the actual response will be sent via WebSocket
         // We'll create the assistant message when the streaming completes
         // This is handled in the ChatMessagesGateway
         
-        res.write(`data: ${JSON.stringify({ event: 'task_created', taskId: result.taskId })}\n\n`);
+        res.write(`data: ${JSON.stringify({ event: 'task_created', taskId: result.taskId, conversation_id: chatId })}\n\n`);
         res.end();
 
       } else {
@@ -402,14 +419,16 @@ export class ChatController {
             retrieverResources: retrieverResources
           });
 
-          // Add assistant message to chat if conversationId is provided
-          if (body.conversationId) {
-            await this.chatService.addMessageToChat(body.conversationId, assistantMessage._id.toString());
-          }
+          // Add assistant message to chat
+          await this.chatService.addMessageToChat(chatId, assistantMessage._id.toString());
         }
         
-        // Return the external API response directly to frontend
-        res.status(200).json(result);
+        // Return the external API response with chatId included
+        const response = {
+          ...result,
+          conversation_id: chatId
+        };
+        res.status(200).json(response);
       }
     } catch (error) {
       if (error instanceof ChatException) {

@@ -26,6 +26,7 @@ const winston_1 = require("winston");
 const logger_config_1 = require("../config/logger.config");
 const message_service_1 = require("./message.service");
 const chat_service_1 = require("./chat.service");
+const https_1 = __importDefault(require("https"));
 let ChatMessagesService = ChatMessagesService_1 = class ChatMessagesService {
     gateway;
     winstonLogger;
@@ -43,7 +44,7 @@ let ChatMessagesService = ChatMessagesService_1 = class ChatMessagesService {
         const loginUrl = 'https://test1.nlp-lab.ir/auth/login';
         const username = 'kalate';
         const password = '12';
-        const loginData = `grant_type=password&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&scope=&client_id=&client_secret=`;
+        const loginData = `grant_type=password&username=${(username)}&password=${(password)}&scope=&client_id=&client_secret=`;
         const loginHeaders = {
             'accept': 'application/json',
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -62,6 +63,7 @@ let ChatMessagesService = ChatMessagesService_1 = class ChatMessagesService {
         const axiosConfig = {
             timeout: 60000,
             headers: loginHeaders,
+            httpsAgent: new https_1.default.Agent({ rejectUnauthorized: false }),
             maxRedirects: 5,
             validateStatus: (status) => status < 500,
         };

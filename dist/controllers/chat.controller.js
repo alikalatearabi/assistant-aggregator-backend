@@ -122,8 +122,18 @@ let ChatController = class ChatController {
                 date: new Date().toISOString(),
                 score: 0
             });
+            let chatId;
             if (body.conversationId) {
                 await this.chatService.addMessageToChat(body.conversationId, userMessage._id.toString());
+                chatId = body.conversationId;
+            }
+            else {
+                const newChat = await this.chatService.createChat({
+                    user: body.user,
+                    title: body.query.substring(0, 50) + (body.query.length > 50 ? '...' : ''),
+                    conversationHistory: [userMessage._id.toString()]
+                });
+                chatId = newChat._id.toString();
             }
             if (responseMode === chat_messages_dto_1.ChatMessagesResponseMode.STREAMING) {
                 res.setHeader('Content-Type', 'text/event-stream');
@@ -131,8 +141,12 @@ let ChatController = class ChatController {
                 res.setHeader('Connection', 'keep-alive');
                 res.setHeader('Access-Control-Allow-Origin', '*');
                 res.setHeader('Access-Control-Allow-Headers', 'Cache-Control');
-                const result = await this.chatMessagesService.processStreaming(body);
-                res.write(`data: ${JSON.stringify({ event: 'task_created', taskId: result.taskId })}\n\n`);
+                const streamingBody = {
+                    ...body,
+                    conversationId: chatId
+                };
+                const result = await this.chatMessagesService.processStreaming(streamingBody);
+                res.write(`data: ${JSON.stringify({ event: 'task_created', taskId: result.taskId, conversation_id: chatId })}\n\n`);
                 res.end();
             }
             else {
@@ -146,11 +160,13 @@ let ChatController = class ChatController {
                         score: 0,
                         retrieverResources: retrieverResources
                     });
-                    if (body.conversationId) {
-                        await this.chatService.addMessageToChat(body.conversationId, assistantMessage._id.toString());
-                    }
+                    await this.chatService.addMessageToChat(chatId, assistantMessage._id.toString());
                 }
-                res.status(200).json(result);
+                const response = {
+                    ...result,
+                    conversation_id: chatId
+                };
+                res.status(200).json(response);
             }
         }
         catch (error) {
