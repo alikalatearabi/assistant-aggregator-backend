@@ -263,13 +263,41 @@ let ChatMessagesService = ChatMessagesService_1 = class ChatMessagesService {
             });
         }
         else {
+            let chatId = req.conversationId || '';
+            if (!req.conversationId) {
+                try {
+                    const userMessage = await this.messageService.createMessage({
+                        category: 'user_input',
+                        text: req.query,
+                        date: new Date().toISOString(),
+                        score: 0
+                    });
+                    const newChat = await this.chatService.createChat({
+                        title: req.query.substring(0, 50) + (req.query.length > 50 ? '...' : ''),
+                        user: req.user,
+                        conversationHistory: [userMessage._id.toString()]
+                    });
+                    chatId = newChat._id.toString();
+                    this.logger.info('=== NEW CHAT CREATED FOR STREAMING ===', {
+                        taskId,
+                        chatId,
+                        userId: req.user
+                    });
+                }
+                catch (error) {
+                    this.logger.error('=== FAILED TO CREATE CHAT FOR STREAMING ===', {
+                        taskId,
+                        error: error?.message
+                    });
+                }
+            }
             const answer = result.answer;
             const chunks = this.chunkText(answer, 20);
             const startTs = new Date().toISOString();
             this.gateway.broadcast({
                 event: 'message_start',
                 taskId,
-                conversation_id: result.conversation_id,
+                conversation_id: chatId,
                 answer: '',
                 history: result.history || [],
                 metadata: result.metadata || {},
@@ -281,7 +309,7 @@ let ChatMessagesService = ChatMessagesService_1 = class ChatMessagesService {
                 this.gateway.broadcast({
                     event: 'message_chunk',
                     taskId,
-                    conversation_id: result.conversation_id,
+                    conversation_id: chatId,
                     answer: chunks.slice(0, i + 1).join(''),
                     history: result.history || [],
                     metadata: result.metadata || {},
@@ -290,7 +318,6 @@ let ChatMessagesService = ChatMessagesService_1 = class ChatMessagesService {
             }
             const endTs = new Date().toISOString();
             const retrieverResources = result.metadata?.retriever_resources || [];
-            let chatId = req.conversationId || '';
             try {
                 const assistantMessage = await this.messageService.createMessage({
                     category: 'assistant_response',
@@ -299,24 +326,7 @@ let ChatMessagesService = ChatMessagesService_1 = class ChatMessagesService {
                     score: 0,
                     retrieverResources: retrieverResources
                 });
-                if (req.conversationId) {
-                    await this.chatService.addMessageToChat(req.conversationId, assistantMessage._id.toString());
-                    chatId = req.conversationId;
-                }
-                else {
-                    const userMessage = await this.messageService.createMessage({
-                        category: 'user_input',
-                        text: req.query,
-                        date: new Date().toISOString(),
-                        score: 0
-                    });
-                    const newChat = await this.chatService.createChat({
-                        title: req.query.substring(0, 50) + (req.query.length > 50 ? '...' : ''),
-                        user: req.user,
-                        conversationHistory: [userMessage._id.toString(), assistantMessage._id.toString()]
-                    });
-                    chatId = newChat._id.toString();
-                }
+                await this.chatService.addMessageToChat(chatId, assistantMessage._id.toString());
                 this.logger.info('=== STREAMING ASSISTANT MESSAGE SAVED ===', {
                     taskId,
                     messageId: assistantMessage._id.toString(),

@@ -278,6 +278,41 @@ export class ChatMessagesService {
         created_at: timestamp,
       });
     } else {
+      // Create chat and user message first if conversationId is not provided
+      let chatId: string = req.conversationId || '';
+      
+      if (!req.conversationId) {
+        try {
+          // Create user message first
+          const userMessage = await this.messageService.createMessage({
+            category: 'user_input',
+            text: req.query,
+            date: new Date().toISOString(),
+            score: 0
+          });
+
+          // Create new chat with user message
+          const newChat = await this.chatService.createChat({
+            title: req.query.substring(0, 50) + (req.query.length > 50 ? '...' : ''),
+            user: req.user!,
+            conversationHistory: [userMessage._id.toString()]
+          });
+
+          chatId = newChat._id.toString();
+          
+          this.logger.info('=== NEW CHAT CREATED FOR STREAMING ===', {
+            taskId,
+            chatId,
+            userId: req.user
+          });
+        } catch (error) {
+          this.logger.error('=== FAILED TO CREATE CHAT FOR STREAMING ===', {
+            taskId,
+            error: error?.message
+          });
+        }
+      }
+      
       // Simulate streaming by chunking the answer
       const answer = result.answer;
       const chunks = this.chunkText(answer, 20); // Chunk by ~20 characters
@@ -287,7 +322,7 @@ export class ChatMessagesService {
       this.gateway.broadcast({
         event: 'message_start',
         taskId,
-        conversation_id: result.conversation_id,
+        conversation_id: chatId,
         answer: '',
         history: result.history || [],
         metadata: result.metadata || {},
@@ -301,7 +336,7 @@ export class ChatMessagesService {
         this.gateway.broadcast({
           event: 'message_chunk',
           taskId,
-          conversation_id: result.conversation_id,
+          conversation_id: chatId,
           answer: chunks.slice(0, i + 1).join(''), // Accumulated answer so far
           history: result.history || [],
           metadata: result.metadata || {},
@@ -315,8 +350,6 @@ export class ChatMessagesService {
       // Extract retriever resources if they exist
       const retrieverResources = result.metadata?.retriever_resources || [];
       
-      let chatId: string = req.conversationId || '';
-      
       // Save assistant message to database with retriever resources
       try {
         const assistantMessage = await this.messageService.createMessage({
@@ -327,27 +360,8 @@ export class ChatMessagesService {
           retrieverResources: retrieverResources
         });
 
-        if (req.conversationId) {
-          // Add assistant message to existing chat
-          await this.chatService.addMessageToChat(req.conversationId, assistantMessage._id.toString());
-          chatId = req.conversationId;
-        } else {
-          // Create new chat and add both user and assistant messages
-          const userMessage = await this.messageService.createMessage({
-            category: 'user_input',
-            text: req.query,
-            date: new Date().toISOString(),
-            score: 0
-          });
-
-          const newChat = await this.chatService.createChat({
-            title: req.query.substring(0, 50) + (req.query.length > 50 ? '...' : ''),
-            user: req.user!,
-            conversationHistory: [userMessage._id.toString(), assistantMessage._id.toString()]
-          });
-
-          chatId = newChat._id.toString();
-        }
+        // Add assistant message to the chat (which was created before streaming started)
+        await this.chatService.addMessageToChat(chatId, assistantMessage._id.toString());
 
         this.logger.info('=== STREAMING ASSISTANT MESSAGE SAVED ===', {
           taskId,
