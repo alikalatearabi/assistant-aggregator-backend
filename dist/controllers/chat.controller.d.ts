@@ -32,7 +32,7 @@ export declare class ChatController {
         activeSessions: number;
     }>;
     findChatsByUser(userId: string): Promise<Chat[]>;
-    findChatById(id: string): Promise<Chat>;
+    findChatById(id: string, userId: string): Promise<Chat>;
     getChatMessageHistory(id: string): Promise<any[]>;
     updateChat(id: string, updateChatDto: UpdateChatDto): Promise<Chat>;
     addMessageToChat(id: string, addMessageDto: AddMessageToChatDto): Promise<Chat>;

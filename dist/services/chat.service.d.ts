@@ -14,7 +14,7 @@ export declare class ChatService {
         limit: number;
         totalPages: number;
     }>;
-    findChatById(id: string): Promise<Chat>;
+    findChatById(id: string, userId?: string): Promise<Chat>;
     findChatsByUser(userId: string): Promise<Chat[]>;
     updateChat(id: string, updateChatDto: UpdateChatDto): Promise<Chat>;
     deleteChat(id: string): Promise<Chat>;

@@ -96,13 +96,23 @@ export class ChatService {
     };
   }
 
-  async findChatById(id: string): Promise<Chat> {
+  async findChatById(id: string, userId?: string): Promise<Chat> {
     if (!Types.ObjectId.isValid(id)) {
       throw new BadRequestException('Invalid chat ID');
     }
 
-    const chat = await this.chatModel
-      .findById(id)
+    if (userId && !Types.ObjectId.isValid(userId)) {
+      throw new BadRequestException('Invalid user ID');
+    }
+
+    const query = this.chatModel.findById(id);
+    
+    // If userId is provided, add user validation to the query
+    if (userId) {
+      query.where('user').equals(userId);
+    }
+
+    const chat = await query
       .populate('user', 'firstname lastname email')
       .populate({
         path: 'conversationHistory',
@@ -112,7 +122,7 @@ export class ChatService {
       .exec();
     
     if (!chat) {
-      throw new NotFoundException('Chat not found');
+      throw new NotFoundException('Chat not found or user does not have access to this chat');
     }
     
     return chat;

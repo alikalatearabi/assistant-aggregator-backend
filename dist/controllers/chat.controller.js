@@ -68,8 +68,8 @@ let ChatController = class ChatController {
     async findChatsByUser(userId) {
         return this.chatService.findChatsByUser(userId);
     }
-    async findChatById(id) {
-        return this.chatService.findChatById(id);
+    async findChatById(id, userId) {
+        return this.chatService.findChatById(id, userId);
     }
     async getChatMessageHistory(id) {
         return this.chatService.getChatMessageHistory(id);
@@ -318,10 +318,29 @@ __decorate([
 ], ChatController.prototype, "findChatsByUser", null);
 __decorate([
     (0, common_1.Get)(':id'),
-    (0, swagger_1.ApiExcludeEndpoint)(),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Get a specific chat by ID',
+        description: 'Retrieves a single chat with full conversation history including retriever resources',
+    }),
+    (0, swagger_1.ApiParam)({ name: 'id', description: 'Chat ID', example: '507f1f77bcf86cd799439011' }),
+    (0, swagger_1.ApiQuery)({ name: 'user', required: true, description: 'User ID to verify ownership', example: '507f1f77bcf86cd799439012' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Chat retrieved successfully',
+        type: chat_schema_1.Chat,
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 404,
+        description: 'Chat not found or user does not have access to this chat',
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 400,
+        description: 'Bad Request - Invalid chat ID or user ID',
+    }),
     __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Query)('user')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], ChatController.prototype, "findChatById", null);
 __decorate([

@@ -79,12 +79,18 @@ let ChatService = class ChatService {
             totalPages,
         };
     }
-    async findChatById(id) {
+    async findChatById(id, userId) {
         if (!mongoose_2.Types.ObjectId.isValid(id)) {
             throw new common_1.BadRequestException('Invalid chat ID');
         }
-        const chat = await this.chatModel
-            .findById(id)
+        if (userId && !mongoose_2.Types.ObjectId.isValid(userId)) {
+            throw new common_1.BadRequestException('Invalid user ID');
+        }
+        const query = this.chatModel.findById(id);
+        if (userId) {
+            query.where('user').equals(userId);
+        }
+        const chat = await query
             .populate('user', 'firstname lastname email')
             .populate({
             path: 'conversationHistory',
@@ -93,7 +99,7 @@ let ChatService = class ChatService {
         })
             .exec();
         if (!chat) {
-            throw new common_1.NotFoundException('Chat not found');
+            throw new common_1.NotFoundException('Chat not found or user does not have access to this chat');
         }
         return chat;
     }

@@ -189,9 +189,30 @@ export class ChatController {
   // Session-based retrieval endpoint removed
 
   @Get(':id')
-  @ApiExcludeEndpoint()
-  async findChatById(@Param('id') id: string): Promise<Chat> {
-    return this.chatService.findChatById(id);
+  @ApiOperation({
+    summary: 'Get a specific chat by ID',
+    description: 'Retrieves a single chat with full conversation history including retriever resources',
+  })
+  @ApiParam({ name: 'id', description: 'Chat ID', example: '507f1f77bcf86cd799439011' })
+  @ApiQuery({ name: 'user', required: true, description: 'User ID to verify ownership', example: '507f1f77bcf86cd799439012' })
+  @ApiResponse({
+    status: 200,
+    description: 'Chat retrieved successfully',
+    type: Chat,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Chat not found or user does not have access to this chat',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request - Invalid chat ID or user ID',
+  })
+  async findChatById(
+    @Param('id') id: string,
+    @Query('user') userId: string
+  ): Promise<Chat> {
+    return this.chatService.findChatById(id, userId);
   }
 
   @Get(':id/messages')
