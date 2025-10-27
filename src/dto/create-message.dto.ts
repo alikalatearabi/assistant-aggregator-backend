@@ -1,5 +1,41 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsDateString, IsNumber, Min, Max, IsIn } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsString, IsNotEmpty, IsDateString, IsNumber, Min, Max, IsIn, IsOptional, IsArray, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+import { RetrieverResource } from '../schemas/message.schema';
+
+export class RetrieverResourceDto implements RetrieverResource {
+  @ApiProperty({ description: 'Position in ranking', example: 1 })
+  @IsNumber()
+  position: number;
+
+  @ApiProperty({ description: 'Dataset ID', example: '001' })
+  @IsString()
+  dataset_id: string;
+
+  @ApiProperty({ description: 'Dataset name', example: 'وزارت' })
+  @IsString()
+  dataset_name: string;
+
+  @ApiProperty({ description: 'Document ID', example: '1221' })
+  @IsString()
+  document_id: string;
+
+  @ApiProperty({ description: 'Document name', example: 'آیین نامه نحوه تأسیس واحد های پژوهشی در دانشگاه ها' })
+  @IsString()
+  document_name: string;
+
+  @ApiProperty({ description: 'Segment ID', example: '6eb1f935-3646-43f6-a18b-ff935e6ed59f' })
+  @IsString()
+  segment_id: string;
+
+  @ApiProperty({ description: 'Similarity score', example: 0.6027078628540039 })
+  @IsNumber()
+  score: number;
+
+  @ApiProperty({ description: 'Content snippet', example: 'آیین نامه نحوه تأسیس واحد های پژوهشی در دانشگاه ها...' })
+  @IsString()
+  content: string;
+}
 
 export class CreateMessageDto {
   @ApiProperty({
@@ -37,4 +73,14 @@ export class CreateMessageDto {
   @Min(-1.0)
   @Max(1.0)
   readonly score: number;
+
+  @ApiPropertyOptional({
+    description: 'Retriever resources (sources used to generate the answer)',
+    type: [RetrieverResourceDto],
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => RetrieverResourceDto)
+  readonly retrieverResources?: RetrieverResourceDto[];
 }

@@ -2,6 +2,33 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document as MongoDocument, Types } from 'mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 
+// Define the RetrieverResource schema
+export class RetrieverResource {
+  @ApiProperty({ description: 'Position in ranking', example: 1 })
+  position: number;
+
+  @ApiProperty({ description: 'Dataset ID', example: '001' })
+  dataset_id: string;
+
+  @ApiProperty({ description: 'Dataset name', example: 'وزارت' })
+  dataset_name: string;
+
+  @ApiProperty({ description: 'Document ID', example: '1221' })
+  document_id: string;
+
+  @ApiProperty({ description: 'Document name', example: 'آیین نامه نحوه تأسیس واحد های پژوهشی در دانشگاه ها' })
+  document_name: string;
+
+  @ApiProperty({ description: 'Segment ID', example: '6eb1f935-3646-43f6-a18b-ff935e6ed59f' })
+  segment_id: string;
+
+  @ApiProperty({ description: 'Similarity score', example: 0.6027078628540039 })
+  score: number;
+
+  @ApiProperty({ description: 'Content snippet', example: 'آیین نامه نحوه تأسیس واحد های پژوهشی در دانشگاه ها...' })
+  content: string;
+}
+
 export type MessageDocument = Message & MongoDocument;
 
 @Schema({
@@ -68,6 +95,14 @@ export class Message {
   })
   @Prop({ type: Date, default: Date.now })
   updatedAt: Date;
+
+  @ApiProperty({
+    description: 'Retriever resources (sources used to generate the answer)',
+    type: [RetrieverResource],
+    required: false,
+  })
+  @Prop({ type: Array, default: [] })
+  retrieverResources?: RetrieverResource[];
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message);

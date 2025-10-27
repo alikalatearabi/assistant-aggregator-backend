@@ -79,7 +79,7 @@ export class ChatService {
       .populate('user', 'firstname lastname email')
       .populate({
         path: 'conversationHistory',
-        select: 'category text date score',
+        select: 'category text date score retrieverResources',
         options: { sort: { date: 1 } }
       })
       .sort({ createdAt: -1 })
@@ -106,7 +106,7 @@ export class ChatService {
       .populate('user', 'firstname lastname email')
       .populate({
         path: 'conversationHistory',
-        select: 'category text date score',
+        select: 'category text date score retrieverResources',
         options: { sort: { date: 1 } }
       })
       .exec();
@@ -128,7 +128,7 @@ export class ChatService {
       .populate('user', 'firstname lastname email')
       .populate({
         path: 'conversationHistory',
-        select: 'category text date score',
+        select: 'category text date score retrieverResources',
         options: { sort: { date: 1 } }
       })
       .sort({ createdAt: -1 })
@@ -168,7 +168,7 @@ export class ChatService {
       .populate('user', 'firstname lastname email')
       .populate({
         path: 'conversationHistory',
-        select: 'category text date score',
+        select: 'category text date score retrieverResources',
         options: { sort: { date: 1 } }
       })
       .exec();
@@ -190,7 +190,7 @@ export class ChatService {
       .populate('user', 'firstname lastname email')
       .populate({
         path: 'conversationHistory',
-        select: 'category text date score',
+        select: 'category text date score retrieverResources',
         options: { sort: { date: 1 } }
       })
       .exec();
@@ -220,7 +220,7 @@ export class ChatService {
       .populate('user', 'firstname lastname email')
       .populate({
         path: 'conversationHistory',
-        select: 'category text date score',
+        select: 'category text date score retrieverResources',
         options: { sort: { date: 1 } }
       })
       .exec();
@@ -250,7 +250,7 @@ export class ChatService {
       .populate('user', 'firstname lastname email')
       .populate({
         path: 'conversationHistory',
-        select: 'category text date score',
+        select: 'category text date score retrieverResources',
         options: { sort: { date: 1 } }
       })
       .exec();
@@ -271,7 +271,7 @@ export class ChatService {
       .populate('user', 'firstname lastname email')
       .populate({
         path: 'conversationHistory',
-        select: 'category text date score',
+        select: 'category text date score retrieverResources',
         options: { sort: { date: 1 } }
       })
       .sort({ createdAt: -1 })
@@ -329,7 +329,7 @@ export class ChatService {
       .findById(chatId)
       .populate({
         path: 'conversationHistory',
-        select: 'category text date score createdAt',
+        select: 'category text date score retrieverResources createdAt',
         options: { sort: { date: 1 } }
       })
       .exec();
