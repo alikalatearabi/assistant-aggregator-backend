@@ -14,6 +14,11 @@ services:
       - ./mongo-init:/docker-entrypoint-initdb.d
     networks:
       - assistant-aggregator-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   minio:
     image: minio/minio:latest
@@ -82,6 +87,38 @@ services:
       - elasticsearch
     networks:
       - assistant-aggregator-network
+
+  seed:
+    image: node:20-bullseye-slim
+    container_name: assistant-aggregator-seed
+    working_dir: /app
+    environment:
+      MONGO_URI: mongodb://admin:password123@mongodb:27017/assistant_aggregator?authSource=admin
+      MINIO_ENDPOINT: minio
+      MINIO_PORT: 9000
+      MINIO_USE_SSL: 'false'
+      BUCKET: assistant-aggregator
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: >
+      sh -c "
+        echo '📦 Installing dependencies...' &&
+        npm ci --no-audit --no-fund &&
+        echo '⏳ Waiting for MongoDB to be ready...' &&
+        node scripts/wait-for-mongo.js &&
+        echo '🌱 Running seed scripts...' &&
+        node scripts/seed-all.js &&
+        echo '✅ Seeding completed successfully!'
+      "
+    depends_on:
+      mongodb:
+        condition: service_started
+      minio:
+        condition: service_started
+    networks:
+      - assistant-aggregator-network
+    restart: "no"  # Don't restart after completion
 
 volumes:
   mongodb_data:
