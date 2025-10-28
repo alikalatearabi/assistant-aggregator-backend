@@ -263,7 +263,7 @@ let ChatMessagesService = ChatMessagesService_1 = class ChatMessagesService {
             });
         }
         else {
-            let chatId = req.conversationId || '';
+            let chatId = (req.conversationId && req.conversationId !== 'new') ? req.conversationId : '';
             const answer = result.answer;
             const chunks = this.chunkText(answer, 20);
             const startTs = new Date().toISOString();

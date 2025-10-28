@@ -123,7 +123,7 @@ let ChatController = class ChatController {
                 score: 0
             });
             let chatId;
-            if (body.conversationId) {
+            if (body.conversationId && body.conversationId !== 'new') {
                 await this.chatService.addMessageToChat(body.conversationId, userMessage._id.toString());
                 chatId = body.conversationId;
             }

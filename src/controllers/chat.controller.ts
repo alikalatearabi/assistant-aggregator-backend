@@ -385,12 +385,12 @@ export class ChatController {
 
       let chatId: string;
 
-      if (body.conversationId) {
+      if (body.conversationId && body.conversationId !== 'new') {
         // Add user message to existing chat
         await this.chatService.addMessageToChat(body.conversationId, userMessage._id.toString());
         chatId = body.conversationId;
       } else {
-        // Create new chat and add user message
+        // Create new chat and add user message (conversationId is empty, null, or "new")
         const newChat = await this.chatService.createChat({
           user: body.user,
           title: body.query.substring(0, 50) + (body.query.length > 50 ? '...' : ''), // Auto-generate title from query

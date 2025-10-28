@@ -279,7 +279,8 @@ export class ChatMessagesService {
       });
     } else {
       // Use the chatId provided by the controller (which handles chat creation)
-      let chatId: string = req.conversationId || '';
+      // Handle special case where conversationId is "new" (treat as empty)
+      let chatId: string = (req.conversationId && req.conversationId !== 'new') ? req.conversationId : '';
       
       // Simulate streaming by chunking the answer
       const answer = result.answer;
