@@ -18,12 +18,18 @@ const common_1 = require("@nestjs/common");
 const websockets_1 = require("@nestjs/websockets");
 const socket_io_1 = require("socket.io");
 const chat_messages_service_1 = require("../services/chat-messages.service");
+const message_service_1 = require("../services/message.service");
+const chat_service_1 = require("../services/chat.service");
 let ChatMessagesGateway = ChatMessagesGateway_1 = class ChatMessagesGateway {
     chatMessagesService;
+    messageService;
+    chatService;
     logger = new common_1.Logger(ChatMessagesGateway_1.name);
     server;
-    constructor(chatMessagesService) {
+    constructor(chatMessagesService, messageService, chatService) {
         this.chatMessagesService = chatMessagesService;
+        this.messageService = messageService;
+        this.chatService = chatService;
     }
     handleConnection(client) {
         this.logger.log(`Client connected to chat-messages WS: ${client.id}`);
@@ -35,7 +41,30 @@ let ChatMessagesGateway = ChatMessagesGateway_1 = class ChatMessagesGateway {
         try {
             this.logger.log(`Received chat_request from client ${client.id} responseMode=${payload?.responseMode}`);
             if (payload?.responseMode === 'streaming') {
-                await this.chatMessagesService.processStreaming(payload);
+                const userMessage = await this.messageService.createMessage({
+                    category: 'user_input',
+                    text: payload.query,
+                    date: new Date().toISOString(),
+                    score: 0
+                });
+                let chatId;
+                if (payload.conversationId && payload.conversationId !== 'new') {
+                    await this.chatService.addMessageToChat(payload.conversationId, userMessage._id.toString());
+                    chatId = payload.conversationId;
+                }
+                else {
+                    const newChat = await this.chatService.createChat({
+                        user: payload.user,
+                        title: payload.query.substring(0, 50) + (payload.query.length > 50 ? '...' : ''),
+                        conversationHistory: [userMessage._id.toString()]
+                    });
+                    chatId = newChat._id.toString();
+                }
+                const streamingPayload = {
+                    ...payload,
+                    conversationId: chatId
+                };
+                await this.chatMessagesService.processStreaming(streamingPayload);
                 return { status: 'accepted' };
             }
             const result = await this.chatMessagesService.processBlocking(payload);
@@ -68,6 +97,8 @@ __decorate([
 exports.ChatMessagesGateway = ChatMessagesGateway = ChatMessagesGateway_1 = __decorate([
     (0, websockets_1.WebSocketGateway)({ namespace: '/chat-messages', cors: true }),
     __param(0, (0, common_1.Inject)((0, common_1.forwardRef)(() => chat_messages_service_1.ChatMessagesService))),
-    __metadata("design:paramtypes", [chat_messages_service_1.ChatMessagesService])
+    __metadata("design:paramtypes", [chat_messages_service_1.ChatMessagesService,
+        message_service_1.MessageService,
+        chat_service_1.ChatService])
 ], ChatMessagesGateway);
 //# sourceMappingURL=chat-messages.gateway.js.map

@@ -385,39 +385,18 @@ export class ChatController {
 
       let chatId: string;
 
-      console.log('=== CHAT CREATION DEBUG ===', {
-        conversationId: body.conversationId,
-        hasConversationId: !!body.conversationId,
-        isNew: body.conversationId === 'new',
-        userMessageId: userMessage._id.toString(),
-        query: body.query.substring(0, 50)
-      });
-
       if (body.conversationId && body.conversationId !== 'new') {
         // Add user message to existing chat
-        console.log('=== ADDING TO EXISTING CHAT ===', {
-          conversationId: body.conversationId,
-          userMessageId: userMessage._id.toString()
-        });
         await this.chatService.addMessageToChat(body.conversationId, userMessage._id.toString());
         chatId = body.conversationId;
       } else {
         // Create new chat and add user message (conversationId is empty, null, or "new")
-        console.log('=== CREATING NEW CHAT ===', {
-          user: body.user,
-          userMessageId: userMessage._id.toString(),
-          title: body.query.substring(0, 50) + (body.query.length > 50 ? '...' : '')
-        });
         const newChat = await this.chatService.createChat({
           user: body.user,
           title: body.query.substring(0, 50) + (body.query.length > 50 ? '...' : ''), // Auto-generate title from query
           conversationHistory: [userMessage._id.toString()]
         });
         chatId = newChat._id.toString();
-        console.log('=== NEW CHAT CREATED ===', {
-          chatId: chatId,
-          conversationHistoryLength: 1
-        });
       }
 
       if (responseMode === ChatMessagesResponseMode.STREAMING) {
