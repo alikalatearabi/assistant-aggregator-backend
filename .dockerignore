@@ -106,7 +106,7 @@ test/
 *.test.ts
 
 # Scripts
-scripts/
+#scripts/
 
 # MongoDB data
 mongo-init/

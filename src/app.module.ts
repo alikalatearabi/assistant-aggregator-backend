@@ -37,7 +37,7 @@ import { AuthModule } from './auth/auth.module';
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>('MONGODB_URI') || 'mongodb://admin:password123@localhost:27017/assistant_aggregator?authSource=admin',
+        uri: configService.get<string>('MONGO_URI') || 'mongodb://admin:password123@localhost:27017/assistant_aggregator?authSource=admin',
       }),
       inject: [ConfigService],
     }),

@@ -39,7 +39,7 @@ RUN corepack enable && \
 
 # Copy built application from builder stage
 COPY --from=builder /usr/src/app/dist ./dist
-
+COPY --from=builder /usr/src/app/scripts ./scripts
 # Create non-root user for security
 RUN groupadd -g 1001 nodejs
 RUN useradd -r -u 1001 -g nodejs nestjs

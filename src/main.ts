@@ -43,8 +43,8 @@ async function bootstrap() {
   // Enable CORS for development
   app.enableCors();
 
-  await app.listen(process.env.PORT ?? 3000);
-  console.log(`Application is running on: http://localhost:${process.env.PORT ?? 3000}`);
-  console.log(`Swagger documentation available at: http://localhost:${process.env.PORT ?? 3000}/api/docs`);
+  await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
+  console.log(`Application is running on: http://0.0.0.0:${process.env.PORT ?? 3000}`);
+  console.log(`Swagger documentation available at: http://0.0.0.0:${process.env.PORT ?? 3000}/api/docs`);
 }
 bootstrap();
