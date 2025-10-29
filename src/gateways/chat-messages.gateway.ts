@@ -4,12 +4,10 @@ import { Server, Socket } from 'socket.io';
 import { ChatMessagesService } from '../services/chat-messages.service';
 import { MessageService } from '../services/message.service';
 import { ChatService } from '../services/chat.service';
-import { ConfigService } from '@nestjs/config';
 
 @WebSocketGateway({ namespace: '/chat-messages', cors: true })
 export class ChatMessagesGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private readonly logger = new Logger(ChatMessagesGateway.name);
-  private readonly namespace: string;
 
   @WebSocketServer()
   server: Server;
@@ -17,12 +15,8 @@ export class ChatMessagesGateway implements OnGatewayConnection, OnGatewayDiscon
   constructor(
     @Inject(forwardRef(() => ChatMessagesService)) private readonly chatMessagesService: ChatMessagesService,
     private readonly messageService: MessageService,
-    private readonly chatService: ChatService,
-    private readonly configService: ConfigService,
-  ) {
-    this.namespace = this.configService.get<string>('CHAT_WS_NAMESPACE') || '/chat-messages';
-    this.logger.log(`WebSocket namespace set to: ${this.namespace}`);
-  }
+    private readonly chatService: ChatService
+  ) {}
 
   handleConnection(client: Socket) {
     this.logger.log(`Client connected to chat-messages WS: ${client.id}`);
@@ -65,6 +59,7 @@ export class ChatMessagesGateway implements OnGatewayConnection, OnGatewayDiscon
         await this.chatMessagesService.processStreaming(streamingPayload);
         return { status: 'accepted' };
       }
+
       const result = await this.chatMessagesService.processBlocking(payload);
       client.emit('chat-messages', result);
       return { status: 'ok' };
