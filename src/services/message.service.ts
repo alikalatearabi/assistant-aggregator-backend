@@ -13,7 +13,6 @@ export class MessageService {
   ) {}
 
   async createMessage(createMessageDto: CreateMessageDto): Promise<Message> {
-    // Validate score range
     if (createMessageDto.score < -1.0 || createMessageDto.score > 1.0) {
       throw new BadRequestException('Score must be between -1.0 and 1.0');
     }

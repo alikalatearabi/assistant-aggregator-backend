@@ -4,10 +4,12 @@ import { Server, Socket } from 'socket.io';
 import { ChatMessagesService } from '../services/chat-messages.service';
 import { MessageService } from '../services/message.service';
 import { ChatService } from '../services/chat.service';
+import { ConfigService } from '@nestjs/config';
 
 @WebSocketGateway({ namespace: '/chat-messages', cors: true })
 export class ChatMessagesGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private readonly logger = new Logger(ChatMessagesGateway.name);
+  private readonly namespace: string;
 
   @WebSocketServer()
   server: Server;
@@ -15,8 +17,12 @@ export class ChatMessagesGateway implements OnGatewayConnection, OnGatewayDiscon
   constructor(
     @Inject(forwardRef(() => ChatMessagesService)) private readonly chatMessagesService: ChatMessagesService,
     private readonly messageService: MessageService,
-    private readonly chatService: ChatService
-  ) {}
+    private readonly chatService: ChatService,
+    private readonly configService: ConfigService,
+  ) {
+    this.namespace = this.configService.get<string>('CHAT_WS_NAMESPACE') || '/chat-messages';
+    this.logger.log(`WebSocket namespace set to: ${this.namespace}`);
+  }
 
   handleConnection(client: Socket) {
     this.logger.log(`Client connected to chat-messages WS: ${client.id}`);
@@ -26,16 +32,11 @@ export class ChatMessagesGateway implements OnGatewayConnection, OnGatewayDiscon
     this.logger.log(`Client disconnected from chat-messages WS: ${client.id}`);
   }
 
-  // Handle incoming socket-based chat requests coming from clients
   @SubscribeMessage('chat_request')
   async handleChatRequest(@MessageBody() payload: any, @ConnectedSocket() client: Socket) {
     try {
       this.logger.log(`Received chat_request from client ${client.id} responseMode=${payload?.responseMode}`);
-
-      // If the client requested streaming, call the streaming path which will
-      // broadcast events back to all connected clients (or could be scoped to a room).
       if (payload?.responseMode === 'streaming') {
-        // Create user message and chat (same logic as HTTP controller)
         const userMessage = await this.messageService.createMessage({
           category: 'user_input',
           text: payload.query,
@@ -46,32 +47,24 @@ export class ChatMessagesGateway implements OnGatewayConnection, OnGatewayDiscon
         let chatId: string;
 
         if (payload.conversationId && payload.conversationId !== 'new') {
-          // Add user message to existing chat
           await this.chatService.addMessageToChat(payload.conversationId, userMessage._id.toString());
           chatId = payload.conversationId;
         } else {
-          // Create new chat and add user message (conversationId is empty, null, or "new")
           const newChat = await this.chatService.createChat({
             user: payload.user,
-            title: payload.query.substring(0, 50) + (payload.query.length > 50 ? '...' : ''), // Auto-generate title from query
+            title: payload.query.substring(0, 50) + (payload.query.length > 50 ? '...' : ''),
             conversationHistory: [userMessage._id.toString()]
           });
           chatId = newChat._id.toString();
         }
-
-        // Update payload with the chatId for streaming service
         const streamingPayload = {
           ...payload,
           conversationId: chatId
         };
 
         await this.chatMessagesService.processStreaming(streamingPayload);
-        // no direct reply here; events will be emitted by the service via broadcast
         return { status: 'accepted' };
       }
-
-      // For blocking/blocking-like requests, call the blocking handler and send
-      // the response back to the requesting socket only.
       const result = await this.chatMessagesService.processBlocking(payload);
       client.emit('chat-messages', result);
       return { status: 'ok' };

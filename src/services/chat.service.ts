@@ -13,12 +13,9 @@ export class ChatService {
   ) {}
 
   async createChat(createChatDto: CreateChatDto): Promise<Chat> {
-    // Validate user ID
     if (!Types.ObjectId.isValid(createChatDto.user.toString())) {
       throw new BadRequestException('Invalid user ID');
     }
-
-    // Validate message IDs if provided
     if (createChatDto.conversationHistory) {
       for (const messageId of createChatDto.conversationHistory) {
         if (!Types.ObjectId.isValid(messageId.toString())) {
