@@ -47,8 +47,9 @@ export class MinioService {
   }
 
   private buildPublicUrl(bucket: string, objectName: string): string {
-    // Hardcoded external server address for external API access
-    const serverExternalIp = '185.149.192.130:9000';
+    // Hardcoded external server address for external API access    
+    const serverExternalIp = (this.config.get<string>('MINIO_ENDPOINT') || '192.168.56.52')+':'+(this.config.get<string>('MINIO_PORT') || '9000')
+    //const serverExternalIp = '185.149.192.130:9000';
     // Ensure each path segment is URL-encoded to support non-ASCII filenames
     const encodedObjectPath = objectName
       .split('/')
