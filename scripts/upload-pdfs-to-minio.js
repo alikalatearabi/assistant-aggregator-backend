@@ -1,4 +1,3 @@
-
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
@@ -20,13 +19,18 @@ const {
 
 const useSSL = String(MINIO_USE_SSL).toLowerCase() === 'true';
 
+// ✅ Normalize filenames: remove problematic chars but keep Persian letters
 function safeFilename(name) {
-  return String(name).trim().replace(/\s+/g, '_');
+  return String(name)
+    .normalize('NFC') // normalize Unicode
+    .replace(/[?#%<>*|":\\]+/g, '_') // forbidden in S3 object keys
+    .replace(/\s+/g, '_')
+    .trim();
 }
 
+// ✅ Do NOT encode key again when building URL
 function buildPublicUrl(endpoint, port, bucket, objectKey) {
-  const encodedKey = objectKey.split('/').map(encodeURIComponent).join('/');
-  return `${useSSL ? 'https' : 'http'}://${endpoint}:${port}/${bucket}/${encodedKey}`;
+  return `${useSSL ? 'https' : 'http'}://${endpoint}:${port}/${bucket}/${objectKey}`;
 }
 
 function sha256File(filePath) {
