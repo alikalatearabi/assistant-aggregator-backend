@@ -1,7 +1,7 @@
 const { MongoClient } = require('mongodb');
 
 async function createDatasets() {
-  const uri = 'mongodb://admin:password123@127.0.0.1:27017/assistant_aggregator?authSource=admin';
+  const uri = process.env.MONGO_URI || 'mongodb://admin:password123@127.0.0.1:27017/assistant_aggregator?authSource=admin';
   const client = new MongoClient(uri);
 
   try {
