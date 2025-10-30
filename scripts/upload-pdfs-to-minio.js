@@ -13,7 +13,7 @@ const {
   MINIO_ACCESS_KEY = 'minioadmin',
   MINIO_SECRET_KEY = 'minioadmin',
   BUCKET = 'assistant-aggregator',
-  FILE_DIR = './General_Law_PDFs',
+  FILE_DIR = '../files/General_Law_PDFs',
   MONGO_URI = 'mongodb://admin:password123@127.0.0.1:27017/assistant_aggregator?authSource=admin',
   SKIP_IF_CHECKSUM_EXISTS = 'true',
 } = process.env;
