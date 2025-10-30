@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const Minio = require('minio');
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 const mime = require('mime-types');
 
 const {
@@ -14,21 +14,18 @@ const {
   BUCKET = 'assistant-aggregator',
   FILE_DIR = '../files/General_Law_PDFs',
   MONGO_URI = 'mongodb://admin:password123@127.0.0.1:27017/assistant_aggregator?authSource=admin',
-  SKIP_IF_CHECKSUM_EXISTS = 'true',
 } = process.env;
 
 const useSSL = String(MINIO_USE_SSL).toLowerCase() === 'true';
 
-// ✅ Normalize filenames: remove problematic chars but keep Persian letters
 function safeFilename(name) {
   return String(name)
-    .normalize('NFC') // normalize Unicode
-    .replace(/[?#%<>*|":\\]+/g, '_') // forbidden in S3 object keys
+    .normalize('NFC')
+    .replace(/[?#%<>*|":\\]+/g, '_')
     .replace(/\s+/g, '_')
     .trim();
 }
 
-// ✅ Do NOT encode key again when building URL
 function buildPublicUrl(endpoint, port, bucket, objectKey) {
   return `${useSSL ? 'https' : 'http'}://${endpoint}:${port}/${bucket}/${objectKey}`;
 }
@@ -60,7 +57,7 @@ async function ensureBucket(client, bucket) {
     secretKey: MINIO_SECRET_KEY,
   });
 
-  const mongo = new MongoClient(MONGO_URI, { useUnifiedTopology: true });
+  const mongo = new MongoClient(MONGO_URI);
   await mongo.connect();
   const db = mongo.db();
   const docs = db.collection('documents');
@@ -85,15 +82,28 @@ async function ensureBucket(client, bucket) {
     try {
       const checksum = await sha256File(filePath);
 
-      if (SKIP_IF_CHECKSUM_EXISTS === 'true') {
-        const existing = await docs.findOne({ checksum });
-        if (existing) {
-          console.log(`⏭️ Skipping ${filename} — already exists in DB (_id=${existing._id})`);
-          continue;
+      // 🔹 Check if the file already exists in Mongo
+      const existing = await docs.findOne({ checksum });
+
+      if (existing) {
+        console.log(`♻️ Found existing ${filename} (_id=${existing._id}) — removing and replacing...`);
+
+        // Try deleting the old object from MinIO (if exists)
+        if (existing.objectKey) {
+          try {
+            await minio.removeObject(BUCKET, existing.objectKey);
+            console.log(`🗑️ Removed old object from MinIO: ${existing.objectKey}`);
+          } catch (removeErr) {
+            console.warn(`⚠️ Could not remove old object from MinIO: ${removeErr.message}`);
+          }
         }
+
+        // Remove old Mongo document
+        await docs.deleteOne({ _id: existing._id });
+        console.log(`🗑️ Deleted old MongoDB document (_id=${existing._id})`);
       }
 
-      // Insert DB record first (get _id early)
+      // Insert new placeholder document
       const placeholder = {
         filename,
         extension,
@@ -131,7 +141,7 @@ async function ensureBucket(client, bucket) {
         }
       );
 
-      console.log(`✅ Uploaded ${filename} (${insertedId})`);
+      console.log(`✅ Uploaded and replaced ${filename} (${insertedId})`);
     } catch (err) {
       console.error(`❌ Error processing ${filename}: ${err.message}`);
       await docs.updateOne(
