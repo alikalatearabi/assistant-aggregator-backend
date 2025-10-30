@@ -74,6 +74,13 @@ export class Document {
   fileUrl: string;
 
   @ApiProperty({
+    description: 'The object key used to store the file in MinIO',
+    required: false,
+  })
+  @Prop({ required: false })
+  objectKey?: string;
+
+  @ApiProperty({
     description: 'File extension/format',
     example: 'pdf',
   })
