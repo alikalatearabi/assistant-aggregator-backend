@@ -39,7 +39,7 @@ export class DocumentController {
   constructor(
     private readonly documentService: DocumentService,
     private readonly minioService: MinioService,
-  ) {}
+  ) { }
 
   @Post()
   @UseInterceptors(FileInterceptor('file'))
@@ -101,7 +101,7 @@ export class DocumentController {
     const safeName = String(body.filename).replace(/\s+/g, '_');
     const objectName = `documents/${Date.now()}_${safeName}`;
     this.logger.log(`Generated object name: ${objectName}`);
-    
+
     const fileUrl = await this.minioService.uploadAndGetUrl({
       buffer: file.buffer,
       objectName,
@@ -122,7 +122,7 @@ export class DocumentController {
     const result = await this.documentService.createDocument(dto);
     this.logger.log(`Document created successfully with ID: ${result._id}`);
     this.logger.log(`=== Document upload completed ===`);
-    
+
     return result;
   }
 
@@ -276,20 +276,6 @@ export class DocumentController {
     return this.documentService.getPresignedUrlForDocument(id, exp);
   }
 
-  @Post('admin/ensure-public-bucket')
-  @ApiExcludeEndpoint()
-  @ApiOperation({ summary: 'Ensure MinIO bucket has public read access' })
-  @ApiResponse({
-    status: 200,
-    description: 'Bucket policy updated',
-    schema: { type: 'object', properties: { message: { type: 'string' } } },
-  })
-  async ensurePublicBucket(): Promise<{ message: string }> {
-    this.logger.log('Admin request: Ensuring public bucket access');
-    await this.minioService.ensurePublicAccess();
-    return { message: 'Bucket policy updated to allow public read access' };
-  }
-
   @Get(':id/pages')
   @ApiOperation({ summary: 'Get all page documents for an original document' })
   @ApiParam({ name: 'id', description: 'Original document MongoDB ObjectId' })
@@ -360,5 +346,15 @@ export class DocumentController {
   @ApiExcludeEndpoint()
   async findDocumentById(@Param('id') id: string): Promise<Document> {
     return this.documentService.findDocumentById(id);
+  }
+
+
+  @Get(':id/download')
+  @ApiOperation({ summary: 'Get temporary download link for document' })
+  async getDownloadLink(@Param('id') id: string, @Query('expires') expires?: string) {
+    const document = await this.documentService.findDocumentById(id);
+    const objectName = document.fileUrl.split('/').slice(4).join('/'); // after bucket
+    const url = await this.minioService.getPresignedDownloadUrl(objectName, parseInt(expires || '600', 10));
+    return { url };
   }
 }

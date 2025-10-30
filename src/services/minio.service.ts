@@ -1,6 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Client } from 'minio';
+import { Readable } from 'stream';
 
 @Injectable()
 export class MinioService {
@@ -15,26 +16,30 @@ export class MinioService {
       accessKey: this.config.get<string>('MINIO_ACCESS_KEY') || 'minioadmin',
       secretKey: this.config.get<string>('MINIO_SECRET_KEY') || 'minioadmin',
     });
-    
-    // Log configuration on startup (without secrets)
-    this.logger.log(`MinIO Configuration:`);
-    this.logger.log(`- ENDPOINT: ${this.config.get<string>('MINIO_ENDPOINT') || 'localhost'}`);
-    this.logger.log(`- PORT: ${this.config.get<string>('MINIO_PORT') || '9000'}`);
-    this.logger.log(`- USE_SSL: ${this.config.get<string>('MINIO_USE_SSL') || 'false'}`);
-    this.logger.log(`- BUCKET: ${this.config.get<string>('MINIO_BUCKET') || 'assistant-aggregator'}`);
-    this.logger.log(`- EXTERNAL_URL: HARDCODED TO 185.149.192.130:9000 for external API access`);
   }
 
-  async getPresignedUrl(bucket: string, objectName: string, expiresSeconds = 900): Promise<string> {
-    // Ensure minimum and maximum expiry supported by MinIO (1 sec to 7 days for S3)
+  async getPresignedDownloadUrl(objectName: string, expiresSeconds = 600, bucket?: string): Promise<string> {
+    const targetBucket = bucket || this.config.get<string>('MINIO_BUCKET') || 'assistant-aggregator';
     const expires = Math.max(1, Math.min(expiresSeconds, 7 * 24 * 60 * 60));
-    return this.client.presignedGetObject(bucket, objectName, expires);
+    this.logger.log(`Generating presigned download URL for ${objectName} in bucket ${targetBucket}`);
+    const url = await this.client.presignedGetObject(targetBucket, objectName, expires);
+    return url;
   }
 
-  async ensurePublicAccess(bucket?: string): Promise<void> {
-    const targetBucket = bucket || this.getDefaultBucket();
-    this.logger.log(`Ensuring public access for bucket: ${targetBucket}`);
-    await this.ensureBucket(targetBucket);
+  async getFileStream(objectName: string, bucket?: string): Promise<Readable> {
+    const targetBucket = bucket || this.config.get<string>('MINIO_BUCKET') || 'assistant-aggregator';
+
+    try {
+      const stream = await this.client.getObject(targetBucket, objectName);
+      this.logger.log(`Streaming file from bucket=${targetBucket}, object=${objectName}`);
+      return stream;
+    } catch (error) {
+      this.logger.error(`Failed to stream file: ${error.message}`);
+      if (error.code === 'NoSuchKey') {
+        throw new NotFoundException('File not found in MinIO');
+      }
+      throw new BadRequestException('Failed to retrieve file');
+    }
   }
 
   private getDefaultBucket(): string {
@@ -51,7 +56,7 @@ export class MinioService {
       .join('/');
 
     const url = `http://${serverExternalIp}/${bucket}/${encodedObjectPath}`;
-    
+
     this.logger.log(`Built public URL for external access: ${url}`);
     return url;
   }
@@ -91,13 +96,13 @@ export class MinioService {
     bucket?: string;
   }): Promise<string> {
     this.logger.log(`Starting upload: ${params.objectName}, size: ${params.buffer.length} bytes, type: ${params.contentType}`);
-    
+
     const bucket = params.bucket || this.getDefaultBucket();
     this.logger.log(`Using bucket: ${bucket}`);
-    
+
     await this.ensureBucket(bucket);
     this.logger.log(`Bucket ensured: ${bucket}`);
-    
+
     await this.client.putObject(
       bucket,
       params.objectName,
@@ -108,7 +113,7 @@ export class MinioService {
       },
     );
     this.logger.log(`Upload completed: ${params.objectName}`);
-    
+
     const url = this.buildPublicUrl(bucket, params.objectName);
     this.logger.log(`Final URL generated: ${url}`);
     return url;

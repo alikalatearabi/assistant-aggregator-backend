@@ -529,8 +529,6 @@ export class DocumentService {
       throw new NotFoundException('Document not found');
     }
 
-    // For MinIO, we can return the direct URL since it's publicly accessible
-    // or implement presigned URL logic here if needed
     return {
       url: document.fileUrl,
       expiresIn: exp || 3600,
