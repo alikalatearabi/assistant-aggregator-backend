@@ -5,7 +5,7 @@ import { ChatMessagesService } from '../services/chat-messages.service';
 import { MessageService } from '../services/message.service';
 import { ChatService } from '../services/chat.service';
 
-@WebSocketGateway({ namespace: '/chat-messages', cors: true })
+@WebSocketGateway({ namespace: '/backend/chat-messages', cors: true })
 export class ChatMessagesGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private readonly logger = new Logger(ChatMessagesGateway.name);
 
