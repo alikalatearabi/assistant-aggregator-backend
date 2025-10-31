@@ -6,6 +6,8 @@ import { CreateDocumentDto } from '../dto/create-document.dto';
 import { UpdateDocumentDto } from '../dto/update-document.dto';
 import { DocumentQueryDto } from '../dto/document-query.dto';
 import { OcrService } from './ocr.service';
+import { OcrStatusService } from './ocr-status.service';
+import { DocumentPageService } from './document-page.service';
 
 @Injectable()
 export class DocumentService {
@@ -14,28 +16,23 @@ export class DocumentService {
   constructor(
     @InjectModel(Document.name) private documentModel: Model<DocumentDocument>,
     private readonly ocrService: OcrService,
+    private readonly ocrStatusService: OcrStatusService,
+    private readonly documentPageService: DocumentPageService,
   ) {}
 
   async createDocument(createDocumentDto: CreateDocumentDto): Promise<Document> {
-    // Validate user ID in metadata if provided
     if (createDocumentDto.metadata?.user_id && !Types.ObjectId.isValid(createDocumentDto.metadata.user_id.toString())) {
       throw new BadRequestException('Invalid user ID in metadata');
     }
-
     const createdDocument = new this.documentModel(createDocumentDto);    const savedDocument = await createdDocument.save();
-    
-    // Send document to OCR service asynchronously (fire and forget)
     this.logger.log(`Document created successfully: ${savedDocument._id}, sending to OCR service`);
-    
     try {
       await this.ocrService.sendDocumentForOcrAsync({
         documentId: savedDocument._id.toString(),
         minioUrl: savedDocument.fileUrl,
       });
-      
       this.logger.log(`Document ${savedDocument._id} sent to OCR service successfully`);
     } catch (error) {
-      // Log error but don't fail document creation
       this.logger.error(`Failed to send document ${savedDocument._id} to OCR service:`, error);
     }
     
@@ -59,7 +56,6 @@ export class DocumentService {
       limit = 10,
     } = query;
 
-    // Build filter object
     const filter: any = {};
     
     if (extension) {
@@ -84,7 +80,6 @@ export class DocumentService {
       }
     }
 
-    // Calculate pagination
     const skip = (page - 1) * limit;
     const total = await this.documentModel.countDocuments(filter);
     const totalPages = Math.ceil(total / limit);
@@ -148,7 +143,6 @@ export class DocumentService {
       throw new BadRequestException('Invalid document ID');
     }
 
-    // Validate user ID in metadata if provided
     if (updateDocumentDto.metadata?.user_id && !Types.ObjectId.isValid(updateDocumentDto.metadata.user_id.toString())) {
       throw new BadRequestException('Invalid user ID in metadata');
     }
@@ -224,12 +218,6 @@ export class DocumentService {
     return document;
   }
 
-  /**
-   * Create or update a page document for an original document.
-   * This will NOT append the page text to the original.raw_text.
-   * It will set the original's ocrStatus to 'processing' (best-effort) and
-   * return the page document.
-   */
   async createPageDocument(
     originalDocumentId: string,
     pageNumber: number,
@@ -282,7 +270,6 @@ export class DocumentService {
       .populate('metadata.user_id', 'firstname lastname email')
       .exec();
 
-    // Best-effort: mark original as processing but DO NOT change original.raw_text
     try {
       await this.documentModel
         .findByIdAndUpdate(
@@ -311,16 +298,11 @@ export class DocumentService {
       throw new BadRequestException('Invalid document ID');
     }
 
-    // First check if document exists
     const existingDocument = await this.documentModel.findById(documentId).exec();
     if (!existingDocument) {
       throw new NotFoundException('Document not found');
     }
-    // If this payload is for a specific page, create/update a page document and
-    // append the page text to the original document. Keep the original marked
-    // as 'processing' while pages are being submitted.
     if (page && Number.isInteger(page) && page > 0) {
-      // Upsert a page document for this page
       const pageDocData: any = {
         filename: `${existingDocument.filename}-page-${page}`,
         fileUrl: existingDocument.fileUrl,
@@ -349,7 +331,6 @@ export class DocumentService {
         .populate('metadata.user_id', 'firstname lastname email')
         .exec();
 
-      // Append the page text to the original document's raw_text (preserve existing)
       const combinedText = [existingDocument.raw_text, extractedText].filter(Boolean).join('\n\n');
 
       const updatedOriginal = await this.documentModel
@@ -374,7 +355,6 @@ export class DocumentService {
       return updatedOriginal as Document;
     }
 
-    // No page provided: treat this as a full-document OCR result (complete)
     const updateData: any = {
       raw_text: extractedText,
       ocrStatus: 'completed',
@@ -403,69 +383,15 @@ export class DocumentService {
   }
 
   async markOcrProcessing(documentId: string): Promise<Document> {
-    if (!Types.ObjectId.isValid(documentId)) {
-      throw new BadRequestException('Invalid document ID');
-    }
-
-    const document = await this.documentModel
-      .findByIdAndUpdate(
-        documentId,
-        { 
-          ocrStatus: 'processing',
-          'ocrMetadata.processingStartedAt': new Date().toISOString()
-        },
-        { new: true }
-      )
-      .populate('metadata.user_id', 'firstname lastname email')
-      .exec();
-    
-    if (!document) {
-      throw new NotFoundException('Document not found');
-    }
-    
-    return document;
+    return this.ocrStatusService.markOcrProcessing(documentId);
   }
 
   async markOcrFailed(documentId: string, error: string): Promise<Document> {
-    if (!Types.ObjectId.isValid(documentId)) {
-      throw new BadRequestException('Invalid document ID');
-    }
-
-    const document = await this.documentModel
-      .findByIdAndUpdate(
-        documentId,
-        { 
-          ocrStatus: 'failed',
-          $set: {
-            'ocrMetadata.error': error,
-            'ocrMetadata.failedAt': new Date().toISOString(),
-            'metadata.ocr.error': error,
-            'metadata.ocr.failedAt': new Date().toISOString(),
-          }
-        },
-        { new: true }
-      )
-      .populate('metadata.user_id', 'firstname lastname email')
-      .exec();
-    
-    if (!document) {
-      throw new NotFoundException('Document not found');
-    }
-    
-    return document;
+    return this.ocrStatusService.markOcrFailed(documentId, error);
   }
 
   async findDocumentsByOcrStatus(status: string): Promise<Document[]> {
-    const validStatuses = ['pending', 'processing', 'completed', 'failed'];
-    if (!validStatuses.includes(status)) {
-      throw new BadRequestException('Invalid OCR status. Must be one of: pending, processing, completed, failed');
-    }
-
-    return this.documentModel
-      .find({ ocrStatus: status })
-      .populate('metadata.user_id', 'firstname lastname email')
-      .sort({ createdAt: -1 })
-      .exec();
+    return this.ocrStatusService.findDocumentsByOcrStatus(status);
   }
 
   async searchDocuments(searchTerm: string): Promise<Document[]> {
@@ -535,38 +461,16 @@ export class DocumentService {
     };
   }
 
+  // Page document query methods have been moved to DocumentPageService
+  // These are convenience methods that delegate to DocumentPageService
   async findPagesByOriginalDocument(originalDocumentId: string): Promise<Document[]> {
-    if (!Types.ObjectId.isValid(originalDocumentId)) {
-      throw new BadRequestException('Invalid document ID');
-    }
-
-    return this.documentModel
-      .find({ 
-        originalDocumentId: new Types.ObjectId(originalDocumentId),
-        isPageDocument: true 
-      })
-      .populate('metadata.user_id', 'firstname lastname email')
-      .sort({ pageNumber: 1 })
-      .exec();
+    return this.documentPageService.findPagesByOriginalDocument(originalDocumentId);
   }
 
   async findOriginalDocuments(): Promise<Document[]> {
-    return this.documentModel
-      .find({ 
-        $or: [
-          { isPageDocument: { $ne: true } },
-          { isPageDocument: { $exists: false } }
-        ]
-      })
-      .populate('metadata.user_id', 'firstname lastname email')
-      .sort({ createdAt: -1 })
-      .exec();
+    return this.documentPageService.findOriginalDocuments();
   }
 
-  /**
-   * Return original documents (not page documents) along with a count of their pages.
-   * Supports simple pagination via page & limit.
-   */
   async findOriginalsWithPageCounts(opts: { page?: number; limit?: number } = {}): Promise<{
     documents: Document[];
     total: number;
@@ -574,114 +478,14 @@ export class DocumentService {
     limit: number;
     totalPages: number;
   }> {
-    const page = opts.page && opts.page > 0 ? Math.floor(opts.page) : 1;
-    const limit = opts.limit && opts.limit > 0 ? Math.floor(opts.limit) : 50;
-    const skip = (page - 1) * limit;
-
-    // Match originals (not page documents)
-    const match: any = {
-      $or: [
-        { isPageDocument: { $ne: true } },
-        { isPageDocument: { $exists: false } },
-      ],
-    };
-
-    // Total count of original documents for pagination
-    const total = await this.documentModel.countDocuments(match as any);
-    const totalPages = Math.ceil(total / limit);
-
-    // Aggregation: lookup pages and compute pageCount
-    const pipeline: any[] = [
-      { $match: match },
-      {
-        $lookup: {
-          from: this.documentModel.collection.name,
-          localField: '_id',
-          foreignField: 'originalDocumentId',
-          as: 'pages',
-        },
-      },
-      {
-        $addFields: {
-          pageCount: { $size: { $ifNull: ['$pages', []] } },
-        },
-      },
-      { $project: { pages: 0 } },
-      { $sort: { createdAt: -1 } },
-      { $skip: skip },
-      { $limit: limit },
-    ];
-
-    const aggResults = await this.documentModel.aggregate(pipeline).exec();
-
-    // Populate metadata.user_id on aggregation results
-    const populated = await this.documentModel.populate(aggResults, { path: 'metadata.user_id', select: 'firstname lastname email' });
-
-    return {
-      documents: populated as Document[],
-      total,
-      page,
-      limit,
-      totalPages,
-    };
+    return this.documentPageService.findOriginalsWithPageCounts(opts);
   }
 
   async reportOcrError(errorData: { documentId: string; error: string; page?: number; status?: string }): Promise<Document> {
-    if (!Types.ObjectId.isValid(errorData.documentId)) {
-      throw new BadRequestException('Invalid document ID');
-    }
-
-    const document = await this.documentModel
-      .findByIdAndUpdate(
-        errorData.documentId,
-        { 
-          ocrStatus: errorData.status || 'failed',
-          'metadata.ocr.error': errorData.error,
-          'metadata.ocr.failedAt': new Date().toISOString(),
-          ...(errorData.page && { 'metadata.ocr.failedPage': errorData.page }),
-        },
-        { new: true }
-      )
-      .populate('metadata.user_id', 'firstname lastname email')
-      .exec();
-    
-    if (!document) {
-      throw new NotFoundException('Document not found');
-    }
-    
-    return document;
+    return this.ocrStatusService.reportOcrError(errorData);
   }
 
   async resetOcrData(id: string): Promise<Document> {
-    if (!Types.ObjectId.isValid(id)) {
-      throw new BadRequestException('Invalid document ID');
-    }
-
-    // Delete any page documents if this is an original document
-    await this.documentModel.deleteMany({ 
-      originalDocumentId: new Types.ObjectId(id),
-      isPageDocument: true 
-    });
-
-    const document = await this.documentModel
-      .findByIdAndUpdate(
-        id,
-        { 
-          $unset: { 
-            raw_text: 1,
-            'metadata.ocr': 1 
-          },
-          ocrStatus: 'pending'
-        },
-        { new: true }
-      )
-      .populate('metadata.user_id', 'firstname lastname email')
-      .exec();
-    
-    if (!document) {
-      throw new NotFoundException('Document not found');
-    }
-    
-    return document;
+    return this.ocrStatusService.resetOcrData(id);
   }
 }

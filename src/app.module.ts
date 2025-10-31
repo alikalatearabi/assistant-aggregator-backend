@@ -21,6 +21,8 @@ import { DatasetService } from './services/dataset.service';
 import { MessageService } from './services/message.service';
 import { ChatService } from './services/chat.service';
 import { OcrService } from './services/ocr.service';
+import { OcrStatusService } from './services/ocr-status.service';
+import { DocumentPageService } from './services/document-page.service';
 import { ChatMessagesGateway } from './gateways/chat-messages.gateway';
 import { ChatMessagesService } from './services/chat-messages.service';
 import { MinioService } from './services/minio.service';
@@ -51,6 +53,6 @@ import { AuthModule } from './auth/auth.module';
     AuthModule,
   ],
   controllers: [AppController, UserController, DocumentController, DatasetController, OcrController, MessageController, ChatController],
-  providers: [AppService, DocumentService, DatasetService, MessageService, ChatService, OcrService, ChatMessagesGateway, ChatMessagesService, MinioService],
+  providers: [AppService, DocumentService, DatasetService, MessageService, ChatService, OcrService, OcrStatusService, DocumentPageService, ChatMessagesGateway, ChatMessagesService, MinioService],
 })
 export class AppModule {}
