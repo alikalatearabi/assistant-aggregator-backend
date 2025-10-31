@@ -14,6 +14,7 @@ const {
   BUCKET = 'assistant-aggregator',
   FILE_DIR = '../files/General_Law_PDFs',
   MONGO_URI = 'mongodb://admin:password123@127.0.0.1:27017/assistant_aggregator?authSource=admin',
+  ID_MAP_PATH = path.resolve('../files/vezarat-documents-export.json'), 
 } = process.env;
 
 const useSSL = String(MINIO_USE_SSL).toLowerCase() === 'true';
@@ -26,10 +27,6 @@ function safeFilename(name) {
     .trim();
 }
 
-function buildPublicUrl(endpoint, port, bucket, objectKey) {
-  return `${useSSL ? 'https' : 'http'}://${endpoint}:${port}/${bucket}/${objectKey}`;
-}
-
 function sha256File(filePath) {
   return new Promise((resolve, reject) => {
     const hash = crypto.createHash('sha256');
@@ -38,6 +35,10 @@ function sha256File(filePath) {
     stream.on('data', chunk => hash.update(chunk));
     stream.on('end', () => resolve(hash.digest('hex')));
   });
+}
+
+function buildPublicUrl(endpoint, port, bucket, objectKey) {
+  return `${useSSL ? 'https' : 'http'}://${endpoint}:${port}/${bucket}/${objectKey}`;
 }
 
 async function ensureBucket(client, bucket) {
@@ -49,6 +50,13 @@ async function ensureBucket(client, bucket) {
 }
 
 (async () => {
+  // 🔹 Load ID map
+  if (!fs.existsSync(ID_MAP_PATH)) {
+    console.error(`❌ ID map file not found: ${ID_MAP_PATH}`);
+    process.exit(1);
+  }
+  const idMap = JSON.parse(fs.readFileSync(ID_MAP_PATH, 'utf8'));
+
   const minio = new Minio.Client({
     endPoint: MINIO_ENDPOINT,
     port: parseInt(MINIO_PORT, 10),
@@ -63,101 +71,69 @@ async function ensureBucket(client, bucket) {
   const docs = db.collection('documents');
 
   const dir = path.resolve(FILE_DIR);
-  if (!fs.existsSync(dir) || !fs.statSync(dir).isDirectory()) {
-    console.error(`❌ FILE_DIR not found or not a directory: ${dir}`);
+  if (!fs.existsSync(dir)) {
+    console.error(`❌ File directory not found: ${dir}`);
     process.exit(1);
   }
 
-  const files = fs.readdirSync(dir).filter(f => path.extname(f).toLowerCase() === '.pdf');
-  console.log(`📂 Found ${files.length} PDF(s) in ${dir}`);
-  if (!files.length) process.exit(0);
-
   await ensureBucket(minio, BUCKET);
 
-  for (const filename of files) {
+  for (const entry of idMap) {
+    const { filename, id, dataset_id } = entry;
     const filePath = path.join(dir, filename);
+
+    if (!fs.existsSync(filePath)) {
+      console.warn(`⚠️ File not found: ${filePath}`);
+      continue;
+    }
+
     const extension = path.extname(filename).slice(1).toLowerCase();
     const mimeType = mime.lookup(filename) || 'application/pdf';
+    const checksum = await sha256File(filePath);
 
+    const objectKey = `documents/${id}/${safeFilename(filename)}`;
+    const fileUrl = buildPublicUrl(MINIO_ENDPOINT, MINIO_PORT, BUCKET, objectKey);
+
+    console.log(`⬆️ Uploading ${filename} → ${objectKey}`);
+
+    // 🗑️ Remove old file if exists
     try {
-      const checksum = await sha256File(filePath);
+      await minio.removeObject(BUCKET, objectKey);
+    } catch (_) {}
 
-      // 🔹 Check if the file already exists in Mongo
-      const existing = await docs.findOne({ checksum });
-
-      if (existing) {
-        console.log(`♻️ Found existing ${filename} (_id=${existing._id}) — removing and replacing...`);
-
-        // Try deleting the old object from MinIO (if exists)
-        if (existing.objectKey) {
-          try {
-            await minio.removeObject(BUCKET, existing.objectKey);
-            console.log(`🗑️ Removed old object from MinIO: ${existing.objectKey}`);
-          } catch (removeErr) {
-            console.warn(`⚠️ Could not remove old object from MinIO: ${removeErr.message}`);
-          }
-        }
-
-        // Remove old Mongo document
-        await docs.deleteOne({ _id: existing._id });
-        console.log(`🗑️ Deleted old MongoDB document (_id=${existing._id})`);
-      }
-
-      // Insert new placeholder document
-      const placeholder = {
-        filename,
-        extension,
-        mimeType,
-        checksum,
-        ocrStatus: 'pending',
-        uploadStatus: 'uploading',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      const { insertedId } = await docs.insertOne(placeholder);
-      const objectKey = `${insertedId.toString()}/${safeFilename(filename)}`;
-
-      console.log(`⬆️ Uploading ${filename} → ${BUCKET}/${objectKey}`);
-
-      await new Promise((resolve, reject) => {
-        minio.fPutObject(BUCKET, objectKey, filePath, { 'Content-Type': mimeType }, err => {
-          if (err) return reject(err);
-          resolve();
-        });
+    // ⬆️ Upload file
+    await new Promise((resolve, reject) => {
+      minio.fPutObject(BUCKET, objectKey, filePath, { 'Content-Type': mimeType }, err => {
+        if (err) return reject(err);
+        resolve();
       });
+    });
 
-      const fileUrl = buildPublicUrl(MINIO_ENDPOINT, MINIO_PORT, BUCKET, objectKey);
-
-      await docs.updateOne(
-        { _id: insertedId },
-        {
-          $set: {
-            objectKey,
-            fileUrl,
-            uploadStatus: 'uploaded',
-            updatedAt: new Date(),
-          },
-        }
-      );
-
-      console.log(`✅ Uploaded and replaced ${filename} (${insertedId})`);
-    } catch (err) {
-      console.error(`❌ Error processing ${filename}: ${err.message}`);
-      await docs.updateOne(
-        { filename },
-        {
-          $set: {
-            uploadStatus: 'failed',
-            uploadError: err.message,
-            updatedAt: new Date(),
-          },
+    // 💾 Upsert MongoDB document
+    await docs.updateOne(
+      { _id: new ObjectId(id) },
+      {
+        $set: {
+          _id: new ObjectId(id),
+          filename,
+          extension,
+          mimeType,
+          checksum,
+          objectKey,
+          fileUrl,
+          dataset: dataset_id ? new ObjectId(dataset_id) : null,
+          ocrStatus: 'pending',
+          uploadStatus: 'uploaded',
+          createdAt: new Date(),
+          updatedAt: new Date(),
         },
-        { upsert: true }
-      );
-    }
+      },
+      { upsert: true }
+    );
+
+    console.log(`✅ Uploaded ${filename} with _id=${id}`);
   }
 
-  console.log('🏁 Finished processing all files.');
+  console.log('🏁 Finished uploading all predefined documents.');
   await mongo.close();
 })();
