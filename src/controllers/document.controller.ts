@@ -353,15 +353,24 @@ export class DocumentController {
   @ApiOperation({ summary: 'Get temporary download link for document' })
   async getDownloadLink(@Param('id') id: string, @Query('expires') expires?: string) {
     const document = await this.documentService.findDocumentById(id);
-    const objectName = document.objectKey
+  
+    // Extract object key cleanly
+    let objectName = document.objectKey
       ? document.objectKey
-      : decodeURIComponent(document.fileUrl.split('/').slice(3).join('/'));
+      : decodeURIComponent(document.fileUrl.split('/').slice(4).join('/'));
+  
+    const bucket = 'assistant-aggregator';
+    if (objectName.startsWith(bucket + '/')) objectName = objectName.replace(bucket + '/', '');
+    if (objectName.startsWith('documents/')) objectName = objectName.replace('documents/', '');
+  
     const url = await this.minioService.getPresignedDownloadUrl(
       objectName,
       parseInt(expires || '600', 10),
     );
-
+  
     return { url };
   }
+  
+  
 
 }
