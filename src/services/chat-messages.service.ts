@@ -222,9 +222,6 @@ export class ChatMessagesService {
         taskId: randomUUID(),
       };
     }
-
-    // Clean up the request interceptor
-    axios.interceptors.request.eject(requestInterceptor);
   }
 
   async processBlocking(
@@ -267,6 +264,7 @@ export class ChatMessagesService {
         taskId,
         conversation_id: req.conversationId || 'unknown',
         answer: '',
+        thinking: result.thinking || '',
         history: [],
         metadata: {
           error: {
@@ -278,15 +276,9 @@ export class ChatMessagesService {
         created_at: timestamp,
       });
     } else {
-      // Use the chatId provided by the controller (which handles chat creation)
-      // Handle special case where conversationId is "new" (treat as empty)
       let chatId: string = (req.conversationId && req.conversationId !== 'new') ? req.conversationId : '';
-      
-      // Simulate streaming by chunking the answer
       const answer = result.answer;
-      const chunks = this.chunkText(answer, 20); // Chunk by ~20 characters
-
-      // Emit start event with new format
+      const chunks = this.chunkText(answer, 20);
       const startTs = new Date().toISOString();
       this.gateway.broadcast({
         event: 'message_start',
@@ -294,32 +286,29 @@ export class ChatMessagesService {
         conversation_id: chatId,
         answer: '',
         history: result.history || [],
+        thinking: result.thinking || '',
         metadata: result.metadata || {},
         created_at: startTs,
       });
 
-      // Emit chunks progressively
       for (let i = 0; i < chunks.length; i++) {
-        await new Promise(resolve => setTimeout(resolve, 150)); // Simulate streaming delay
+        await new Promise(resolve => setTimeout(resolve, 150));
         const chunkTs = new Date().toISOString();
         this.gateway.broadcast({
           event: 'message_chunk',
           taskId,
           conversation_id: chatId,
-          answer: chunks.slice(0, i + 1).join(''), // Accumulated answer so far
+          answer: chunks.slice(0, i + 1).join(''),
           history: result.history || [],
+          thinking: result.thinking || '',
           metadata: result.metadata || {},
           created_at: chunkTs,
         });
       }
 
-      // Emit end event with complete new format
       const endTs = new Date().toISOString();
-      
-      // Extract retriever resources if they exist
       const retrieverResources = result.metadata?.retriever_resources || [];
       
-      // Save assistant message to database with retriever resources
       try {
         const assistantMessage = await this.messageService.createMessage({
           category: 'assistant_response',
@@ -329,7 +318,6 @@ export class ChatMessagesService {
           retrieverResources: retrieverResources
         });
 
-        // Add assistant message to the chat (which was created before streaming started)
         await this.chatService.addMessageToChat(chatId, assistantMessage._id.toString());
 
         this.logger.info('=== STREAMING ASSISTANT MESSAGE SAVED ===', {
@@ -346,16 +334,16 @@ export class ChatMessagesService {
         });
       }
       
-      // Broadcast the final message with retriever resources
       this.gateway.broadcast({
         event: 'message_end',
         taskId,
         conversation_id: chatId,
         answer: result.answer,
         history: result.history || [],
+        thinking: result.thinking || '',
         metadata: result.metadata || {},
         created_at: endTs,
-        retrieverResources: retrieverResources, // Include retriever resources for the frontend
+        retrieverResources: retrieverResources, 
       });
     }
 
@@ -367,7 +355,6 @@ export class ChatMessagesService {
     return { taskId };
   }
 
-  // Helper method to chunk text
   private chunkText(text: string, chunkSize: number): string[] {
     const chunks: string[] = [];
     for (let i = 0; i < text.length; i += chunkSize) {

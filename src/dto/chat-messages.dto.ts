@@ -140,6 +140,10 @@ export class ChatMessageAnswerResponseDto {
   @ApiProperty({ description: 'Metadata', type: ChatMessagesMetadataDto })
   metadata: ChatMessagesMetadataDto & { retriever_resources?: RetrieverResourceDto[] };
 
+
+  @ApiProperty({ description: 'Thinking content' })
+  thinking: string;
+
   @ApiProperty({ description: 'Creation timestamp' })
   created_at: string;
 }

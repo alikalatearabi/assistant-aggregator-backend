@@ -305,19 +305,14 @@ export class ChatService {
       { $group: { _id: null, averageMessages: { $avg: '$messageCount' } } }
     ]);
     const averageMessagesPerChat = averageMessagesResult[0]?.averageMessages || 0;
-
-    // Recent chats (last 7 days)
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     const recentChats = await this.chatModel.countDocuments({
       createdAt: { $gte: sevenDaysAgo }
     });
-
-    // Active sessions (chats with at least one message)
     const activeSessions = await this.chatModel.countDocuments({
       conversationHistory: { $exists: true, $not: { $size: 0 } }
     });
-
     return {
       totalChats,
       chatsByUser,

@@ -17,7 +17,6 @@ import {
   ApiResponse,
   ApiParam,
   ApiQuery,
-  ApiBody,
   ApiExcludeEndpoint,
 } from '@nestjs/swagger';
 import { Response } from 'express';

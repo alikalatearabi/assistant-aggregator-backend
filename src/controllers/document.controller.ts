@@ -361,7 +361,6 @@ export class DocumentController {
   
     const bucket = 'assistant-aggregator';
     if (objectName.startsWith(bucket + '/')) objectName = objectName.replace(bucket + '/', '');
-    if (objectName.startsWith('documents/')) objectName = objectName.replace('documents/', '');
   
     const url = await this.minioService.getPresignedDownloadUrl(
       objectName,
