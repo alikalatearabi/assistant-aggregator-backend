@@ -22,6 +22,7 @@ import { DocumentPageService } from './services/document-page.service';
 import { OcrTimeoutService } from './services/ocr-timeout.service';
 import { ChatMessagesGateway } from './gateways/chat-messages.gateway';
 import { ChatMessagesService } from './services/chat-messages.service';
+import { MessageService } from './services/message.service';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { MessagesModule } from './messages/messages.module';
@@ -74,6 +75,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     OcrTimeoutService,
     ChatMessagesGateway,
     ChatMessagesService,
+    MessageService,
   ],
 })
 export class AppModule {}
