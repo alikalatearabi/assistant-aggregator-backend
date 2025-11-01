@@ -39,9 +39,6 @@ export declare class DocumentController {
     getPresignedUrl(id: string, expires?: string): Promise<{
         url: string;
     }>;
-    ensurePublicBucket(): Promise<{
-        message: string;
-    }>;
     getDocumentPages(id: string): Promise<Document[]>;
     getOriginalDocuments(): Promise<Document[]>;
     getOriginalsWithPageCounts(page?: string, limit?: string): Promise<{
@@ -52,4 +49,7 @@ export declare class DocumentController {
         totalPages: number;
     }>;
     findDocumentById(id: string): Promise<Document>;
+    getDownloadLink(id: string, expires?: string): Promise<{
+        url: string;
+    }>;
 }

@@ -219,7 +219,6 @@ let ChatMessagesService = ChatMessagesService_1 = class ChatMessagesService {
                 taskId: (0, crypto_1.randomUUID)(),
             };
         }
-        axios_1.default.interceptors.request.eject(requestInterceptor);
     }
     async processBlocking(req) {
         this.logger.info('=== PROCESSING BLOCKING REQUEST ===', {
@@ -251,6 +250,7 @@ let ChatMessagesService = ChatMessagesService_1 = class ChatMessagesService {
                 taskId,
                 conversation_id: req.conversationId || 'unknown',
                 answer: '',
+                thinking: result.thinking || '',
                 history: [],
                 metadata: {
                     error: {
@@ -273,6 +273,7 @@ let ChatMessagesService = ChatMessagesService_1 = class ChatMessagesService {
                 conversation_id: chatId,
                 answer: '',
                 history: result.history || [],
+                thinking: result.thinking || '',
                 metadata: result.metadata || {},
                 created_at: startTs,
             });
@@ -285,6 +286,7 @@ let ChatMessagesService = ChatMessagesService_1 = class ChatMessagesService {
                     conversation_id: chatId,
                     answer: chunks.slice(0, i + 1).join(''),
                     history: result.history || [],
+                    thinking: result.thinking || '',
                     metadata: result.metadata || {},
                     created_at: chunkTs,
                 });
@@ -320,6 +322,7 @@ let ChatMessagesService = ChatMessagesService_1 = class ChatMessagesService {
                 conversation_id: chatId,
                 answer: result.answer,
                 history: result.history || [],
+                thinking: result.thinking || '',
                 metadata: result.metadata || {},
                 created_at: endTs,
                 retrieverResources: retrieverResources,

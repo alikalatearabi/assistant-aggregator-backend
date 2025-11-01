@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.databaseConfig = void 0;
 const databaseConfig = () => ({
     database: {
-        uri: 'mongodb://admin:password123@185.149.192.130:27017/assistant_aggregator?authSource=admin'
+        uri: process.env.MONGO_URI || 'mongodb://admin:password123@mongodb:27017/assistant_aggregator?authSource=admin',
     },
     minio: {
         endpoint: process.env.MINIO_ENDPOINT || 'localhost',

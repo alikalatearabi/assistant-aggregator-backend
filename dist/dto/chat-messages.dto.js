@@ -194,6 +194,7 @@ class ChatMessageAnswerResponseDto {
     answer;
     history;
     metadata;
+    thinking;
     created_at;
 }
 exports.ChatMessageAnswerResponseDto = ChatMessageAnswerResponseDto;
@@ -213,6 +214,10 @@ __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Metadata', type: ChatMessagesMetadataDto }),
     __metadata("design:type", Object)
 ], ChatMessageAnswerResponseDto.prototype, "metadata", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Thinking content' }),
+    __metadata("design:type", String)
+], ChatMessageAnswerResponseDto.prototype, "thinking", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Creation timestamp' }),
     __metadata("design:type", String)

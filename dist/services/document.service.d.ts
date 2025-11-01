@@ -4,11 +4,15 @@ import { CreateDocumentDto } from '../dto/create-document.dto';
 import { UpdateDocumentDto } from '../dto/update-document.dto';
 import { DocumentQueryDto } from '../dto/document-query.dto';
 import { OcrService } from './ocr.service';
+import { OcrStatusService } from './ocr-status.service';
+import { DocumentPageService } from './document-page.service';
 export declare class DocumentService {
     private documentModel;
     private readonly ocrService;
+    private readonly ocrStatusService;
+    private readonly documentPageService;
     private readonly logger;
-    constructor(documentModel: Model<DocumentDocument>, ocrService: OcrService);
+    constructor(documentModel: Model<DocumentDocument>, ocrService: OcrService, ocrStatusService: OcrStatusService, documentPageService: DocumentPageService);
     createDocument(createDocumentDto: CreateDocumentDto): Promise<Document>;
     findAllDocuments(query?: DocumentQueryDto): Promise<{
         documents: Document[];

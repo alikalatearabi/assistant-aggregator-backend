@@ -144,5 +144,32 @@ export class OcrStatusService {
       .sort({ createdAt: -1 })
       .exec();
   }
+
+  async markOcrCompleted(documentId: string): Promise<Document> {
+    if (!Types.ObjectId.isValid(documentId)) {
+      throw new BadRequestException('Invalid document ID');
+    }
+
+    const document = await this.documentModel
+      .findByIdAndUpdate(
+        documentId,
+        { 
+          $set: {
+            ocrStatus: 'completed',
+            'metadata.ocr.completedAt': new Date().toISOString(),
+            'metadata.ocr.processingCompletedBy': 'timeout-service',
+          }
+        },
+        { new: true }
+      )
+      .populate('metadata.user_id', 'firstname lastname email')
+      .exec();
+    
+    if (!document) {
+      throw new NotFoundException('Document not found');
+    }
+    
+    return document;
+  }
 }
 

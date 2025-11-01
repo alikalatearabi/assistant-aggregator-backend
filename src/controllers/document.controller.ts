@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Query,
+  UseGuards,
   UploadedFile,
   UseInterceptors,
   Logger,
@@ -30,9 +31,15 @@ import { UpdateDocumentDto } from '../dto/update-document.dto';
 import { DocumentQueryDto } from '../dto/document-query.dto';
 import { DocumentMetadataDto } from '../dto/document-metadata.dto';
 import { Document } from '../schemas/document.schema';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Roles } from 'src/auth/roles.decorator';
+import { UserRole } from 'src/schemas/user.schema';
+
 
 @ApiTags('documents')
 @Controller('documents')
+@UseGuards(JwtAuthGuard)
+@Roles(UserRole.ADMIN)
 export class DocumentController {
   private readonly logger = new Logger(DocumentController.name);
 
@@ -179,7 +186,6 @@ export class DocumentController {
   async findDocumentsByExtension(@Param('extension') extension: string): Promise<Document[]> {
     return this.documentService.findDocumentsByExtension(extension);
   }
-
 
   @Patch(':id')
   @ApiOperation({
@@ -348,13 +354,10 @@ export class DocumentController {
     return this.documentService.findDocumentById(id);
   }
 
-
   @Get(':id/download')
   @ApiOperation({ summary: 'Get temporary download link for document' })
   async getDownloadLink(@Param('id') id: string, @Query('expires') expires?: string) {
     const document = await this.documentService.findDocumentById(id);
-  
-    // Extract object key cleanly
     let objectName = document.objectKey
       ? document.objectKey
       : decodeURIComponent(document.fileUrl.split('/').slice(4).join('/'));
@@ -366,10 +369,6 @@ export class DocumentController {
       objectName,
       parseInt(expires || '600', 10),
     );
-  
     return { url };
   }
-  
-  
-
 }

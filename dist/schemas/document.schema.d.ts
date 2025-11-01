@@ -18,6 +18,7 @@ export declare class Document {
     _id: Types.ObjectId;
     filename: string;
     fileUrl: string;
+    objectKey?: string;
     extension: string;
     dataset?: Types.ObjectId | Dataset;
     originalDocumentId?: Types.ObjectId;

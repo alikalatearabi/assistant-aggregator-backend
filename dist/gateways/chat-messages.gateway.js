@@ -95,7 +95,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], ChatMessagesGateway.prototype, "handleChatRequest", null);
 exports.ChatMessagesGateway = ChatMessagesGateway = ChatMessagesGateway_1 = __decorate([
-    (0, websockets_1.WebSocketGateway)({ namespace: '/chat-messages', cors: true }),
+    (0, websockets_1.WebSocketGateway)({ namespace: '/backend/chat-messages', cors: true }),
     __param(0, (0, common_1.Inject)((0, common_1.forwardRef)(() => chat_messages_service_1.ChatMessagesService))),
     __metadata("design:paramtypes", [chat_messages_service_1.ChatMessagesService,
         message_service_1.MessageService,

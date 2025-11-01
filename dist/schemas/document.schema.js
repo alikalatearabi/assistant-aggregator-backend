@@ -83,6 +83,7 @@ let Document = class Document {
     _id;
     filename;
     fileUrl;
+    objectKey;
     extension;
     dataset;
     originalDocumentId;
@@ -119,6 +120,14 @@ __decorate([
     (0, mongoose_1.Prop)({ required: true }),
     __metadata("design:type", String)
 ], Document.prototype, "fileUrl", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'The object key used to store the file in MinIO',
+        required: false,
+    }),
+    (0, mongoose_1.Prop)({ required: false }),
+    __metadata("design:type", String)
+], Document.prototype, "objectKey", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: 'File extension/format',

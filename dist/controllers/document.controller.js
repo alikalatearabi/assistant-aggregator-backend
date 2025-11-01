@@ -109,11 +109,6 @@ let DocumentController = DocumentController_1 = class DocumentController {
         const exp = expires ? parseInt(expires, 10) : undefined;
         return this.documentService.getPresignedUrlForDocument(id, exp);
     }
-    async ensurePublicBucket() {
-        this.logger.log('Admin request: Ensuring public bucket access');
-        await this.minioService.ensurePublicAccess();
-        return { message: 'Bucket policy updated to allow public read access' };
-    }
     async getDocumentPages(id) {
         this.logger.log(`Request: Get pages for document ${id}`);
         return this.documentService.findPagesByOriginalDocument(id);
@@ -130,6 +125,17 @@ let DocumentController = DocumentController_1 = class DocumentController {
     }
     async findDocumentById(id) {
         return this.documentService.findDocumentById(id);
+    }
+    async getDownloadLink(id, expires) {
+        const document = await this.documentService.findDocumentById(id);
+        let objectName = document.objectKey
+            ? document.objectKey
+            : decodeURIComponent(document.fileUrl.split('/').slice(4).join('/'));
+        const bucket = 'assistant-aggregator';
+        if (objectName.startsWith(bucket + '/'))
+            objectName = objectName.replace(bucket + '/', '');
+        const url = await this.minioService.getPresignedDownloadUrl(objectName, parseInt(expires || '600', 10));
+        return { url };
     }
 };
 exports.DocumentController = DocumentController;
@@ -325,19 +331,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], DocumentController.prototype, "getPresignedUrl", null);
 __decorate([
-    (0, common_1.Post)('admin/ensure-public-bucket'),
-    (0, swagger_1.ApiExcludeEndpoint)(),
-    (0, swagger_1.ApiOperation)({ summary: 'Ensure MinIO bucket has public read access' }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Bucket policy updated',
-        schema: { type: 'object', properties: { message: { type: 'string' } } },
-    }),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], DocumentController.prototype, "ensurePublicBucket", null);
-__decorate([
     (0, common_1.Get)(':id/pages'),
     (0, swagger_1.ApiOperation)({ summary: 'Get all page documents for an original document' }),
     (0, swagger_1.ApiParam)({ name: 'id', description: 'Original document MongoDB ObjectId' }),
@@ -412,6 +405,15 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], DocumentController.prototype, "findDocumentById", null);
+__decorate([
+    (0, common_1.Get)(':id/download'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get temporary download link for document' }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Query)('expires')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], DocumentController.prototype, "getDownloadLink", null);
 exports.DocumentController = DocumentController = DocumentController_1 = __decorate([
     (0, swagger_1.ApiTags)('documents'),
     (0, common_1.Controller)('documents'),

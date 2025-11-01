@@ -23,10 +23,12 @@ import { ChatService } from './services/chat.service';
 import { OcrService } from './services/ocr.service';
 import { OcrStatusService } from './services/ocr-status.service';
 import { DocumentPageService } from './services/document-page.service';
+import { OcrTimeoutService } from './services/ocr-timeout.service';
 import { ChatMessagesGateway } from './gateways/chat-messages.gateway';
 import { ChatMessagesService } from './services/chat-messages.service';
 import { MinioService } from './services/minio.service';
 import { AuthModule } from './auth/auth.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -36,6 +38,7 @@ import { AuthModule } from './auth/auth.module';
     }),
     WinstonModule.forRoot(loggerConfig),
     HttpModule,
+    ScheduleModule.forRoot(),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -53,6 +56,6 @@ import { AuthModule } from './auth/auth.module';
     AuthModule,
   ],
   controllers: [AppController, UserController, DocumentController, DatasetController, OcrController, MessageController, ChatController],
-  providers: [AppService, DocumentService, DatasetService, MessageService, ChatService, OcrService, OcrStatusService, DocumentPageService, ChatMessagesGateway, ChatMessagesService, MinioService],
+  providers: [AppService, DocumentService, DatasetService, MessageService, ChatService, OcrService, OcrStatusService, DocumentPageService, OcrTimeoutService, ChatMessagesGateway, ChatMessagesService, MinioService],
 })
 export class AppModule {}
