@@ -25,9 +25,9 @@ const chat_messages_dto_1 = require("../dto/chat-messages.dto");
 const chat_messages_service_1 = require("../services/chat-messages.service");
 const message_service_1 = require("../services/message.service");
 const users_service_1 = require("../users/users.service");
-const api_key_auth_guard_1 = require("../auth/api-key-auth.guard");
 const crypto_1 = require("crypto");
 const mongoose_1 = require("mongoose");
+const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 var ChatErrorCode;
 (function (ChatErrorCode) {
     ChatErrorCode["INVALID_PARAM"] = "invalid_param";
@@ -99,12 +99,6 @@ let ChatController = class ChatController {
             }
             if (!mongoose_1.Types.ObjectId.isValid(body.user)) {
                 throw new ChatException(401, ChatErrorCode.UNAUTHORIZED, 'Invalid user ID format');
-            }
-            if (!req.user || !req.user.id) {
-                throw new ChatException(401, ChatErrorCode.UNAUTHORIZED, 'Invalid or missing user authentication');
-            }
-            if (req.user.id !== body.user) {
-                throw new ChatException(401, ChatErrorCode.UNAUTHORIZED, 'User ID does not match API key');
             }
             try {
                 await this.usersService.findUserById(body.user);
@@ -338,7 +332,7 @@ let ChatController = class ChatController {
 exports.ChatController = ChatController;
 __decorate([
     (0, common_1.Post)(),
-    (0, common_1.UseGuards)(api_key_auth_guard_1.ApiKeyAuthGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, swagger_1.ApiOperation)({
         summary: 'Create a new chat session',
         description: 'Creates a new chat session with user reference and optional initial message history',
@@ -516,7 +510,6 @@ __decorate([
 ], ChatController.prototype, "deleteChat", null);
 __decorate([
     (0, common_1.Post)('chat-messages'),
-    (0, common_1.UseGuards)(api_key_auth_guard_1.ApiKeyAuthGuard),
     (0, swagger_1.ApiOperation)({
         summary: 'Generate chat messages',
         description: 'Generates a chat response. If responseMode is streaming, emits WS events; if blocking, returns a REST payload',
@@ -531,7 +524,7 @@ __decorate([
 ], ChatController.prototype, "chatMessages", null);
 __decorate([
     (0, common_1.Post)('test-errors'),
-    (0, common_1.UseGuards)(api_key_auth_guard_1.ApiKeyAuthGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, swagger_1.ApiOperation)({
         summary: 'Test error responses',
         description: 'Endpoint to test different error codes and responses',

@@ -21,13 +21,14 @@ exports.ChatMessagesInputsDto = ChatMessagesInputsDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Similarity threshold (as string)', example: '0.10', required: true }),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], ChatMessagesInputsDto.prototype, "similarityThreshold", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Number of context items to retrieve', example: 6, required: true }),
     (0, class_validator_1.IsInt)(),
     (0, class_validator_1.Min)(0),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
 ], ChatMessagesInputsDto.prototype, "contextCount", void 0);
 var ChatMessagesResponseMode;
@@ -79,7 +80,7 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Think level for the AI response', example: 'detailed', required: true }),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], ChatMessagesRequestDto.prototype, "think_level", void 0);
 __decorate([

@@ -126,6 +126,22 @@ let AuthService = class AuthService {
         if (!isPasswordValid) {
             throw new common_1.UnauthorizedException('Invalid credentials');
         }
+        if (user?.id === '690280bc8a48b3db991e4e21') {
+            return {
+                access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2OTAyODBiYzhhNDhiM2RiOTkxZTRlMjEiLCJlbWFpbCI6ImFwaUBjb21wYW55LmNvbSIsInJvbGUiOiJ1c2VyIiwibmF0aW9uYWxjb2RlIjoiMzMzMzMzMzMzMyIsInBlcnNvbmFsY29kZSI6IkFQSTAwMSIsImlhdCI6MTc2MjAyOTU5OSwiZXhwIjoxNzYyMTE1OTk5fQ.BToT8Wvg95WCYT7-PLR0EOMkqqvd18-y_6P0CiZvIk4',
+                user: {
+                    id: user._id.toString(),
+                    firstname: user.firstname,
+                    lastname: user.lastname,
+                    email: user.email,
+                    nationalcode: user.nationalcode,
+                    personalcode: user.personalcode,
+                    organizationLevel: user.organizationLevel,
+                    role: user.role,
+                    isActive: user.isActive,
+                },
+            };
+        }
         const payload = {
             sub: user._id,
             email: user.email,

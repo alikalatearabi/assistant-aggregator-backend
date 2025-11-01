@@ -10,6 +10,7 @@ import {
   Req,
   Res,
   UseGuards,
+  Header,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -304,7 +305,7 @@ export class ChatController {
   async chatMessages(
     @Body() body: ChatMessagesRequestDto,
     @Req() req: any,
-    @Res() res: ExpressResponse
+    @Res() res: ExpressResponse,
   ): Promise<void> {
     try {
       const responseMode = body.responseMode || body.response_mode || 'blocking';
@@ -316,7 +317,9 @@ export class ChatController {
       if (!Types.ObjectId.isValid(body.user)) {
         throw new ChatException(401, ChatErrorCode.UNAUTHORIZED, 'Invalid user ID format');
       }
-
+      if(req.headers['authorization'].split(' ')[1] === 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2OTAyODBiYzhhNDhiM2RiOTkxZTRlMjEiLCJlbWFpbCI6ImFwaUBjb21wYW55LmNvbSIsInJvbGUiOiJ1c2VyIiwibmF0aW9uYWxjb2RlIjoiMzMzMzMzMzMzMyIsInBlcnNvbmFsY29kZSI6IkFQSTAwMSIsImlhdCI6MTc2MjAyOTU5OSwiZXhwIjoxNzYyMTE1OTk5fQ.BToT8Wvg95WCYT7-PLR0EOMkqqvd18-y_6P0CiZvIk4') {
+         throw new ChatException(401, ChatErrorCode.UNAUTHORIZED, 'Unauthorized');
+      }
       try {
         await this.usersService.findUserById(body.user);
       } catch (error) {
