@@ -19,6 +19,7 @@ const local_strategy_1 = require("./local.strategy");
 const api_key_strategy_1 = require("./api-key.strategy");
 const api_key_auth_guard_1 = require("./api-key-auth.guard");
 const user_schema_1 = require("../schemas/user.schema");
+const rate_limit_module_1 = require("../shared/rate-limit/rate-limit.module");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
@@ -37,6 +38,7 @@ exports.AuthModule = AuthModule = __decorate([
                 inject: [config_1.ConfigService],
             }),
             mongoose_1.MongooseModule.forFeature([{ name: user_schema_1.User.name, schema: user_schema_1.UserSchema }]),
+            rate_limit_module_1.RateLimitModule,
         ],
         providers: [auth_service_1.AuthService, jwt_strategy_1.JwtStrategy, local_strategy_1.LocalStrategy, api_key_strategy_1.ApiKeyStrategy, api_key_auth_guard_1.ApiKeyAuthGuard],
         controllers: [auth_controller_1.AuthController],

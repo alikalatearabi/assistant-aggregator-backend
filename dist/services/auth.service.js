@@ -52,12 +52,15 @@ const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
 const bcrypt = __importStar(require("bcryptjs"));
 const user_schema_1 = require("../schemas/user.schema");
+const rate_limit_service_1 = require("../shared/rate-limit/rate-limit.service");
 let AuthService = class AuthService {
     userModel;
     jwtService;
-    constructor(userModel, jwtService) {
+    rateLimitService;
+    constructor(userModel, jwtService, rateLimitService) {
         this.userModel = userModel;
         this.jwtService = jwtService;
+        this.rateLimitService = rateLimitService;
     }
     async register(registerDto) {
         const { email, nationalcode, personalcode, password, ...userData } = registerDto;
@@ -122,11 +125,14 @@ let AuthService = class AuthService {
         if (!user.isActive) {
             throw new common_1.UnauthorizedException('Account is deactivated');
         }
+        const userId = user._id.toString();
+        await this.rateLimitService.checkRateLimit(userId, rate_limit_service_1.RateLimitType.LOGIN);
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
             throw new common_1.UnauthorizedException('Invalid credentials');
         }
-        if (user?.id === '690280bc8a48b3db991e4e21') {
+        await this.rateLimitService.incrementRateLimit(userId, rate_limit_service_1.RateLimitType.LOGIN);
+        if (user?.id === '6906738cf06ae7f1c47105e2') {
             return {
                 access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2OTAyODBiYzhhNDhiM2RiOTkxZTRlMjEiLCJlbWFpbCI6ImFwaUBjb21wYW55LmNvbSIsInJvbGUiOiJ1c2VyIiwibmF0aW9uYWxjb2RlIjoiMzMzMzMzMzMzMyIsInBlcnNvbmFsY29kZSI6IkFQSTAwMSIsImlhdCI6MTc2MjAyOTU5OSwiZXhwIjoxNzYyMTE1OTk5fQ.BToT8Wvg95WCYT7-PLR0EOMkqqvd18-y_6P0CiZvIk4',
                 user: {
@@ -191,6 +197,7 @@ exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, mongoose_1.InjectModel)(user_schema_1.User.name)),
     __metadata("design:paramtypes", [mongoose_2.Model,
-        jwt_1.JwtService])
+        jwt_1.JwtService,
+        rate_limit_service_1.RateLimitService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

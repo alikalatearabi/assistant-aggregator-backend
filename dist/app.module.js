@@ -38,6 +38,7 @@ const messages_module_1 = require("./messages/messages.module");
 const datasets_module_1 = require("./datasets/datasets.module");
 const chats_module_1 = require("./chats/chats.module");
 const minio_module_1 = require("./shared/minio/minio.module");
+const rate_limit_module_1 = require("./shared/rate-limit/rate-limit.module");
 const schedule_1 = require("@nestjs/schedule");
 let AppModule = class AppModule {
 };
@@ -53,6 +54,7 @@ exports.AppModule = AppModule = __decorate([
             axios_1.HttpModule,
             schedule_1.ScheduleModule.forRoot(),
             minio_module_1.MinioModule,
+            rate_limit_module_1.RateLimitModule,
             mongoose_1.MongooseModule.forRootAsync({
                 imports: [config_1.ConfigModule],
                 useFactory: async (configService) => ({

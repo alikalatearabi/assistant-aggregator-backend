@@ -29,6 +29,7 @@ import { MessagesModule } from './messages/messages.module';
 import { DatasetsModule } from './datasets/datasets.module';
 import { ChatsModule } from './chats/chats.module';
 import { MinioModule } from './shared/minio/minio.module';
+import { RateLimitModule } from './shared/rate-limit/rate-limit.module';
 import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
@@ -41,6 +42,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     HttpModule,
     ScheduleModule.forRoot(),
     MinioModule,
+    RateLimitModule,
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({

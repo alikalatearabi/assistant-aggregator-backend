@@ -7,12 +7,14 @@ import { User, UserDocument, UserRole } from '../schemas/user.schema';
 import { LoginDto } from '../dto/login.dto';
 import { RegisterDto } from '../dto/register.dto';
 import { AuthResponseDto } from '../dto/auth-response.dto';
+import { RateLimitService, RateLimitType } from '../shared/rate-limit/rate-limit.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     private jwtService: JwtService,
+    private rateLimitService: RateLimitService,
   ) {}
 
   async register(registerDto: RegisterDto): Promise<AuthResponseDto> {
@@ -95,11 +97,18 @@ export class AuthService {
       throw new UnauthorizedException('Account is deactivated');
     }
 
+    // Check rate limit for login attempts
+    const userId = (user._id as any).toString();
+    await this.rateLimitService.checkRateLimit(userId, RateLimitType.LOGIN);
+
     // Verify password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
+
+    // Increment successful login count
+    await this.rateLimitService.incrementRateLimit(userId, RateLimitType.LOGIN);
 
     // Generate JWT token
     if (user?.id === '6906738cf06ae7f1c47105e2') {

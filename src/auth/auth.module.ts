@@ -10,6 +10,7 @@ import { LocalStrategy } from './local.strategy';
 import { ApiKeyStrategy } from './api-key.strategy';
 import { ApiKeyAuthGuard } from './api-key-auth.guard';
 import { User, UserSchema } from '../schemas/user.schema';
+import { RateLimitModule } from '../shared/rate-limit/rate-limit.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { User, UserSchema } from '../schemas/user.schema';
       inject: [ConfigService],
     }),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    RateLimitModule,
   ],
   providers: [AuthService, JwtStrategy, LocalStrategy, ApiKeyStrategy, ApiKeyAuthGuard],
   controllers: [AuthController],

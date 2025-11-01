@@ -28,6 +28,7 @@ const users_service_1 = require("../users/users.service");
 const crypto_1 = require("crypto");
 const mongoose_1 = require("mongoose");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
+const rate_limit_service_1 = require("../shared/rate-limit/rate-limit.service");
 var ChatErrorCode;
 (function (ChatErrorCode) {
     ChatErrorCode["INVALID_PARAM"] = "invalid_param";
@@ -39,6 +40,7 @@ var ChatErrorCode;
     ChatErrorCode["UNAUTHORIZED"] = "unauthorized";
     ChatErrorCode["CONVERSATION_DOES_NOT_EXIST"] = "conversation_does_not_exist";
     ChatErrorCode["INTERNAL_SERVER_ERROR"] = "internal_server_error";
+    ChatErrorCode["TOO_MANY_REQUESTS"] = "too_many_requests";
 })(ChatErrorCode || (ChatErrorCode = {}));
 class ChatException extends Error {
     status;
@@ -55,11 +57,13 @@ let ChatController = class ChatController {
     chatMessagesService;
     messageService;
     usersService;
-    constructor(chatService, chatMessagesService, messageService, usersService) {
+    rateLimitService;
+    constructor(chatService, chatMessagesService, messageService, usersService, rateLimitService) {
         this.chatService = chatService;
         this.chatMessagesService = chatMessagesService;
         this.messageService = messageService;
         this.usersService = usersService;
+        this.rateLimitService = rateLimitService;
     }
     async createChat(createChatDto) {
         return this.chatService.createChat(createChatDto);
@@ -100,6 +104,9 @@ let ChatController = class ChatController {
             if (!mongoose_1.Types.ObjectId.isValid(body.user)) {
                 throw new ChatException(401, ChatErrorCode.UNAUTHORIZED, 'Invalid user ID format');
             }
+            if (body.user === "6906738cf06ae7f1c47105e2" && req.headers['authorization'].split(' ')[1] !== 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2OTAyODBiYzhhNDhiM2RiOTkxZTRlMjEiLCJlbWFpbCI6ImFwaUBjb21wYW55LmNvbSIsInJvbGUiOiJ1c2VyIiwibmF0aW9uYWxjb2RlIjoiMzMzMzMzMzMzMyIsInBlcnNvbmFsY29kZSI6IkFQSTAwMSIsImlhdCI6MTc2MjAyOTU5OSwiZXhwIjoxNzYyMTE1OTk5fQ.BToT8Wvg95WCYT7-PLR0EOMkqqvd18-y_6P0CiZvIk4') {
+                throw new ChatException(401, ChatErrorCode.UNAUTHORIZED, 'Unauthorized');
+            }
             try {
                 await this.usersService.findUserById(body.user);
             }
@@ -108,6 +115,12 @@ let ChatController = class ChatController {
                     throw new ChatException(401, ChatErrorCode.UNAUTHORIZED, 'User does not exist');
                 }
                 throw error;
+            }
+            try {
+                await this.rateLimitService.checkRateLimit(body.user, rate_limit_service_1.RateLimitType.MESSAGE);
+            }
+            catch (error) {
+                throw new ChatException(error.status || 429, ChatErrorCode.TOO_MANY_REQUESTS, error.message);
             }
             const inputs = body.inputs || {};
             if (!inputs.similarityThreshold) {
@@ -187,6 +200,12 @@ let ChatController = class ChatController {
                         }
                     };
                     res.write(`data: ${JSON.stringify(endEvent)}\n\n`);
+                    try {
+                        await this.rateLimitService.incrementRateLimit(body.user, rate_limit_service_1.RateLimitType.MESSAGE);
+                    }
+                    catch (incrementError) {
+                        console.error('Failed to increment rate limit:', incrementError);
+                    }
                     res.end();
                 }
                 catch (error) {
@@ -246,6 +265,12 @@ let ChatController = class ChatController {
                     },
                     created_at: Math.floor(Date.now() / 1000),
                 };
+                try {
+                    await this.rateLimitService.incrementRateLimit(body.user, rate_limit_service_1.RateLimitType.MESSAGE);
+                }
+                catch (incrementError) {
+                    console.error('Failed to increment rate limit:', incrementError);
+                }
                 res.status(200).json(response);
             }
         }
@@ -541,6 +566,7 @@ exports.ChatController = ChatController = __decorate([
     __metadata("design:paramtypes", [chat_service_1.ChatService,
         chat_messages_service_1.ChatMessagesService,
         message_service_1.MessageService,
-        users_service_1.UsersService])
+        users_service_1.UsersService,
+        rate_limit_service_1.RateLimitService])
 ], ChatController);
 //# sourceMappingURL=chat.controller.js.map

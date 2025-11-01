@@ -124,6 +124,38 @@ export class User {
   })
   @Prop({ type: Date, default: Date.now })
   updatedAt: Date;
+
+  @ApiProperty({
+    description: 'Login attempts count and reset timestamp',
+  })
+  @Prop({
+    type: {
+      count: { type: Number, default: 0 },
+      resetAt: { type: Date, default: Date.now },
+    },
+    default: () => ({ count: 0, resetAt: new Date() }),
+    _id: false,
+  })
+  loginRateLimit?: {
+    count: number;
+    resetAt: Date;
+  };
+
+  @ApiProperty({
+    description: 'Message count and reset timestamp',
+  })
+  @Prop({
+    type: {
+      count: { type: Number, default: 0 },
+      resetAt: { type: Date, default: Date.now },
+    },
+    default: () => ({ count: 0, resetAt: new Date() }),
+    _id: false,
+  })
+  messageRateLimit?: {
+    count: number;
+    resetAt: Date;
+  };
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

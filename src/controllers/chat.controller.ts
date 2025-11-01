@@ -34,6 +34,7 @@ import { UsersService } from '../users/users.service';
 import { randomUUID } from 'crypto';
 import { Types } from 'mongoose';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { RateLimitService, RateLimitType } from '../shared/rate-limit/rate-limit.service';
 
 interface RetrieverResource {
   position: number;
@@ -55,7 +56,8 @@ enum ChatErrorCode {
   COMPLETION_REQUEST_ERROR = 'completion_request_error',
   UNAUTHORIZED = 'unauthorized',
   CONVERSATION_DOES_NOT_EXIST = 'conversation_does_not_exist',
-  INTERNAL_SERVER_ERROR = 'internal_server_error'
+  INTERNAL_SERVER_ERROR = 'internal_server_error',
+  TOO_MANY_REQUESTS = 'too_many_requests',
 }
 
 class ChatException extends Error {
@@ -123,6 +125,7 @@ export class ChatController {
     private readonly chatMessagesService: ChatMessagesService,
     private readonly messageService: MessageService,
     private readonly usersService: UsersService,
+    private readonly rateLimitService: RateLimitService,
   ) {}
 
   @Post()
@@ -329,6 +332,13 @@ export class ChatController {
         throw error;
       }
 
+      // Check rate limit for messages
+      try {
+        await this.rateLimitService.checkRateLimit(body.user, RateLimitType.MESSAGE);
+      } catch (error) {
+        throw new ChatException(error.status || 429, ChatErrorCode.TOO_MANY_REQUESTS, error.message);
+      }
+
       const inputs = body.inputs || {};
       if (!inputs.similarityThreshold) {
         inputs.similarityThreshold = '0.10';
@@ -432,6 +442,14 @@ export class ChatController {
           };
           res.write(`data: ${JSON.stringify(endEvent)}\n\n`);
           
+          // Increment successful message count for streaming
+          try {
+            await this.rateLimitService.incrementRateLimit(body.user, RateLimitType.MESSAGE);
+          } catch (incrementError) {
+            // Log but don't fail the response
+            console.error('Failed to increment rate limit:', incrementError);
+          }
+          
           res.end();
         } catch (error) {
           // Send error event in SSE format
@@ -503,6 +521,14 @@ export class ChatController {
           },
           created_at: Math.floor(Date.now() / 1000), // Unix timestamp as integer
         };
+        
+        // Increment successful message count
+        try {
+          await this.rateLimitService.incrementRateLimit(body.user, RateLimitType.MESSAGE);
+        } catch (incrementError) {
+          // Log but don't fail the response
+          console.error('Failed to increment rate limit:', incrementError);
+        }
         
         res.status(200).json(response);
       }
