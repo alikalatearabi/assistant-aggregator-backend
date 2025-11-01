@@ -8,7 +8,7 @@ import { DocumentQueryDto } from '../dto/document-query.dto';
 import { OcrService } from './ocr.service';
 import { OcrStatusService } from './ocr-status.service';
 import { DocumentPageService } from './document-page.service';
-import { sendRagDataToExternalApi } from './rag.service';
+import { sendRagDataToExternalApi } from '../shared/rag/rag.service';
 
 @Injectable()
 export class DocumentService {

@@ -25,7 +25,7 @@ import {
 } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { DocumentService } from '../services/document.service';
-import { MinioService } from '../services/minio.service';
+import { MinioService } from '../shared/minio/minio.service';
 import { BadRequestException } from '@nestjs/common';
 import { CreateDocumentDto } from '../dto/create-document.dto';
 import { UpdateDocumentDto } from '../dto/update-document.dto';
