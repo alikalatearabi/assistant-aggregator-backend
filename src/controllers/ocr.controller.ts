@@ -9,9 +9,7 @@ import { Document } from '../schemas/document.schema';
 @Controller('ocr')
 export class OcrController {
   private readonly logger = new Logger(OcrController.name);
-
   constructor(private readonly documentService: DocumentService) {}
-
   @Post('submit')
   @ApiOperation({
     summary: 'Submit OCR analysis result',
@@ -30,7 +28,6 @@ export class OcrController {
       has_page: submitOcrResultDto.page !== undefined,
     });
 
-    // If a page number is provided, create a page document separately
     if (submitOcrResultDto.page && Number.isInteger(submitOcrResultDto.page) && submitOcrResultDto.page > 0) {
       const pageDoc = await this.documentService.createPageDocument(
         submitOcrResultDto.documentId.toString(),
@@ -38,12 +35,10 @@ export class OcrController {
         submitOcrResultDto.raw_text,
         { processedBy: 'ocr-service' },
       );
-
       this.logger.log(`OCR Submit - Successfully stored page ${submitOcrResultDto.page} for document: ${submitOcrResultDto.documentId}`);
       return pageDoc;
     }
 
-    // No page provided: treat this as a full-document OCR result (complete)
     const result = await this.documentService.submitOcrResult(
       submitOcrResultDto.documentId.toString(),
       submitOcrResultDto.raw_text,

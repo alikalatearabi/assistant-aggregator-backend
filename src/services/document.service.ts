@@ -8,6 +8,7 @@ import { DocumentQueryDto } from '../dto/document-query.dto';
 import { OcrService } from './ocr.service';
 import { OcrStatusService } from './ocr-status.service';
 import { DocumentPageService } from './document-page.service';
+import { sendRagDataToExternalApi } from './rag.service';
 
 @Injectable()
 export class DocumentService {
@@ -18,13 +19,13 @@ export class DocumentService {
     private readonly ocrService: OcrService,
     private readonly ocrStatusService: OcrStatusService,
     private readonly documentPageService: DocumentPageService,
-  ) {}
+  ) { }
 
   async createDocument(createDocumentDto: CreateDocumentDto): Promise<Document> {
     if (createDocumentDto.metadata?.user_id && !Types.ObjectId.isValid(createDocumentDto.metadata.user_id.toString())) {
       throw new BadRequestException('Invalid user ID in metadata');
     }
-    const createdDocument = new this.documentModel(createDocumentDto);    const savedDocument = await createdDocument.save();
+    const createdDocument = new this.documentModel(createDocumentDto); const savedDocument = await createdDocument.save();
     this.logger.log(`Document created successfully: ${savedDocument._id}, sending to OCR service`);
     try {
       await this.ocrService.sendDocumentForOcrAsync({
@@ -35,7 +36,7 @@ export class DocumentService {
     } catch (error) {
       this.logger.error(`Failed to send document ${savedDocument._id} to OCR service:`, error);
     }
-    
+
     return savedDocument;
   }
 
@@ -57,19 +58,19 @@ export class DocumentService {
     } = query;
 
     const filter: any = {};
-    
+
     if (extension) {
       filter.extension = { $regex: extension, $options: 'i' };
     }
-    
+
     if (metadataUserId && Types.ObjectId.isValid(metadataUserId)) {
       filter['metadata.user_id'] = new Types.ObjectId(metadataUserId);
     }
-    
+
     if (filename) {
       filter.filename = { $regex: filename, $options: 'i' };
     }
-    
+
     if (dateFrom || dateTo) {
       filter.createdAt = {};
       if (dateFrom) {
@@ -110,11 +111,11 @@ export class DocumentService {
       .findById(id)
       .populate('metadata.user_id', 'firstname lastname email')
       .exec();
-    
+
     if (!document) {
       throw new NotFoundException('Document not found');
     }
-    
+
     return document;
   }
 
@@ -151,11 +152,11 @@ export class DocumentService {
       .findByIdAndUpdate(id, updateDocumentDto, { new: true })
       .populate('metadata.user_id', 'firstname lastname email')
       .exec();
-    
+
     if (!document) {
       throw new NotFoundException('Document not found');
     }
-    
+
     return document;
   }
 
@@ -168,11 +169,11 @@ export class DocumentService {
       .findByIdAndDelete(id)
       .populate('metadata.user_id', 'firstname lastname email')
       .exec();
-    
+
     if (!document) {
       throw new NotFoundException('Document not found');
     }
-    
+
     return document;
   }
 
@@ -189,11 +190,11 @@ export class DocumentService {
       )
       .populate('metadata.user_id', 'firstname lastname email')
       .exec();
-    
+
     if (!document) {
       throw new NotFoundException('Document not found');
     }
-    
+
     return document;
   }
 
@@ -210,11 +211,11 @@ export class DocumentService {
       )
       .populate('metadata.user_id', 'firstname lastname email')
       .exec();
-    
+
     if (!document) {
       throw new NotFoundException('Document not found');
     }
-    
+
     return document;
   }
 
@@ -352,6 +353,21 @@ export class DocumentService {
         .populate('metadata.user_id', 'firstname lastname email')
         .exec();
 
+      sendRagDataToExternalApi({
+        raw_text: combinedText,
+        metadata: {
+          document_id: existingDocument.metadata?.document_id || '',
+          page_id: existingDocument.metadata?.page_id || '',
+          user_id: existingDocument.metadata?.user_id?.toString() || '',
+          title: existingDocument.metadata?.title || '',
+          approved_date: existingDocument.metadata?.approved_date || '',
+          effective_date: existingDocument.metadata?.effective_date || '',
+          owner: existingDocument.metadata?.owner || '',
+          username: existingDocument.metadata?.username || '',
+          access_level: existingDocument.metadata?.access_level || '',
+        }
+      });
+
       return updatedOriginal as Document;
     }
 
@@ -396,7 +412,7 @@ export class DocumentService {
 
   async searchDocuments(searchTerm: string): Promise<Document[]> {
     const searchRegex = { $regex: searchTerm, $options: 'i' };
-    
+
     return this.documentModel
       .find({
         $or: [
@@ -418,7 +434,7 @@ export class DocumentService {
     recentDocuments: number;
   }> {
     const totalDocuments = await this.documentModel.countDocuments();
-    
+
     const documentsByExtension = await this.documentModel.aggregate([
       { $group: { _id: '$extension', count: { $sum: 1 } } },
       { $sort: { count: -1 } },

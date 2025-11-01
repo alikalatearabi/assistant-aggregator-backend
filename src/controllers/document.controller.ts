@@ -45,7 +45,6 @@ import { RolesGuard } from 'src/auth/roles.guard';
 @ApiBearerAuth()
 export class DocumentController {
   private readonly logger = new Logger(DocumentController.name);
-
   constructor(
     private readonly documentService: DocumentService,
     private readonly minioService: MinioService,
@@ -82,19 +81,10 @@ export class DocumentController {
     @UploadedFile() file: any,
     @Body() body: any,
   ): Promise<Document> {
-    this.logger.log(`=== Starting document upload ===`);
-    this.logger.log(`Request body keys: ${Object.keys(body)}`);
-    this.logger.log(`File info: ${file ? `size=${file.size}, type=${file.mimetype}, originalname=${file.originalname}` : 'NO FILE'}`);
-
-    // Validate required fields from body
     if (!file || !body?.filename || !body?.extension) {
       this.logger.error(`Validation failed - file: ${!!file}, filename: ${!!body?.filename}, extension: ${!!body?.extension}`);
       throw new BadRequestException('file, filename and extension are required');
     }
-
-    this.logger.log(`Processing file: ${body.filename}.${body.extension}`);
-
-    // Parse metadata if it's a JSON string
     let metadataParsed: any = undefined;
     if (typeof body?.metadata === 'string') {
       try {
@@ -108,8 +98,6 @@ export class DocumentController {
       metadataParsed = body.metadata;
       this.logger.log(`Using metadata object: ${JSON.stringify(metadataParsed)}`);
     }
-
-    // Upload to MinIO and obtain a public URL
     const safeName = String(body.filename).replace(/\s+/g, '_');
     const objectName = `documents/${Date.now()}_${safeName}`;
     this.logger.log(`Generated object name: ${objectName}`);
@@ -120,8 +108,6 @@ export class DocumentController {
       contentType: file.mimetype,
     });
     this.logger.log(`Upload completed, fileUrl: ${fileUrl}`);
-
-    // Build DTO expected by service
     const dto: CreateDocumentDto = {
       filename: body.filename,
       fileUrl,
@@ -134,7 +120,6 @@ export class DocumentController {
     const result = await this.documentService.createDocument(dto);
     this.logger.log(`Document created successfully with ID: ${result._id}`);
     this.logger.log(`=== Document upload completed ===`);
-
     return result;
   }
 
@@ -277,7 +262,7 @@ export class DocumentController {
   @ApiResponse({
     status: 200,
     description: 'Presigned URL created',
-    schema: { type: 'object', properties: { url: { type: 'string', example: 'https://minio.local/bucket/object?X-Amz-Expires=900&X-Amz-Signature=...' } } },
+    schema: { type: 'object', properties: { url: { type: 'string'}}},
   })
   async getPresignedUrl(
     @Param('id') id: string,

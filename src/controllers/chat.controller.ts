@@ -19,7 +19,6 @@ import {
   ApiQuery,
   ApiExcludeEndpoint,
 } from '@nestjs/swagger';
-import { Response } from 'express';
 import type { Response as ExpressResponse } from 'express';
 import { ChatService } from '../services/chat.service';
 import { CreateChatDto } from '../dto/create-chat.dto';
@@ -32,7 +31,6 @@ import { ChatMessagesService } from '../services/chat-messages.service';
 import { MessageService } from '../services/message.service';
 import { ApiKeyAuthGuard } from '../auth/api-key-auth.guard';
 
-// Define response interfaces to match the specified schema
 interface RetrieverResource {
   position: number;
   dataset_id: string;
@@ -44,7 +42,6 @@ interface RetrieverResource {
   content: string;
 }
 
-// Define error codes enum
 enum ChatErrorCode {
   INVALID_PARAM = 'invalid_param',
   APP_UNAVAILABLE = 'app_unavailable',
@@ -57,7 +54,6 @@ enum ChatErrorCode {
   INTERNAL_SERVER_ERROR = 'internal_server_error'
 }
 
-// Custom exception class for chat errors
 class ChatException extends Error {
   constructor(
     public status: number,
