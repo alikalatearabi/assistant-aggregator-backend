@@ -14,19 +14,57 @@ echo "Base URL: ${BASE_URL}"
 echo "User ID: ${USER_ID}"
 echo "==========================================="
 
-# Test 1: Login Rate Limit
+# Test 1A: Failed Login Rate Limit (counts all attempts)
 echo ""
 echo "==========================================="
-echo "TEST 1: Login Rate Limit"
+echo "TEST 1A: Failed Login Rate Limit"
+echo "Expected: Failed logins count toward limit, hit 429 after 10 attempts"
+echo "==========================================="
+echo ""
+
+LOGIN_EMAIL="api@company.com"
+
+echo "Attempting 12 failed logins with wrong password (rate limit is 10/hour)..."
+for i in {1..12}; do
+  echo -n "Failed login attempt $i: "
+  response=$(curl -s -X POST ${BASE_URL}/auth/login \
+    -H "Content-Type: application/json" \
+    -d "{
+      \"email\": \"${LOGIN_EMAIL}\",
+      \"password\": \"wrong_password_${i}\"
+    }" \
+    -w "\nHTTP_STATUS:%{http_code}")
+  
+  http_code=$(echo "$response" | grep -o "HTTP_STATUS:[0-9]*" | cut -d: -f2)
+  echo "Status: $http_code"
+  
+  if [ "$http_code" = "429" ]; then
+    echo "✅ Rate limit hit! Attempt $i returned 429"
+    echo ""
+    echo "Response:"
+    echo "$response" | grep -v "HTTP_STATUS" | jq '.' 2>/dev/null || echo "$response" | grep -v "HTTP_STATUS"
+    break
+  elif [ "$http_code" = "401" ]; then
+    echo "✅ Login failed as expected (wrong password)"
+  else
+    echo "❌ Unexpected status: $http_code"
+    echo "$response" | grep -v "HTTP_STATUS"
+  fi
+  
+  sleep 0.5
+done
+
+# Test 1B: Successful Login Rate Limit
+echo ""
+echo "==========================================="
+echo "TEST 1B: Successful Login Rate Limit"
 echo "Expected: First few attempts should succeed, then 429 Too Many Requests"
 echo "==========================================="
 echo ""
 
-# Get the password from the seeded user (assuming we know it)
-LOGIN_EMAIL="api@company.com"
 LOGIN_PASSWORD="ApiUser123!"
 
-echo "Attempting 12 login attempts (rate limit is 10/hour)..."
+echo "Attempting 12 successful logins (rate limit is 10/hour)..."
 for i in {1..12}; do
   echo -n "Login attempt $i: "
   response=$(curl -s -X POST ${BASE_URL}/auth/login \

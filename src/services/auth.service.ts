@@ -97,13 +97,19 @@ export class AuthService {
       throw new UnauthorizedException('Account is deactivated');
     }
 
-    // Check rate limit for login attempts
+    // Check rate limit for login attempts (counts all attempts, successful or not)
     const userId = (user._id as any).toString();
     await this.rateLimitService.checkRateLimit(userId, RateLimitType.LOGIN);
 
     // Verify password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
+      // Increment failed login attempt
+      try {
+        await this.rateLimitService.incrementRateLimit(userId, RateLimitType.LOGIN);
+      } catch (incrementError) {
+        // Ignore increment errors, we're already throwing UnauthorizedException
+      }
       throw new UnauthorizedException('Invalid credentials');
     }
 

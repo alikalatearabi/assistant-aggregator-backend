@@ -13,6 +13,18 @@ RATE_LIMIT_MESSAGE_MAX=50            # Max messages per window
 RATE_LIMIT_MESSAGE_WINDOW_HOURS=1    # Time window in hours
 ```
 
+## How Rate Limiting Works
+
+### Login Rate Limiting
+- **Counts ALL login attempts** (both successful and failed)
+- Protects against brute force attacks
+- Example: If limit is 10/hour, after 10 attempts (regardless of success/failure), you get 429 error
+
+### Message Rate Limiting
+- **Counts successful message deliveries**
+- Protects API from abuse
+- Example: If limit is 50/hour, after 50 successful messages, you get 429 error
+
 ## Testing Scripts
 
 ### 1. Quick Single Test
