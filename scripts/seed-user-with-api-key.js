@@ -49,15 +49,12 @@ async function seedUserWithApiKey() {
       return;
     }
 
-    // Hash the password
     console.log('Creating API user...');
     const saltRounds = 12;
     const hashedPassword = await bcrypt.hash(userToSeed.password, saltRounds);
 
-    // Generate API key (same format as createApiKeyForUser)
-    const apiKey = 'sk_9c30f5fd1bd5b69db561a4de84ca2b64bed7f89e2b1894da'
+    const apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2OTAyODBiYzhhNDhiM2RiOTkxZTRlMjEiLCJlbWFpbCI6ImFwaUBjb21wYW55LmNvbSIsInJvbGUiOiJ1c2VyIiwibmF0aW9uYWxjb2RlIjoiMzMzMzMzMzMzMyIsInBlcnNvbmFsY29kZSI6IkFQSTAwMSIsImlhdCI6MTc2MjAyOTU5OSwiZXhwIjoxNzYyMTE1OTk5fQ.BToT8Wvg95WCYT7-PLR0EOMkqqvd18-y_6P0CiZvIk4'
 
-    // Create the user with API key
     const userDoc = {
       ...userToSeed,
       password: hashedPassword,

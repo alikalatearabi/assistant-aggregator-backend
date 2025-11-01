@@ -1,5 +1,5 @@
 import { DocumentService } from '../services/document.service';
-import { MinioService } from '../services/minio.service';
+import { MinioService } from '../shared/minio/minio.service';
 import { UpdateDocumentDto } from '../dto/update-document.dto';
 import { DocumentQueryDto } from '../dto/document-query.dto';
 import { DocumentMetadataDto } from '../dto/document-metadata.dto';

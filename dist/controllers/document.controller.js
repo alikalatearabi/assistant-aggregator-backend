@@ -18,12 +18,16 @@ const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const platform_express_1 = require("@nestjs/platform-express");
 const document_service_1 = require("../services/document.service");
-const minio_service_1 = require("../services/minio.service");
+const minio_service_1 = require("../shared/minio/minio.service");
 const common_2 = require("@nestjs/common");
 const update_document_dto_1 = require("../dto/update-document.dto");
 const document_query_dto_1 = require("../dto/document-query.dto");
 const document_metadata_dto_1 = require("../dto/document-metadata.dto");
 const document_schema_1 = require("../schemas/document.schema");
+const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
+const roles_decorator_1 = require("../auth/roles.decorator");
+const user_schema_1 = require("../schemas/user.schema");
+const roles_guard_1 = require("../auth/roles.guard");
 let DocumentController = DocumentController_1 = class DocumentController {
     documentService;
     minioService;
@@ -33,14 +37,10 @@ let DocumentController = DocumentController_1 = class DocumentController {
         this.minioService = minioService;
     }
     async createDocument(file, body) {
-        this.logger.log(`=== Starting document upload ===`);
-        this.logger.log(`Request body keys: ${Object.keys(body)}`);
-        this.logger.log(`File info: ${file ? `size=${file.size}, type=${file.mimetype}, originalname=${file.originalname}` : 'NO FILE'}`);
         if (!file || !body?.filename || !body?.extension) {
             this.logger.error(`Validation failed - file: ${!!file}, filename: ${!!body?.filename}, extension: ${!!body?.extension}`);
             throw new common_2.BadRequestException('file, filename and extension are required');
         }
-        this.logger.log(`Processing file: ${body.filename}.${body.extension}`);
         let metadataParsed = undefined;
         if (typeof body?.metadata === 'string') {
             try {
@@ -143,6 +143,8 @@ __decorate([
     (0, common_1.Post)(),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
     (0, swagger_1.ApiConsumes)('multipart/form-data'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)(user_schema_1.UserRole.ADMIN, user_schema_1.UserRole.USER),
     (0, swagger_1.ApiOperation)({
         summary: 'Upload and create a new document',
         description: 'Uploads a file and creates a document record; file is sent to OCR service afterward',
@@ -322,7 +324,7 @@ __decorate([
     (0, swagger_1.ApiResponse)({
         status: 200,
         description: 'Presigned URL created',
-        schema: { type: 'object', properties: { url: { type: 'string', example: 'https://minio.local/bucket/object?X-Amz-Expires=900&X-Amz-Signature=...' } } },
+        schema: { type: 'object', properties: { url: { type: 'string' } } },
     }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Query)('expires')),
@@ -417,6 +419,9 @@ __decorate([
 exports.DocumentController = DocumentController = DocumentController_1 = __decorate([
     (0, swagger_1.ApiTags)('documents'),
     (0, common_1.Controller)('documents'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)(user_schema_1.UserRole.ADMIN, user_schema_1.UserRole.USER),
+    (0, swagger_1.ApiBearerAuth)(),
     __metadata("design:paramtypes", [document_service_1.DocumentService,
         minio_service_1.MinioService])
 ], DocumentController);

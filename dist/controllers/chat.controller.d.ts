@@ -8,11 +8,13 @@ import { Chat } from '../schemas/chat.schema';
 import { ChatMessagesRequestDto } from '../dto/chat-messages.dto';
 import { ChatMessagesService } from '../services/chat-messages.service';
 import { MessageService } from '../services/message.service';
+import { UsersService } from '../users/users.service';
 export declare class ChatController {
     private readonly chatService;
     private readonly chatMessagesService;
     private readonly messageService;
-    constructor(chatService: ChatService, chatMessagesService: ChatMessagesService, messageService: MessageService);
+    private readonly usersService;
+    constructor(chatService: ChatService, chatMessagesService: ChatMessagesService, messageService: MessageService, usersService: UsersService);
     createChat(createChatDto: CreateChatDto): Promise<Chat>;
     findAllChats(query: ChatQueryDto): Promise<{
         chats: Chat[];

@@ -21,6 +21,7 @@ const document_schema_1 = require("../schemas/document.schema");
 const ocr_service_1 = require("./ocr.service");
 const ocr_status_service_1 = require("./ocr-status.service");
 const document_page_service_1 = require("./document-page.service");
+const rag_service_1 = require("../shared/rag/rag.service");
 let DocumentService = DocumentService_1 = class DocumentService {
     documentModel;
     ocrService;
@@ -212,6 +213,20 @@ let DocumentService = DocumentService_1 = class DocumentService {
                 createdAt: processedAt,
             },
         };
+        (0, rag_service_1.sendRagDataToExternalApi)({
+            raw_text: rawText,
+            metadata: {
+                document_id: original.metadata?.document_id || '',
+                page_id: original.metadata?.page_id || '',
+                user_id: original.metadata?.user_id?.toString() || '',
+                title: original.metadata?.title || '',
+                approved_date: original.metadata?.approved_date || '',
+                effective_date: original.metadata?.effective_date || '',
+                owner: original.metadata?.owner || '',
+                username: original.metadata?.username || '',
+                access_level: original.metadata?.access_level || '',
+            }
+        });
         const pageDoc = await this.documentModel
             .findOneAndUpdate(pageFilter, pageUpdate, { upsert: true, new: true, setDefaultsOnInsert: true })
             .populate('metadata.user_id', 'firstname lastname email')
