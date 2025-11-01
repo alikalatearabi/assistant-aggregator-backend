@@ -2,15 +2,14 @@ const { MongoClient } = require('mongodb');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 
-// Configuration for the user to seed with API key
 const userToSeed = {
   firstname: 'API',
   lastname: 'User',
-  nationalcode: '3333333333', // Unique national code
-  personalcode: 'API001',      // Unique personal code
-  email: 'api@company.com',    // API user email
+  nationalcode: '3333333333',
+  personalcode: 'API001',
+  email: 'api@company.com',
   organizationLevel: 'senior',
-  password: 'ApiUser123!',     // Plain text password - will be hashed
+  password: 'ApiUser123!',
   isActive: true,
   role: 'user'
 };
@@ -26,7 +25,6 @@ async function seedUserWithApiKey() {
     const database = client.db('assistant_aggregator');
     const collection = database.collection('users');
 
-    // Check if user already exists
     const existingUser = await collection.findOne({
       $or: [
         { email: userToSeed.email },
@@ -86,7 +84,6 @@ async function seedUserWithApiKey() {
   }
 }
 
-// Run the seed function
 if (require.main === module) {
   seedUserWithApiKey();
 }
