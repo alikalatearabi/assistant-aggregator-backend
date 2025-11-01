@@ -33,6 +33,7 @@ import { UsersService } from '../users/users.service';
 import { ApiKeyAuthGuard } from '../auth/api-key-auth.guard';
 import { randomUUID } from 'crypto';
 import { Types } from 'mongoose';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 interface RetrieverResource {
   position: number;
@@ -125,7 +126,7 @@ export class ChatController {
   ) {}
 
   @Post()
-  @UseGuards(ApiKeyAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Create a new chat session',
     description: 'Creates a new chat session with user reference and optional initial message history',
@@ -296,7 +297,8 @@ export class ChatController {
   }
 
   @Post('chat-messages')
-  @UseGuards(ApiKeyAuthGuard)
+  // @UseGuards(ApiKeyAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Generate chat messages',
     description: 'Generates a chat response. If responseMode is streaming, emits WS events; if blocking, returns a REST payload',
@@ -532,7 +534,8 @@ export class ChatController {
   }
 
   @Post('test-errors')
-  @UseGuards(ApiKeyAuthGuard)
+  // @UseGuards(ApiKeyAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Test error responses',
     description: 'Endpoint to test different error codes and responses',

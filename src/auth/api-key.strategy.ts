@@ -18,23 +18,23 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') {
 		const authHeader = req.headers?.authorization || '';
 		let apiKey: string | undefined;
 
-		if (authHeader) {
-			const parts = authHeader.split(' ');
-			if (parts.length === 2) {
-				const scheme = parts[0].toLowerCase();
-				if (scheme === 'bearer' || scheme === 'api-key') {
-					apiKey = parts[1];
-				}
-			}
-		}
+		// if (authHeader) {
+		// 	const parts = authHeader.split(' ');
+		// 	if (parts.length === 2) {
+		// 		const scheme = parts[0].toLowerCase();
+		// 		if (scheme === 'bearer' || scheme === 'api-key') {
+		// 			apiKey = parts[1];
+		// 		}
+		// 	}
+		// }
 
-		if (!apiKey) {
-			apiKey = req.headers['x-api-key'];
-		}
+		// if (!apiKey) {
+		// 	apiKey = req.headers['x-api-key'];
+		// }
 
-		if (!apiKey) {
-			throw new UnauthorizedException('API key is missing');
-		}
+		// if (!apiKey) {
+		// 	throw new UnauthorizedException('API key is missing');
+		// }
 
 		const user = await this.userModel.findOne({ apiKey }).select('+password');
 
