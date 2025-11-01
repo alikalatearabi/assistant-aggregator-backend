@@ -36,7 +36,7 @@ export class DocumentService {
     } catch (error) {
       this.logger.error(`Failed to send document ${savedDocument._id} to OCR service:`, error);
     }
-
+    
     return savedDocument;
   }
 
@@ -58,19 +58,19 @@ export class DocumentService {
     } = query;
 
     const filter: any = {};
-
+    
     if (extension) {
       filter.extension = { $regex: extension, $options: 'i' };
     }
-
+    
     if (metadataUserId && Types.ObjectId.isValid(metadataUserId)) {
       filter['metadata.user_id'] = new Types.ObjectId(metadataUserId);
     }
-
+    
     if (filename) {
       filter.filename = { $regex: filename, $options: 'i' };
     }
-
+    
     if (dateFrom || dateTo) {
       filter.createdAt = {};
       if (dateFrom) {
@@ -111,11 +111,11 @@ export class DocumentService {
       .findById(id)
       .populate('metadata.user_id', 'firstname lastname email')
       .exec();
-
+    
     if (!document) {
       throw new NotFoundException('Document not found');
     }
-
+    
     return document;
   }
 
@@ -152,11 +152,11 @@ export class DocumentService {
       .findByIdAndUpdate(id, updateDocumentDto, { new: true })
       .populate('metadata.user_id', 'firstname lastname email')
       .exec();
-
+    
     if (!document) {
       throw new NotFoundException('Document not found');
     }
-
+    
     return document;
   }
 
@@ -169,11 +169,11 @@ export class DocumentService {
       .findByIdAndDelete(id)
       .populate('metadata.user_id', 'firstname lastname email')
       .exec();
-
+    
     if (!document) {
       throw new NotFoundException('Document not found');
     }
-
+    
     return document;
   }
 
@@ -190,11 +190,11 @@ export class DocumentService {
       )
       .populate('metadata.user_id', 'firstname lastname email')
       .exec();
-
+    
     if (!document) {
       throw new NotFoundException('Document not found');
     }
-
+    
     return document;
   }
 
@@ -211,11 +211,11 @@ export class DocumentService {
       )
       .populate('metadata.user_id', 'firstname lastname email')
       .exec();
-
+    
     if (!document) {
       throw new NotFoundException('Document not found');
     }
-
+    
     return document;
   }
 
@@ -408,7 +408,7 @@ export class DocumentService {
 
   async searchDocuments(searchTerm: string): Promise<Document[]> {
     const searchRegex = { $regex: searchTerm, $options: 'i' };
-
+    
     return this.documentModel
       .find({
         $or: [
@@ -430,7 +430,7 @@ export class DocumentService {
     recentDocuments: number;
   }> {
     const totalDocuments = await this.documentModel.countDocuments();
-
+    
     const documentsByExtension = await this.documentModel.aggregate([
       { $group: { _id: '$extension', count: { $sum: 1 } } },
       { $sort: { count: -1 } },
