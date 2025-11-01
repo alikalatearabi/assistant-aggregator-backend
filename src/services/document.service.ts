@@ -231,7 +231,6 @@ export class DocumentService {
     }
 
     const originalIdObj = new Types.ObjectId(originalDocumentId);
-
     const original = await this.documentModel.findById(originalIdObj).exec();
     if (!original) {
       this.logger.warn(`createPageDocument: original document not found ${originalDocumentId}`);
@@ -239,7 +238,6 @@ export class DocumentService {
     }
 
     const processedAt = new Date().toISOString();
-
     const pageFilter = {
       originalDocumentId: originalIdObj,
       pageNumber,
@@ -265,6 +263,20 @@ export class DocumentService {
         createdAt: processedAt,
       },
     };
+    sendRagDataToExternalApi({
+      raw_text: rawText,
+      metadata: {
+        document_id: original.metadata?.document_id || '',
+        page_id: original.metadata?.page_id || '',
+        user_id: original.metadata?.user_id?.toString() || '',
+        title: original.metadata?.title || '',
+        approved_date: original.metadata?.approved_date || '',
+        effective_date: original.metadata?.effective_date || '',
+        owner: original.metadata?.owner || '',
+        username: original.metadata?.username || '',
+        access_level: original.metadata?.access_level || '',
+      }
+    });
 
     const pageDoc = await this.documentModel
       .findOneAndUpdate(pageFilter, pageUpdate, { upsert: true, new: true, setDefaultsOnInsert: true })
@@ -352,22 +364,6 @@ export class DocumentService {
         )
         .populate('metadata.user_id', 'firstname lastname email')
         .exec();
-
-      sendRagDataToExternalApi({
-        raw_text: combinedText,
-        metadata: {
-          document_id: existingDocument.metadata?.document_id || '',
-          page_id: existingDocument.metadata?.page_id || '',
-          user_id: existingDocument.metadata?.user_id?.toString() || '',
-          title: existingDocument.metadata?.title || '',
-          approved_date: existingDocument.metadata?.approved_date || '',
-          effective_date: existingDocument.metadata?.effective_date || '',
-          owner: existingDocument.metadata?.owner || '',
-          username: existingDocument.metadata?.username || '',
-          access_level: existingDocument.metadata?.access_level || '',
-        }
-      });
-
       return updatedOriginal as Document;
     }
 
@@ -477,8 +473,6 @@ export class DocumentService {
     };
   }
 
-  // Page document query methods have been moved to DocumentPageService
-  // These are convenience methods that delegate to DocumentPageService
   async findPagesByOriginalDocument(originalDocumentId: string): Promise<Document[]> {
     return this.documentPageService.findPagesByOriginalDocument(originalDocumentId);
   }
