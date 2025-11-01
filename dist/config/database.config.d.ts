@@ -19,4 +19,14 @@ export declare const databaseConfig: () => {
     };
     port: number;
     nodeEnv: string;
+    rateLimit: {
+        login: {
+            maxCount: number;
+            windowHours: number;
+        };
+        message: {
+            maxCount: number;
+            windowHours: number;
+        };
+    };
 };
