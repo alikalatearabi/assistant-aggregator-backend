@@ -99,3 +99,31 @@ No warning found.
 
 ⚠ WARNINGS (FYI):
 [WARNING]: (test_blocking_response_mode) responded with error and evaluation was performed on the error response (PLEASE FIX IT)
+
+==== SUMMARY ====
+✅ PASSED TESTS:
+[OK]: test_blocking_response_mode PASSED ✅
+[OK]: test_invalid_api_key PASSED ✅
+[OK]: test_missing_user_id PASSED ✅
+[OK]: test_missing_inputs PASSED ✅
+[OK]: test_missing_query PASSED ✅
+
+❌ ERRORS:
+[ERROR]: (test_invalid_user_id) Invalid response for invalid user ID
+[ERROR]: test_invalid_user_id FAILED ❌
+[ERROR]: (test_streaming_response_mode) Streaming mode produced no events
+[ERROR]: test_streaming_response_mode FAILED ❌
+[ERROR]: (test_missing_conversation_id) Missing field [event] in response
+[ERROR]: (test_missing_conversation_id) Missing field [task_id] in response
+[ERROR]: (test_missing_conversation_id) Missing field [id] in response
+[ERROR]: (test_missing_conversation_id) Missing field [message_id] in response
+[ERROR]: (test_missing_conversation_id) Missing field [conversation_id] in response
+[ERROR]: (test_missing_conversation_id) Missing field [mode] in response
+[ERROR]: (test_missing_conversation_id) Missing field [answer] in response
+[ERROR]: (test_missing_conversation_id) Missing field [metadata] in response
+[ERROR]: (test_missing_conversation_id) Missing field [created_at] in response
+[ERROR]: (test_missing_conversation_id) conversation_id not present in response
+[ERROR]: test_missing_conversation_id FAILED ❌
+
+⚠ WARNINGS (FYI):
+[WARNING]: (test_blocking_response_mode) responded with error and evaluation was performed on the error response (PLEASE FIX IT)

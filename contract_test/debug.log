@@ -387,3 +387,88 @@ Response data in json: [{'status': 400, 'code': 'invalid_param', 'message': 'inp
 [ERROR]: (test_missing_conversation_id) conversation_id not present in response
 [ERROR]: test_missing_conversation_id FAILED ❌
 ======================================================
+
+Testing blocking response mode request...
+Validating [test_blocking_response_mode] response...
+Received response: [<Response [400 Bad Request]>]
+Response data in json: [{'status': 400, 'code': 'invalid_param', 'message': 'inputs.similarityThreshold should not be empty, inputs.similarityThreshold must be a string, inputs.contextCount must not be less than 0, inputs.contextCount must be an integer number, think_level should not be empty, think_level must be a string'}]
+[WARNING]: (test_blocking_response_mode) responded with error and evaluation was performed on the error response (PLEASE FIX IT)
+[OK]: (test_blocking_response_mode) Field [status] validated successfully.
+[OK]: (test_blocking_response_mode) Field [code] validated successfully.
+[OK]: (test_blocking_response_mode) Field [message] validated successfully.
+[OK]: test_blocking_response_mode PASSED ✅
+======================================================
+
+Testing invalid API_KEY request...
+Validating [invalid_api_key] response...
+Received response: [<Response [401 Unauthorized]>]
+Response data in json: [{'status': 401, 'code': 'unauthorized', 'message': 'Invalid API key'}]
+[OK]: (test_invalid_api_key) Field [status] validated successfully.
+[OK]: (test_invalid_api_key) Field [code] validated successfully.
+[OK]: (test_invalid_api_key) Field [message] validated successfully.
+[OK]: test_invalid_api_key PASSED ✅
+======================================================
+
+Testing invalid USER_ID request...
+Validating [test_invalid_user_id] response...
+Received response: [<Response [400 Bad Request]>]
+Response data in json: [{'status': 400, 'code': 'invalid_param', 'message': 'inputs.similarityThreshold should not be empty, inputs.similarityThreshold must be a string, inputs.contextCount must not be less than 0, inputs.contextCount must be an integer number, think_level should not be empty, think_level must be a string'}]
+[OK]: (test_invalid_user_id) Field [status] validated successfully.
+[OK]: (test_invalid_user_id) Field [code] validated successfully.
+[OK]: (test_invalid_user_id) Field [message] validated successfully.
+[ERROR]: (test_invalid_user_id) Invalid response for invalid user ID
+[ERROR]: test_invalid_user_id FAILED ❌
+======================================================
+
+Testing test_missing_user_id in request...
+Validating [test_missing_user_id] response...
+Received response: [<Response [400 Bad Request]>]
+Response data in json: [{'status': 400, 'code': 'invalid_param', 'message': 'inputs.similarityThreshold should not be empty, inputs.similarityThreshold must be a string, inputs.contextCount must not be less than 0, inputs.contextCount must be an integer number, think_level should not be empty, think_level must be a string'}]
+[OK]: (test_missing_user_id) Field [status] validated successfully.
+[OK]: (test_missing_user_id) Field [code] validated successfully.
+[OK]: (test_missing_user_id) Field [message] validated successfully.
+[OK]: test_missing_user_id PASSED ✅
+======================================================
+
+Testing test_missing_inputs in request...
+Validating [test_missing_inputs] response...
+Received response: [<Response [400 Bad Request]>]
+Response data in json: [{'status': 400, 'code': 'invalid_param', 'message': 'inputs should not be empty, think_level should not be empty, think_level must be a string'}]
+[OK]: (test_missing_inputs) Field [status] validated successfully.
+[OK]: (test_missing_inputs) Field [code] validated successfully.
+[OK]: (test_missing_inputs) Field [message] validated successfully.
+[OK]: test_missing_inputs PASSED ✅
+======================================================
+
+Testing test_missing_query in request...
+Validating [test_missing_query] response...
+Received response: [<Response [400 Bad Request]>]
+Response data in json: [{'status': 400, 'code': 'invalid_param', 'message': 'query should not be empty, query must be a string, inputs.similarityThreshold should not be empty, inputs.similarityThreshold must be a string, inputs.contextCount must not be less than 0, inputs.contextCount must be an integer number, think_level should not be empty, think_level must be a string'}]
+[OK]: (test_missing_query) Field [status] validated successfully.
+[OK]: (test_missing_query) Field [code] validated successfully.
+[OK]: (test_missing_query) Field [message] validated successfully.
+[OK]: test_missing_query PASSED ✅
+======================================================
+
+Testing streaming response mode request...
+Validating [streaming_response_mode] response...
+[ERROR]: (test_streaming_response_mode) Streaming mode produced no events
+[ERROR]: test_streaming_response_mode FAILED ❌
+======================================================
+
+Testing missing conversation id request...
+Validating [test_missing_conversation_id] response...
+Received response: [<Response [400 Bad Request]>]
+Response data in json: [{'status': 400, 'code': 'invalid_param', 'message': 'inputs.similarityThreshold should not be empty, inputs.similarityThreshold must be a string, inputs.contextCount must not be less than 0, inputs.contextCount must be an integer number, think_level should not be empty, think_level must be a string'}]
+[ERROR]: (test_missing_conversation_id) Missing field [event] in response
+[ERROR]: (test_missing_conversation_id) Missing field [task_id] in response
+[ERROR]: (test_missing_conversation_id) Missing field [id] in response
+[ERROR]: (test_missing_conversation_id) Missing field [message_id] in response
+[ERROR]: (test_missing_conversation_id) Missing field [conversation_id] in response
+[ERROR]: (test_missing_conversation_id) Missing field [mode] in response
+[ERROR]: (test_missing_conversation_id) Missing field [answer] in response
+[ERROR]: (test_missing_conversation_id) Missing field [metadata] in response
+[ERROR]: (test_missing_conversation_id) Missing field [created_at] in response
+[ERROR]: (test_missing_conversation_id) conversation_id not present in response
+[ERROR]: test_missing_conversation_id FAILED ❌
+======================================================
