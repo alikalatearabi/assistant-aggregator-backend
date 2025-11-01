@@ -5,12 +5,13 @@ import { Type } from 'class-transformer';
 export class ChatMessagesInputsDto {
   @ApiProperty({ description: 'Similarity threshold (as string)', example: '0.10', required: true })
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   similarityThreshold: string;
 
   @ApiProperty({ description: 'Number of context items to retrieve', example: 6, required: true })
   @IsInt()
   @Min(0)
+  @IsOptional()
   contextCount: number;
 }
 
@@ -43,7 +44,7 @@ export class ChatMessagesRequestDto {
 
   @ApiProperty({ description: 'Think level for the AI response', example: 'detailed', required: true })
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   think_level: string;
 
   @ApiProperty({ description: 'Response mode', enum: ChatMessagesResponseMode, example: ChatMessagesResponseMode.BLOCKING, required: false })
