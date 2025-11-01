@@ -27,6 +27,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { MessagesModule } from './messages/messages.module';
 import { DatasetsModule } from './datasets/datasets.module';
+import { ChatsModule } from './chats/chats.module';
 import { MinioModule } from './shared/minio/minio.module';
 import { ScheduleModule } from '@nestjs/schedule';
 
@@ -59,6 +60,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     UsersModule,
     MessagesModule,
     DatasetsModule,
+    ChatsModule,
   ],
   controllers: [
     AppController,
