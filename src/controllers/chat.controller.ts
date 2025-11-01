@@ -30,7 +30,6 @@ import { ChatMessagesRequestDto, ChatMessageAnswerResponseDto, ChatMessagesRespo
 import { ChatMessagesService } from '../services/chat-messages.service';
 import { MessageService } from '../services/message.service';
 import { UsersService } from '../users/users.service';
-import { ApiKeyAuthGuard } from '../auth/api-key-auth.guard';
 import { randomUUID } from 'crypto';
 import { Types } from 'mongoose';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
@@ -297,8 +296,6 @@ export class ChatController {
   }
 
   @Post('chat-messages')
-  // @UseGuards(ApiKeyAuthGuard)
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Generate chat messages',
     description: 'Generates a chat response. If responseMode is streaming, emits WS events; if blocking, returns a REST payload',
@@ -318,13 +315,6 @@ export class ChatController {
       
       if (!Types.ObjectId.isValid(body.user)) {
         throw new ChatException(401, ChatErrorCode.UNAUTHORIZED, 'Invalid user ID format');
-      }
-
-      if (!req.user || !req.user.id) {
-        throw new ChatException(401, ChatErrorCode.UNAUTHORIZED, 'Invalid or missing user authentication');
-      }
-      if (req.user.id !== body.user) {
-        throw new ChatException(401, ChatErrorCode.UNAUTHORIZED, 'User ID does not match API key');
       }
 
       try {
