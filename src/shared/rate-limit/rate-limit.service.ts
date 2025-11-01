@@ -1,4 +1,5 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from '../../users/schemas/user.schema';
@@ -15,20 +16,29 @@ export interface RateLimitConfig {
 
 @Injectable()
 export class RateLimitService {
-  private readonly rateLimitConfigs: Record<RateLimitType, RateLimitConfig> = {
-    [RateLimitType.LOGIN]: {
-      maxCount: 10,
-      windowMs: 60 * 60 * 1000, // 1 hour
-    },
-    [RateLimitType.MESSAGE]: {
-      maxCount: 50,
-      windowMs: 60 * 60 * 1000, // 1 hour
-    },
-  };
+  private readonly rateLimitConfigs: Record<RateLimitType, RateLimitConfig>;
 
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
-  ) {}
+    private configService: ConfigService,
+  ) {
+    // Load rate limit configuration from environment variables
+    const loginMaxCount = this.configService.get<number>('RATE_LIMIT_LOGIN_MAX', 10);
+    const loginWindowHours = this.configService.get<number>('RATE_LIMIT_LOGIN_WINDOW_HOURS', 1);
+    const messageMaxCount = this.configService.get<number>('RATE_LIMIT_MESSAGE_MAX', 50);
+    const messageWindowHours = this.configService.get<number>('RATE_LIMIT_MESSAGE_WINDOW_HOURS', 1);
+
+    this.rateLimitConfigs = {
+      [RateLimitType.LOGIN]: {
+        maxCount: loginMaxCount,
+        windowMs: loginWindowHours * 60 * 60 * 1000,
+      },
+      [RateLimitType.MESSAGE]: {
+        maxCount: messageMaxCount,
+        windowMs: messageWindowHours * 60 * 60 * 1000,
+      },
+    };
+  }
 
   /**
    * Check if user has exceeded rate limit for a given action
