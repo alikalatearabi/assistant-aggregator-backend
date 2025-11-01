@@ -34,17 +34,15 @@ async function seedUserWithApiKey() {
     });
 
     if (existingUser) {
-      console.log('API user already exists:');
-      console.log(`- Email: ${existingUser.email}`);
-      console.log(`- National Code: ${existingUser.nationalcode}`);
-      console.log(`- Personal Code: ${existingUser.personalcode}`);
-      console.log(`- Role: ${existingUser.role}`);
+      console.log('API user already exists, recreating...');
+      console.log(`- Old Email: ${existingUser.email}`);
+      console.log(`- Old ID: ${existingUser._id}`);
       if (existingUser.apiKey) {
-        console.log(`- API Key: ${existingUser.apiKey}`);
-      } else {
-        console.log('- No API key assigned yet');
+        console.log(`- Old API Key: ${existingUser.apiKey}`);
       }
-      return;
+      // Delete the existing user
+      await collection.deleteOne({ _id: existingUser._id });
+      console.log('✅ Old user deleted successfully!');
     }
 
     console.log('Creating API user...');
