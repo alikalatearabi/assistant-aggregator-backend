@@ -21,6 +21,7 @@ import {
   ApiBody,
   ApiExcludeEndpoint,
   ApiConsumes,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { DocumentService } from '../services/document.service';
@@ -34,12 +35,14 @@ import { Document } from '../schemas/document.schema';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from 'src/auth/roles.decorator';
 import { UserRole } from 'src/schemas/user.schema';
+import { RolesGuard } from 'src/auth/roles.guard';
 
 
 @ApiTags('documents')
 @Controller('documents')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(UserRole.ADMIN)
+@ApiBearerAuth()
 export class DocumentController {
   private readonly logger = new Logger(DocumentController.name);
 
@@ -51,6 +54,8 @@ export class DocumentController {
   @Post()
   @UseInterceptors(FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @ApiOperation({
     summary: 'Upload and create a new document',
     description: 'Uploads a file and creates a document record; file is sent to OCR service afterward',
