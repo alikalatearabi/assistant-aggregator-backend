@@ -12,10 +12,11 @@ const {
   MINIO_ACCESS_KEY = 'minioadmin',
   MINIO_SECRET_KEY = 'minioadmin123',
   BUCKET = 'assistant-aggregator',
-  FILE_DIR = '../files/Vezarat_olom_PDFs',
+  FILE_DIR = '../files/Vezarat_varzeh',
   MONGODB_URI = 'mongodb://admin:password123@185.149.192.130:27017/assistant_aggregator?authSource=admin',
   ID_MAP_PATH = path.resolve('../files/vezarat-documents-export.json'),
-  EXPORT_OUTPUT_PATH = path.resolve('../files/vezarat-documents-export.json'),
+  EXPORT_OUTPUT_PATH = path.resolve('../files/vezarat-varzeh-documents-export.json'),
+  DATASET_ID,
 } = process.env;
 
 const useSSL = String(MINIO_USE_SSL).toLowerCase() === 'true';
@@ -51,12 +52,15 @@ async function ensureBucket(client, bucket) {
 }
 
 (async () => {
-  // 🔹 Load ID map
-  if (!fs.existsSync(ID_MAP_PATH)) {
-    console.error(`❌ ID map file not found: ${ID_MAP_PATH}`);
-    process.exit(1);
+  // 🔹 Load ID map (optional)
+  let idMap = [];
+  if (fs.existsSync(ID_MAP_PATH)) {
+    idMap = JSON.parse(fs.readFileSync(ID_MAP_PATH, 'utf8'));
+    console.log(`✅ Loaded ${idMap.length} entries from ID map: ${ID_MAP_PATH}`);
+  } else {
+    console.log(`⚠️  ID map file not found: ${ID_MAP_PATH}`);
+    console.log(`📝 Will create new documents for all files in directory`);
   }
-  const idMap = JSON.parse(fs.readFileSync(ID_MAP_PATH, 'utf8'));
   
   const minio = new Minio.Client({
     endPoint: MINIO_ENDPOINT,
@@ -75,6 +79,16 @@ async function ensureBucket(client, bucket) {
   if (!fs.existsSync(dir)) {
     console.error(`❌ File directory not found: ${dir}`);
     process.exit(1);
+  }
+  
+  // 🔹 Determine dataset ID
+  let defaultDatasetId = null;
+  if (DATASET_ID) {
+    defaultDatasetId = new ObjectId(DATASET_ID);
+    console.log(`📌 Using dataset ID from environment: ${DATASET_ID}`);
+  } else if (idMap.length > 0 && idMap[0].dataset_id) {
+    defaultDatasetId = new ObjectId(idMap[0].dataset_id);
+    console.log(`📌 Using dataset ID from first ID map entry: ${idMap[0].dataset_id}`);
   }
 
   await ensureBucket(minio, BUCKET);
@@ -163,7 +177,6 @@ async function ensureBucket(client, bucket) {
   
   if (missingFiles.length > 0) {
     console.log('🔎 Checking if these files already exist in MongoDB...');
-    const datasetId = idMap.length > 0 && idMap[0].dataset_id ? new ObjectId(idMap[0].dataset_id) : null;
     
     for (const filename of missingFiles) {
       // Check if document already exists in MongoDB by filename
@@ -180,7 +193,7 @@ async function ensureBucket(client, bucket) {
           filename,
           extension: path.extname(filename).slice(1).toLowerCase(),
           mimeType: mime.lookup(filename) || 'application/pdf',
-          dataset: datasetId,
+          dataset: defaultDatasetId,
           ocrStatus: 'pending',
           uploadStatus: 'pending',
           createdAt: new Date(),
@@ -228,7 +241,7 @@ async function ensureBucket(client, bucket) {
             checksum,
             objectKey,
             fileUrl,
-            dataset: datasetId,
+            dataset: defaultDatasetId,
             ocrStatus: 'pending',
             uploadStatus: 'uploaded',
             updatedAt: new Date(),
@@ -244,7 +257,7 @@ async function ensureBucket(client, bucket) {
         filename,
         id,
         minioPath: `/${objectKey}`,
-        dataset_id: datasetId ? datasetId.toString() : undefined,
+        dataset_id: defaultDatasetId ? defaultDatasetId.toString() : undefined,
       });
     }
   }

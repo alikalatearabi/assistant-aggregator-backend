@@ -1,7 +1,7 @@
 const { MongoClient } = require('mongodb');
 
 async function createDatasets() {
-  const uri = process.env.MONGO_URI || 'mongodb://admin:password123@127.0.0.1:27017/assistant_aggregator?authSource=admin';
+  const uri = process.env.MONGODB_URI || 'mongodb://admin:password123@185.149.192.130:27017/assistant_aggregator?authSource=admin';
   const client = new MongoClient(uri);
 
   try {
@@ -13,7 +13,7 @@ async function createDatasets() {
     const existingDatasets = await collection.find({}).toArray();
     console.log('Existing datasets:', existingDatasets);
 
-    // Create the two datasets
+    // Create the three datasets
     const datasets = [
       {
         dataset_id: 'general_law',
@@ -24,6 +24,12 @@ async function createDatasets() {
       {
         dataset_id: 'vezarat_olom',
         dataset_name: 'Ministry of Science, Research and Technology Documents',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        dataset_id: 'vezarat_varzeh',
+        dataset_name: 'Ministry of Youth and Sports Documents',
         createdAt: new Date(),
         updatedAt: new Date()
       }
