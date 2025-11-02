@@ -5,7 +5,7 @@
 
 # Configuration
 BASE_URL="${BASE_URL:-http://localhost:3000}"
-API_KEY="${API_KEY:-sk_9c30f5fd1bd5b69db561a4de84ca2b64bed7f89e2b1894da}"
+API_KEY="${API_KEY:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2OTAyODBiYzhhNDhiM2RiOTkxZTRlMjEiLCJlbWFpbCI6ImFwaUBjb21wYW55LmNvbSIsInJvbGUiOiJ1c2VyIiwibmF0aW9uYWxjb2RlIjoiMzMzMzMzMzMzMyIsInBlcnNvbmFsY29kZSI6IkFQSTAwMSIsImlhdCI6MTc2MjAyOTU5OSwiZXhwIjoxNzYyMTE1OTk5fQ.BToT8Wvg95WCYT7-PLR0EOMkqqvd18-y_6P0CiZvIk4}"
 USER_ID="${USER_ID:-690280bc8a48b3db991e4e21}"
 
 echo "==========================================="

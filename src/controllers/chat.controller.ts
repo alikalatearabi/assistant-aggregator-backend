@@ -35,6 +35,7 @@ import { randomUUID } from 'crypto';
 import { Types } from 'mongoose';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RateLimitService, RateLimitType } from '../shared/rate-limit/rate-limit.service';
+import { ConfigService } from '@nestjs/config';
 
 interface RetrieverResource {
   position: number;
@@ -126,6 +127,7 @@ export class ChatController {
     private readonly messageService: MessageService,
     private readonly usersService: UsersService,
     private readonly rateLimitService: RateLimitService,
+    private readonly configService: ConfigService,
   ) {}
 
   @Post()
@@ -320,8 +322,14 @@ export class ChatController {
       if (!Types.ObjectId.isValid(body.user)) {
         throw new ChatException(401, ChatErrorCode.UNAUTHORIZED, 'Invalid user ID format');
       }
-      if(body.user ===  "6906738cf06ae7f1c47105e2" && req.headers['authorization'].split(' ')[1] !== 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2OTAyODBiYzhhNDhiM2RiOTkxZTRlMjEiLCJlbWFpbCI6ImFwaUBjb21wYW55LmNvbSIsInJvbGUiOiJ1c2VyIiwibmF0aW9uYWxjb2RlIjoiMzMzMzMzMzMzMyIsInBlcnNvbmFsY29kZSI6IkFQSTAwMSIsImlhdCI6MTc2MjAyOTU5OSwiZXhwIjoxNzYyMTE1OTk5fQ.BToT8Wvg95WCYT7-PLR0EOMkqqvd18-y_6P0CiZvIk4') {
-         throw new ChatException(401, ChatErrorCode.UNAUTHORIZED, 'Unauthorized');
+      
+      const specialUserId = this.configService.get<string>('SPECIAL_USER_ID');
+      const specialUserToken = this.configService.get<string>('SPECIAL_USER_TOKEN');
+      if (specialUserId && specialUserToken && body.user === specialUserId) {
+        const authHeader = req.headers['authorization'];
+        if (!authHeader || authHeader.split(' ')[1] !== specialUserToken) {
+          throw new ChatException(401, ChatErrorCode.UNAUTHORIZED, 'Unauthorized');
+        }
       }
       try {
         await this.usersService.findUserById(body.user);
@@ -332,7 +340,6 @@ export class ChatController {
         throw error;
       }
 
-      // Check rate limit for messages
       try {
         await this.rateLimitService.checkRateLimit(body.user, RateLimitType.MESSAGE);
       } catch (error) {
