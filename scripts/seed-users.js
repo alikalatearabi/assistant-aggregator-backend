@@ -1,7 +1,6 @@
 const { MongoClient } = require('mongodb');
 const bcrypt = require('bcryptjs');
 
-// Seed data for initial users
 const usersToSeed = [
   {
     firstname: 'Admin',
@@ -103,7 +102,6 @@ async function seedUsers() {
   }
 }
 
-// Clean up function to remove seeded users (for development/testing)
 async function cleanupSeedUsers() {
   const mongoUri = process.env.MONGO_URI || 'mongodb://admin:password123@127.0.0.1:27017/assistant_aggregator?authSource=admin';
   const client = new MongoClient(mongoUri);
@@ -115,11 +113,10 @@ async function cleanupSeedUsers() {
     const database = client.db('assistant_aggregator');
     const collection = database.collection('users');
 
-    // Remove only the seeded users
     const seedEmails = usersToSeed.map(u => u.email);
     const result = await collection.deleteMany({ email: { $in: seedEmails } });
 
-    console.log(`🗑️  Removed ${result.deletedCount} seeded users`);
+    console.log(`Removed ${result.deletedCount} seeded users`);
 
   } catch (error) {
     console.error('Error cleaning up seed users:', error);
@@ -130,7 +127,6 @@ async function cleanupSeedUsers() {
   }
 }
 
-// Command line interface
 const command = process.argv[2];
 
 if (require.main === module) {
