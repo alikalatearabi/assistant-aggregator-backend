@@ -14,7 +14,6 @@ const useSSL = String(MINIO_USE_SSL).toLowerCase() === 'true';
 
 const GENERAL_LAW_FILE = path.resolve(__dirname, '../files/general-law-documents-export.json');
 const VEZARAT_OLOM_FILE = path.resolve(__dirname, '../files/vezarat-documents-export.json');
-const VEZARAT_VARZEH_FILE = path.resolve(__dirname, '../files/vezarat-varzeh-documents-export.json');
 
 function buildFileUrl(minioPath) {
   if (!minioPath) throw new Error('Missing minioPath for document');

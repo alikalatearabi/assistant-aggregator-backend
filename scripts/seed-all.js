@@ -6,7 +6,7 @@ async function runSeeds() {
 
   const seeds = [
     { name: 'Users', script: 'seed-users.js' },
-    { name: 'Documents', script: 'seed-documents.js' },
+    { name: 'Documents Varzesh', script: 'seed-documents-varzesh.js' },
     { name: 'Datasets', script: 'create-datasets.js' },
   ];
 

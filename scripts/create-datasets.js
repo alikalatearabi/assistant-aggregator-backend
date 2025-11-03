@@ -16,21 +16,21 @@ async function createDatasets() {
       {
         _id: new ObjectId('507f1f77bcf86cd799439011'), 
         dataset_id: 'general_law',
-        dataset_name: 'General Law Documents',
+        dataset_name: 'دادگان  قوانین عمومی',
         createdAt: new Date(),
         updatedAt: new Date()
       },
       {
         _id: new ObjectId('507f1f77bcf86cd799439012'), 
         dataset_id: 'vezarat_olom',
-        dataset_name: 'Ministry of Science, Research and Technology Documents',
+        dataset_name: 'دادگان وزارت علوم، تحقیقات و فناوری',
         createdAt: new Date(),
         updatedAt: new Date()
       },
       {
         _id: new ObjectId('507f1f77bcf86cd799439013'),
         dataset_id: 'vezarat_varzeh',
-        dataset_name: 'Ministry of Youth and Sports Documents',
+        dataset_name: 'دادگان وزارت ورزش و جوانان',
         createdAt: new Date(),
         updatedAt: new Date()
       }
