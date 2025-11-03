@@ -22,16 +22,6 @@ const databaseConfig = () => ({
     },
     port: parseInt(process.env.PORT || '3000', 10),
     nodeEnv: process.env.NODE_ENV || 'development',
-    rateLimit: {
-        login: {
-            maxCount: parseInt(process.env.RATE_LIMIT_LOGIN_MAX || '10', 10),
-            windowHours: parseInt(process.env.RATE_LIMIT_LOGIN_WINDOW_HOURS || '1', 10),
-        },
-        message: {
-            maxCount: parseInt(process.env.RATE_LIMIT_MESSAGE_MAX || '50', 10),
-            windowHours: parseInt(process.env.RATE_LIMIT_MESSAGE_WINDOW_HOURS || '1', 10),
-        },
-    },
 });
 exports.databaseConfig = databaseConfig;
 //# sourceMappingURL=database.config.js.map

@@ -129,6 +129,11 @@ let AuthService = class AuthService {
         await this.rateLimitService.checkRateLimit(userId, rate_limit_service_1.RateLimitType.LOGIN);
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
+            try {
+                await this.rateLimitService.incrementRateLimit(userId, rate_limit_service_1.RateLimitType.LOGIN);
+            }
+            catch (incrementError) {
+            }
             throw new common_1.UnauthorizedException('Invalid credentials');
         }
         await this.rateLimitService.incrementRateLimit(userId, rate_limit_service_1.RateLimitType.LOGIN);

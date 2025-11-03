@@ -29,6 +29,7 @@ const crypto_1 = require("crypto");
 const mongoose_1 = require("mongoose");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 const rate_limit_service_1 = require("../shared/rate-limit/rate-limit.service");
+const config_1 = require("@nestjs/config");
 var ChatErrorCode;
 (function (ChatErrorCode) {
     ChatErrorCode["INVALID_PARAM"] = "invalid_param";
@@ -58,12 +59,14 @@ let ChatController = class ChatController {
     messageService;
     usersService;
     rateLimitService;
-    constructor(chatService, chatMessagesService, messageService, usersService, rateLimitService) {
+    configService;
+    constructor(chatService, chatMessagesService, messageService, usersService, rateLimitService, configService) {
         this.chatService = chatService;
         this.chatMessagesService = chatMessagesService;
         this.messageService = messageService;
         this.usersService = usersService;
         this.rateLimitService = rateLimitService;
+        this.configService = configService;
     }
     async createChat(createChatDto) {
         return this.chatService.createChat(createChatDto);
@@ -104,8 +107,13 @@ let ChatController = class ChatController {
             if (!mongoose_1.Types.ObjectId.isValid(body.user)) {
                 throw new ChatException(401, ChatErrorCode.UNAUTHORIZED, 'Invalid user ID format');
             }
-            if (body.user === "6906738cf06ae7f1c47105e2" && req.headers['authorization'].split(' ')[1] !== 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2OTAyODBiYzhhNDhiM2RiOTkxZTRlMjEiLCJlbWFpbCI6ImFwaUBjb21wYW55LmNvbSIsInJvbGUiOiJ1c2VyIiwibmF0aW9uYWxjb2RlIjoiMzMzMzMzMzMzMyIsInBlcnNvbmFsY29kZSI6IkFQSTAwMSIsImlhdCI6MTc2MjAyOTU5OSwiZXhwIjoxNzYyMTE1OTk5fQ.BToT8Wvg95WCYT7-PLR0EOMkqqvd18-y_6P0CiZvIk4') {
-                throw new ChatException(401, ChatErrorCode.UNAUTHORIZED, 'Unauthorized');
+            const specialUserId = this.configService.get('SPECIAL_USER_ID');
+            const specialUserToken = this.configService.get('SPECIAL_USER_TOKEN');
+            if (specialUserId && specialUserToken && body.user === specialUserId) {
+                const authHeader = req.headers['authorization'];
+                if (!authHeader || authHeader.split(' ')[1] !== specialUserToken) {
+                    throw new ChatException(401, ChatErrorCode.UNAUTHORIZED, 'Unauthorized');
+                }
             }
             try {
                 await this.usersService.findUserById(body.user);
@@ -567,6 +575,7 @@ exports.ChatController = ChatController = __decorate([
         chat_messages_service_1.ChatMessagesService,
         message_service_1.MessageService,
         users_service_1.UsersService,
-        rate_limit_service_1.RateLimitService])
+        rate_limit_service_1.RateLimitService,
+        config_1.ConfigService])
 ], ChatController);
 //# sourceMappingURL=chat.controller.js.map
