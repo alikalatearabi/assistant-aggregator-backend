@@ -3,7 +3,7 @@ const path = require('path');
 const { MongoClient, ObjectId } = require('mongodb');
 
 const {
-  MONGODB_URI = 'mongodb://admin:password123@127.0.0.1:27017/assistant_aggregator?authSource=admin',
+  MONGO_URI = 'mongodb://admin:password123@127.0.0.1:27017/assistant_aggregator?authSource=admin',
   MINIO_ENDPOINT = '127.0.0.1',
   MINIO_PORT = '9000',
   MINIO_USE_SSL = 'false',
@@ -69,7 +69,7 @@ function loadJsonFile(filePath) {
 }
 
 async function seedDocuments() {
-  const client = new MongoClient(MONGODB_URI);
+  const client = new MongoClient(MONGO_URI);
   await client.connect();
 
   console.log('Connected to MongoDB');  

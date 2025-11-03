@@ -2,7 +2,7 @@ const { MongoClient } = require('mongodb');
 const fs = require('fs');
 
 async function exportVezaratDocuments() {
-  const uri = 'mongodb://admin:password123@185.149.192.130:27017/assistant_aggregator?authSource=admin';
+  const uri = process.env.MONGO_URI ||'mongodb://admin:password123@185.149.192.130:27017/assistant_aggregator?authSource=admin';
   const client = new MongoClient(uri);
 
   try {

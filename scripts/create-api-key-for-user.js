@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 const { UserSchema } = require('../src/schemas/user.schema');
 const crypto = require('crypto');
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/assistant';
+const MONGODB_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/assistant';
+//const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/assistant';
 
 async function run() {
   const argv = require('yargs').argv;
