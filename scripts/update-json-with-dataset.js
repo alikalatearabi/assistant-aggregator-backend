@@ -7,7 +7,7 @@ function updateJsonWithDataset() {
   // Add dataset_id to each document
   const updatedData = jsonData.map(doc => ({
     ...doc,
-    dataset_id: '68fa953c7a5728a95624fe7b' // vezarat_olom dataset ID
+    dataset_id: '68fa953c7a5728a95624fe7b' 
   }));
   
   // Write the updated JSON back to the file
