@@ -2,10 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const { MongoClient, ObjectId } = require('mongodb');
 
-/* ------------------- Configuration ------------------- */
-
 const {
-  MONGO_URI = 'mongodb://admin:password123@127.0.0.1:27017/assistant_aggregator?authSource=admin',
+  MONGODB_URI = 'mongodb://admin:password123@127.0.0.1:27017/assistant_aggregator?authSource=admin',
   MINIO_ENDPOINT = '127.0.0.1',
   MINIO_PORT = '9000',
   MINIO_USE_SSL = 'false',
@@ -15,9 +13,8 @@ const {
 const useSSL = String(MINIO_USE_SSL).toLowerCase() === 'true';
 
 const GENERAL_LAW_FILE = path.resolve(__dirname, '../files/general-law-documents-export.json');
-const VEZARAT_FILE = path.resolve(__dirname, '../files/vezarat-documents-export.json');
-
-/* ------------------- Helper Functions ------------------- */
+const VEZARAT_OLOM_FILE = path.resolve(__dirname, '../files/vezarat-documents-export.json');
+const VEZARAT_VARZEH_FILE = path.resolve(__dirname, '../files/vezarat-varzeh-documents-export.json');
 
 function buildFileUrl(minioPath) {
   if (!minioPath) throw new Error('Missing minioPath for document');
@@ -67,30 +64,29 @@ function loadJsonFile(filePath) {
     if (!Array.isArray(parsed)) throw new Error('JSON content is not an array');
     return parsed;
   } catch (err) {
-    console.error(`❌ Failed to load JSON file (${filePath}): ${err.message}`);
+    console.error(`Failed to load JSON file (${filePath}): ${err.message}`);
     throw err;
   }
 }
 
-/* ------------------- Main Seeder ------------------- */
-
 async function seedDocuments() {
-  const client = new MongoClient(MONGO_URI);
+  const client = new MongoClient(MONGODB_URI);
   await client.connect();
-
-  console.log('✅ Connected to MongoDB');
+  console.log('Connected to MongoDB');
   const db = client.db('assistant_aggregator');
   const collection = db.collection('documents');
 
   try {
-    console.log('📂 Loading JSON export files...');
+    console.log('Loading JSON export files...');
     const generalLawDocs = loadJsonFile(GENERAL_LAW_FILE);
-    const vezaratDocs = loadJsonFile(VEZARAT_FILE);
-    const allDocs = [...generalLawDocs, ...vezaratDocs];
+    const vezaratOlomDocs = loadJsonFile(VEZARAT_OLOM_FILE);
+    const vezaratVarzehDocs = loadJsonFile(VEZARAT_VARZEH_FILE);
+    const allDocs = [...generalLawDocs, ...vezaratOlomDocs, ...vezaratVarzehDocs];
 
     console.log(`   - General Law: ${generalLawDocs.length}`);
-    console.log(`   - Vezarat: ${vezaratDocs.length}`);
-    console.log(`   - Total: ${allDocs.length} documents\n`);
+    console.log(`   - Vezarat Olom: ${vezaratOlomDocs.length}`);
+    console.log(`   - Vezarat Varzeh: ${vezaratVarzehDocs.length}`);
+    console.log(`   - Total: ${allDocs.length} documents`);
 
     let created = 0;
     let updated = 0;
@@ -114,7 +110,7 @@ async function seedDocuments() {
           const res = await collection.updateOne({ _id: transformed._id }, update);
           if (res.modifiedCount > 0) {
             updated++;
-            console.log(`🔄 Updated: ${transformed.filename} (${transformed._id})`);
+            console.log(`Updated: ${transformed.filename} (${transformed._id})`);
           }
         } else {
           const insertDoc = {
@@ -123,30 +119,29 @@ async function seedDocuments() {
           };
           await collection.insertOne(insertDoc);
           created++;
-          console.log(`✅ Created: ${transformed.filename} (${transformed._id})`);
+          console.log(`Created: ${transformed.filename} (${transformed._id})`);
         }
       } catch (err) {
         failed++;
-        console.error(`❌ Error for ${docData.filename || docData.id}: ${err.message}`);
+        console.error(`Error for ${docData.filename || docData.id}: ${err.message}`);
       }
     }
 
-    console.log('\n🎉 Seeding Summary:');
-    console.log(`   ✅ Created: ${created}`);
-    console.log(`   🔄 Updated: ${updated}`);
-    console.log(`   ❌ Failed: ${failed}`);
-    console.log(`   📊 Total processed: ${allDocs.length}`);
+    console.log('\nSeeding Summary:');
+    console.log(`   Created: ${created}`);
+    console.log(`   Updated: ${updated}`);
+    console.log(`   Failed: ${failed}`);
+    console.log(`   Total processed: ${allDocs.length}`);
 
   } catch (err) {
-    console.error('🚨 Fatal error during seeding:', err.message);
+    console.error('Fatal error during seeding:', err.message);
     process.exitCode = 1;
   } finally {
     await client.close();
-    console.log('\n🔌 Database connection closed.');
+    console.log('\nDatabase connection closed.');
   }
 }
 
-/* ------------------- Execute If Run Directly ------------------- */
 
 if (require.main === module) {
   seedDocuments();
