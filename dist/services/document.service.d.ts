@@ -1,5 +1,6 @@
 import { Model } from 'mongoose';
 import { Document, DocumentDocument } from '../schemas/document.schema';
+import { DatasetDocument } from '../schemas/dataset.schema';
 import { CreateDocumentDto } from '../dto/create-document.dto';
 import { UpdateDocumentDto } from '../dto/update-document.dto';
 import { DocumentQueryDto } from '../dto/document-query.dto';
@@ -8,11 +9,12 @@ import { OcrStatusService } from './ocr-status.service';
 import { DocumentPageService } from './document-page.service';
 export declare class DocumentService {
     private documentModel;
+    private datasetModel;
     private readonly ocrService;
     private readonly ocrStatusService;
     private readonly documentPageService;
     private readonly logger;
-    constructor(documentModel: Model<DocumentDocument>, ocrService: OcrService, ocrStatusService: OcrStatusService, documentPageService: DocumentPageService);
+    constructor(documentModel: Model<DocumentDocument>, datasetModel: Model<DatasetDocument>, ocrService: OcrService, ocrStatusService: OcrStatusService, documentPageService: DocumentPageService);
     createDocument(createDocumentDto: CreateDocumentDto): Promise<Document>;
     findAllDocuments(query?: DocumentQueryDto): Promise<{
         documents: Document[];
@@ -22,6 +24,7 @@ export declare class DocumentService {
         totalPages: number;
     }>;
     findDocumentById(id: string): Promise<Document>;
+    enrichRetrieverResourcesWithDatasets(resources: any[]): Promise<any[]>;
     findDocumentsByUploader(uploaderId: string): Promise<Document[]>;
     findDocumentsByExtension(extension: string): Promise<Document[]>;
     updateDocument(id: string, updateDocumentDto: UpdateDocumentDto): Promise<Document>;

@@ -9,6 +9,7 @@ import { ChatMessagesRequestDto } from '../dto/chat-messages.dto';
 import { ChatMessagesService } from '../services/chat-messages.service';
 import { MessageService } from '../services/message.service';
 import { UsersService } from '../users/users.service';
+import { DocumentService } from '../services/document.service';
 import { RateLimitService } from '../shared/rate-limit/rate-limit.service';
 import { ConfigService } from '@nestjs/config';
 export declare class ChatController {
@@ -18,7 +19,8 @@ export declare class ChatController {
     private readonly usersService;
     private readonly rateLimitService;
     private readonly configService;
-    constructor(chatService: ChatService, chatMessagesService: ChatMessagesService, messageService: MessageService, usersService: UsersService, rateLimitService: RateLimitService, configService: ConfigService);
+    private readonly documentService;
+    constructor(chatService: ChatService, chatMessagesService: ChatMessagesService, messageService: MessageService, usersService: UsersService, rateLimitService: RateLimitService, configService: ConfigService, documentService: DocumentService);
     createChat(createChatDto: CreateChatDto): Promise<Chat>;
     findAllChats(query: ChatQueryDto): Promise<{
         chats: Chat[];

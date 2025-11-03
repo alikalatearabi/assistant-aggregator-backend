@@ -26,18 +26,21 @@ const winston_1 = require("winston");
 const logger_config_1 = require("../config/logger.config");
 const message_service_1 = require("./message.service");
 const chat_service_1 = require("./chat.service");
+const document_service_1 = require("./document.service");
 const https_1 = __importDefault(require("https"));
 let ChatMessagesService = ChatMessagesService_1 = class ChatMessagesService {
     gateway;
     winstonLogger;
     messageService;
     chatService;
+    documentService;
     logger;
-    constructor(gateway, winstonLogger, messageService, chatService) {
+    constructor(gateway, winstonLogger, messageService, chatService, documentService) {
         this.gateway = gateway;
         this.winstonLogger = winstonLogger;
         this.messageService = messageService;
         this.chatService = chatService;
+        this.documentService = documentService;
         this.logger = this.winstonLogger.child({ context: ChatMessagesService_1.name });
     }
     async proxyToExternalApi(req) {
@@ -292,7 +295,13 @@ let ChatMessagesService = ChatMessagesService_1 = class ChatMessagesService {
                 });
             }
             const endTs = new Date().toISOString();
-            const retrieverResources = result.metadata?.retriever_resources || [];
+            let retrieverResources = result.metadata?.retriever_resources || [];
+            try {
+                retrieverResources = await this.documentService.enrichRetrieverResourcesWithDatasets(retrieverResources);
+            }
+            catch (enrichError) {
+                this.logger.error('Error enriching retriever resources:', enrichError.message);
+            }
             try {
                 const assistantMessage = await this.messageService.createMessage({
                     category: 'assistant_response',
@@ -302,20 +311,8 @@ let ChatMessagesService = ChatMessagesService_1 = class ChatMessagesService {
                     retrieverResources: retrieverResources
                 });
                 await this.chatService.addMessageToChat(chatId, assistantMessage._id.toString());
-                this.logger.info('=== STREAMING ASSISTANT MESSAGE SAVED ===', {
-                    taskId,
-                    messageId: assistantMessage._id.toString(),
-                    conversationId: chatId,
-                    retrieverResourcesCount: retrieverResources.length
-                });
             }
-            catch (saveError) {
-                this.logger.error('=== FAILED TO SAVE STREAMING ASSISTANT MESSAGE ===', {
-                    taskId,
-                    error: saveError?.message,
-                    conversationId: req.conversationId || 'new_chat_creation_failed'
-                });
-            }
+            catch (saveError) { }
             this.gateway.broadcast({
                 event: 'message_end',
                 taskId,
@@ -350,6 +347,7 @@ exports.ChatMessagesService = ChatMessagesService = ChatMessagesService_1 = __de
     __metadata("design:paramtypes", [chat_messages_gateway_1.ChatMessagesGateway,
         winston_1.Logger,
         message_service_1.MessageService,
-        chat_service_1.ChatService])
+        chat_service_1.ChatService,
+        document_service_1.DocumentService])
 ], ChatMessagesService);
 //# sourceMappingURL=chat-messages.service.js.map

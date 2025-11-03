@@ -18,18 +18,21 @@ const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
 const document_schema_1 = require("../schemas/document.schema");
+const dataset_schema_1 = require("../schemas/dataset.schema");
 const ocr_service_1 = require("./ocr.service");
 const ocr_status_service_1 = require("./ocr-status.service");
 const document_page_service_1 = require("./document-page.service");
 const rag_service_1 = require("../shared/rag/rag.service");
 let DocumentService = DocumentService_1 = class DocumentService {
     documentModel;
+    datasetModel;
     ocrService;
     ocrStatusService;
     documentPageService;
     logger = new common_1.Logger(DocumentService_1.name);
-    constructor(documentModel, ocrService, ocrStatusService, documentPageService) {
+    constructor(documentModel, datasetModel, ocrService, ocrStatusService, documentPageService) {
         this.documentModel = documentModel;
+        this.datasetModel = datasetModel;
         this.ocrService = ocrService;
         this.ocrStatusService = ocrStatusService;
         this.documentPageService = documentPageService;
@@ -99,11 +102,54 @@ let DocumentService = DocumentService_1 = class DocumentService {
         const document = await this.documentModel
             .findById(id)
             .populate('metadata.user_id', 'firstname lastname email')
+            .populate('dataset')
             .exec();
         if (!document) {
             throw new common_1.NotFoundException('Document not found');
         }
         return document;
+    }
+    async enrichRetrieverResourcesWithDatasets(resources) {
+        if (!resources || resources.length === 0) {
+            return resources;
+        }
+        const documentIds = [...new Set(resources
+                .map(r => r.document_id)
+                .filter(id => id && mongoose_2.Types.ObjectId.isValid(id)))];
+        if (documentIds.length === 0) {
+            return resources;
+        }
+        const documents = await this.documentModel
+            .find({ _id: { $in: documentIds.map(id => new mongoose_2.Types.ObjectId(id)) } })
+            .populate('dataset')
+            .exec();
+        const documentDatasetMap = new Map();
+        documents.forEach(doc => {
+            if (doc.dataset) {
+                const dataset = typeof doc.dataset === 'object' && doc.dataset !== null
+                    ? doc.dataset
+                    : null;
+                if (dataset && dataset.dataset_name) {
+                    documentDatasetMap.set(doc._id.toString(), {
+                        dataset_id: dataset.dataset_id || dataset._id?.toString(),
+                        dataset_name: dataset.dataset_name
+                    });
+                }
+            }
+        });
+        return resources.map(resource => {
+            if (!resource.dataset_name && resource.document_id) {
+                const datasetInfo = documentDatasetMap.get(resource.document_id);
+                if (datasetInfo) {
+                    return {
+                        ...resource,
+                        dataset_name: datasetInfo.dataset_name,
+                        dataset_id: datasetInfo.dataset_id || resource.dataset_id
+                    };
+                }
+            }
+            return resource;
+        });
     }
     async findDocumentsByUploader(uploaderId) {
         if (!mongoose_2.Types.ObjectId.isValid(uploaderId)) {
@@ -395,7 +441,9 @@ exports.DocumentService = DocumentService;
 exports.DocumentService = DocumentService = DocumentService_1 = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, mongoose_1.InjectModel)(document_schema_1.Document.name)),
+    __param(1, (0, mongoose_1.InjectModel)(dataset_schema_1.Dataset.name)),
     __metadata("design:paramtypes", [mongoose_2.Model,
+        mongoose_2.Model,
         ocr_service_1.OcrService,
         ocr_status_service_1.OcrStatusService,
         document_page_service_1.DocumentPageService])

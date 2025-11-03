@@ -8,6 +8,7 @@ import { Logger } from 'winston';
 import { externalApiLogger } from '../config/logger.config';
 import { MessageService } from './message.service';
 import { ChatService } from './chat.service';
+import { DocumentService } from './document.service';
 import https from 'https';
 
 @Injectable()
@@ -17,7 +18,8 @@ export class ChatMessagesService {
     @Inject(forwardRef(() => ChatMessagesGateway)) private readonly gateway: ChatMessagesGateway,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly winstonLogger: Logger,
     private readonly messageService: MessageService,
-    private readonly chatService: ChatService
+    private readonly chatService: ChatService,
+    private readonly documentService: DocumentService
   ) {
     this.logger = this.winstonLogger.child({ context: ChatMessagesService.name });
   }
@@ -257,7 +259,6 @@ export class ChatMessagesService {
     const result = await this.proxyToExternalApi(req);
 
     if (result && typeof result === 'object' && 'event' in result && result.event === 'error') {
-      // Broadcast error event with new format
       const timestamp = new Date().toISOString();
       this.gateway.broadcast({
         event: 'error',
@@ -290,7 +291,6 @@ export class ChatMessagesService {
         metadata: result.metadata || {},
         created_at: startTs,
       });
-
       for (let i = 0; i < chunks.length; i++) {
         await new Promise(resolve => setTimeout(resolve, 150));
         const chunkTs = new Date().toISOString();
@@ -305,9 +305,14 @@ export class ChatMessagesService {
           created_at: chunkTs,
         });
       }
-
       const endTs = new Date().toISOString();
-      const retrieverResources = result.metadata?.retriever_resources || [];
+      let retrieverResources = result.metadata?.retriever_resources || [];
+      
+      try {
+        retrieverResources = await this.documentService.enrichRetrieverResourcesWithDatasets(retrieverResources);
+      } catch (enrichError) {
+        this.logger.error('Error enriching retriever resources:', enrichError.message);
+      }
       
       try {
         const assistantMessage = await this.messageService.createMessage({
@@ -317,22 +322,8 @@ export class ChatMessagesService {
           score: 0,
           retrieverResources: retrieverResources
         });
-
         await this.chatService.addMessageToChat(chatId, assistantMessage._id.toString());
-
-        this.logger.info('=== STREAMING ASSISTANT MESSAGE SAVED ===', {
-          taskId,
-          messageId: assistantMessage._id.toString(),
-          conversationId: chatId,
-          retrieverResourcesCount: retrieverResources.length
-        });
-      } catch (saveError) {
-        this.logger.error('=== FAILED TO SAVE STREAMING ASSISTANT MESSAGE ===', {
-          taskId,
-          error: saveError?.message,
-          conversationId: req.conversationId || 'new_chat_creation_failed'
-        });
-      }
+      } catch (saveError) {}
       
       this.gateway.broadcast({
         event: 'message_end',

@@ -31,6 +31,7 @@ import { ChatMessagesRequestDto, ChatMessageAnswerResponseDto, ChatMessagesRespo
 import { ChatMessagesService } from '../services/chat-messages.service';
 import { MessageService } from '../services/message.service';
 import { UsersService } from '../users/users.service';
+import { DocumentService } from '../services/document.service';
 import { randomUUID } from 'crypto';
 import { Types } from 'mongoose';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
@@ -128,6 +129,7 @@ export class ChatController {
     private readonly usersService: UsersService,
     private readonly rateLimitService: RateLimitService,
     private readonly configService: ConfigService,
+    private readonly documentService: DocumentService,
   ) {}
 
   @Post()
@@ -388,28 +390,24 @@ export class ChatController {
       let chatId: string;
 
       if (body.conversationId && body.conversationId !== 'new') {
-        // Add user message to existing chat
         await this.chatService.addMessageToChat(body.conversationId, userMessage._id.toString());
         chatId = body.conversationId;
       } else {
-        // Create new chat and add user message (conversationId is empty, null, or "new")
         const newChat = await this.chatService.createChat({
           user: body.user,
-          title: body.query.substring(0, 50) + (body.query.length > 50 ? '...' : ''), // Auto-generate title from query
+          title: body.query.substring(0, 50) + (body.query.length > 50 ? '...' : ''),
           conversationHistory: [userMessage._id.toString()]
         });
         chatId = newChat._id.toString();
       }
 
       if (responseMode === ChatMessagesResponseMode.STREAMING) {
-        // Handle streaming response
         res.setHeader('Content-Type', 'text/event-stream');
         res.setHeader('Cache-Control', 'no-cache');
         res.setHeader('Connection', 'keep-alive');
         res.setHeader('Access-Control-Allow-Origin', '*');
         res.setHeader('Access-Control-Allow-Headers', 'Cache-Control');
 
-        // Update the request body to include the chatId and thinkLevel for streaming
         const streamingBody = {
           ...body,
           conversationId: chatId,
@@ -419,10 +417,7 @@ export class ChatController {
         try {
           const result = await this.chatMessagesService.processStreaming(streamingBody);
           
-          // Generate taskId if not provided
           const taskId = result?.taskId || randomUUID();
-          
-          // Send initial message event (required for streaming)
           const taskCreatedEvent = {
             event: 'message',
             task_id: taskId,
@@ -432,10 +427,6 @@ export class ChatController {
             created_at: Math.floor(Date.now() / 1000),
           };
           res.write(`data: ${JSON.stringify(taskCreatedEvent)}\n\n`);
-
-          // Note: Additional streaming events should be sent as they arrive
-          // For now, send a message_end event after processing
-          // In a real implementation, you'd listen to events from the service
           const endEvent = {
             event: 'message_end',
             task_id: taskId,
@@ -444,22 +435,17 @@ export class ChatController {
             conversation_id: chatId,
             metadata: {
               retriever_resources: []
-            }
-            // Note: created_at is NOT required for message_end events per contract
+            },
           };
           res.write(`data: ${JSON.stringify(endEvent)}\n\n`);
-          
-          // Increment successful message count for streaming
           try {
             await this.rateLimitService.incrementRateLimit(body.user, RateLimitType.MESSAGE);
           } catch (incrementError) {
-            // Log but don't fail the response
             console.error('Failed to increment rate limit:', incrementError);
           }
           
           res.end();
         } catch (error) {
-          // Send error event in SSE format
           const taskId = randomUUID();
           const errorEvent = {
             event: 'error',
@@ -475,15 +461,12 @@ export class ChatController {
         }
 
       } else {
-        // Handle blocking response
-        // Update body to include thinkLevel
         const blockingBody = {
           ...body,
           think_level: thinkLevel
         };
         const result = await this.chatMessagesService.processBlocking(blockingBody);
         
-        // Check if service returned an error response
         if (result && result.event === 'error' && result.error) {
           const errorResponse: BlockingErrorResponse = {
             status: result.error.status || 500,
@@ -498,9 +481,17 @@ export class ChatController {
         let assistantMessageId = '';
         
         // Create assistant message record from the result
+        let retrieverResources: any[] = [];
         if (result && result.answer) {
           // Extract retriever resources if they exist
-          const retrieverResources = result.metadata?.retriever_resources || [];
+          retrieverResources = result.metadata?.retriever_resources || [];
+          
+          // Enrich retriever resources with dataset names
+          try {
+            retrieverResources = await this.documentService.enrichRetrieverResourcesWithDatasets(retrieverResources);
+          } catch (enrichError) {
+            console.error('Error enriching retriever resources:', enrichError.message);
+          }
           
           const assistantMessage = await this.messageService.createMessage({
             category: 'assistant_response',
@@ -524,7 +515,7 @@ export class ChatController {
           mode: 'blocking',
           answer: result?.answer || '',
           metadata: {
-            retriever_resources: result?.metadata?.retriever_resources || []
+            retriever_resources: retrieverResources
           },
           created_at: Math.floor(Date.now() / 1000), // Unix timestamp as integer
         };

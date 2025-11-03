@@ -25,6 +25,7 @@ const chat_messages_dto_1 = require("../dto/chat-messages.dto");
 const chat_messages_service_1 = require("../services/chat-messages.service");
 const message_service_1 = require("../services/message.service");
 const users_service_1 = require("../users/users.service");
+const document_service_1 = require("../services/document.service");
 const crypto_1 = require("crypto");
 const mongoose_1 = require("mongoose");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
@@ -60,13 +61,15 @@ let ChatController = class ChatController {
     usersService;
     rateLimitService;
     configService;
-    constructor(chatService, chatMessagesService, messageService, usersService, rateLimitService, configService) {
+    documentService;
+    constructor(chatService, chatMessagesService, messageService, usersService, rateLimitService, configService, documentService) {
         this.chatService = chatService;
         this.chatMessagesService = chatMessagesService;
         this.messageService = messageService;
         this.usersService = usersService;
         this.rateLimitService = rateLimitService;
         this.configService = configService;
+        this.documentService = documentService;
     }
     async createChat(createChatDto) {
         return this.chatService.createChat(createChatDto);
@@ -205,7 +208,7 @@ let ChatController = class ChatController {
                         conversation_id: chatId,
                         metadata: {
                             retriever_resources: []
-                        }
+                        },
                     };
                     res.write(`data: ${JSON.stringify(endEvent)}\n\n`);
                     try {
@@ -248,8 +251,15 @@ let ChatController = class ChatController {
                 }
                 const taskId = (0, crypto_1.randomUUID)();
                 let assistantMessageId = '';
+                let retrieverResources = [];
                 if (result && result.answer) {
-                    const retrieverResources = result.metadata?.retriever_resources || [];
+                    retrieverResources = result.metadata?.retriever_resources || [];
+                    try {
+                        retrieverResources = await this.documentService.enrichRetrieverResourcesWithDatasets(retrieverResources);
+                    }
+                    catch (enrichError) {
+                        console.error('Error enriching retriever resources:', enrichError.message);
+                    }
                     const assistantMessage = await this.messageService.createMessage({
                         category: 'assistant_response',
                         text: result.answer,
@@ -269,7 +279,7 @@ let ChatController = class ChatController {
                     mode: 'blocking',
                     answer: result?.answer || '',
                     metadata: {
-                        retriever_resources: result?.metadata?.retriever_resources || []
+                        retriever_resources: retrieverResources
                     },
                     created_at: Math.floor(Date.now() / 1000),
                 };
@@ -576,6 +586,7 @@ exports.ChatController = ChatController = __decorate([
         message_service_1.MessageService,
         users_service_1.UsersService,
         rate_limit_service_1.RateLimitService,
-        config_1.ConfigService])
+        config_1.ConfigService,
+        document_service_1.DocumentService])
 ], ChatController);
 //# sourceMappingURL=chat.controller.js.map

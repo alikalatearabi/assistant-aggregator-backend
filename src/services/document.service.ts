@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, BadRequestException, Logger } from '@nes
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Document, DocumentDocument } from '../schemas/document.schema';
+import { Dataset, DatasetDocument } from '../schemas/dataset.schema';
 import { CreateDocumentDto } from '../dto/create-document.dto';
 import { UpdateDocumentDto } from '../dto/update-document.dto';
 import { DocumentQueryDto } from '../dto/document-query.dto';
@@ -16,6 +17,7 @@ export class DocumentService {
 
   constructor(
     @InjectModel(Document.name) private documentModel: Model<DocumentDocument>,
+    @InjectModel(Dataset.name) private datasetModel: Model<DatasetDocument>,
     private readonly ocrService: OcrService,
     private readonly ocrStatusService: OcrStatusService,
     private readonly documentPageService: DocumentPageService,
@@ -110,6 +112,7 @@ export class DocumentService {
     const document = await this.documentModel
       .findById(id)
       .populate('metadata.user_id', 'firstname lastname email')
+      .populate('dataset')
       .exec();
     
     if (!document) {
@@ -117,6 +120,63 @@ export class DocumentService {
     }
     
     return document;
+  }
+
+  /**
+   * Enrich retriever resources with dataset information
+   */
+  async enrichRetrieverResourcesWithDatasets(resources: any[]): Promise<any[]> {
+    if (!resources || resources.length === 0) {
+      return resources;
+    }
+
+    // Get unique document IDs from resources
+    const documentIds = [...new Set(
+      resources
+        .map(r => r.document_id)
+        .filter(id => id && Types.ObjectId.isValid(id))
+    )];
+
+    if (documentIds.length === 0) {
+      return resources;
+    }
+
+    // Fetch all documents with their datasets in one query
+    const documents = await this.documentModel
+      .find({ _id: { $in: documentIds.map(id => new Types.ObjectId(id)) } })
+      .populate('dataset')
+      .exec();
+
+    // Create a map of document_id to dataset info
+    const documentDatasetMap = new Map();
+    documents.forEach(doc => {
+      if (doc.dataset) {
+        const dataset = typeof doc.dataset === 'object' && doc.dataset !== null 
+          ? doc.dataset 
+          : null;
+        if (dataset && (dataset as any).dataset_name) {
+          documentDatasetMap.set(doc._id.toString(), {
+            dataset_id: (dataset as any).dataset_id || (dataset as any)._id?.toString(),
+            dataset_name: (dataset as any).dataset_name
+          });
+        }
+      }
+    });
+
+    // Enrich resources with dataset information
+    return resources.map(resource => {
+      if (!resource.dataset_name && resource.document_id) {
+        const datasetInfo = documentDatasetMap.get(resource.document_id);
+        if (datasetInfo) {
+          return {
+            ...resource,
+            dataset_name: datasetInfo.dataset_name,
+            dataset_id: datasetInfo.dataset_id || resource.dataset_id
+          };
+        }
+      }
+      return resource;
+    });
   }
 
   async findDocumentsByUploader(uploaderId: string): Promise<Document[]> {
