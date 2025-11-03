@@ -15,7 +15,7 @@ async function createDatasets() {
     const datasets = [
       {
         _id: new ObjectId('507f1f77bcf86cd799439011'), 
-        dataset_id: 'general_law',
+        dataset_id: 'دادگان قوانین عمومی',
         dataset_name: 'General Law Documents',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -23,7 +23,7 @@ async function createDatasets() {
       {
         _id: new ObjectId('68fa953c7a5728a95624fe7b'), 
         dataset_id: 'vezarat_olom',
-        dataset_name: 'Ministry of Science, Research and Technology Documents',
+        dataset_name: 'دادگان ورزارت علوم، تحقیقات و فناوری',
         createdAt: new Date(),
         updatedAt: new Date()
       },
