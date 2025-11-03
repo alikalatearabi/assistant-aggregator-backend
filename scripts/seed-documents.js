@@ -71,20 +71,23 @@ function loadJsonFile(filePath) {
 async function seedDocuments() {
   const client = new MongoClient(MONGODB_URI);
   await client.connect();
-  console.log('Connected to MongoDB');
+
+  console.log('Connected to MongoDB');  
   const db = client.db('assistant_aggregator');
   const collection = db.collection('documents');
+
+  console.log('Clearing existing documents...');
+  const deleteResult = await collection.deleteMany({});
+  console.log(`   Deleted ${deleteResult.deletedCount} existing documents.`);
 
   try {
     console.log('Loading JSON export files...');
     const generalLawDocs = loadJsonFile(GENERAL_LAW_FILE);
     const vezaratOlomDocs = loadJsonFile(VEZARAT_OLOM_FILE);
-    const vezaratVarzehDocs = loadJsonFile(VEZARAT_VARZEH_FILE);
-    const allDocs = [...generalLawDocs, ...vezaratOlomDocs, ...vezaratVarzehDocs];
+    const allDocs = [...generalLawDocs, ...vezaratOlomDocs];
 
     console.log(`   - General Law: ${generalLawDocs.length}`);
     console.log(`   - Vezarat Olom: ${vezaratOlomDocs.length}`);
-    console.log(`   - Vezarat Varzeh: ${vezaratVarzehDocs.length}`);
     console.log(`   - Total: ${allDocs.length} documents`);
 
     let created = 0;

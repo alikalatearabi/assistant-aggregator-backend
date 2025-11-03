@@ -33,15 +33,10 @@ import { DocumentQueryDto } from '../dto/document-query.dto';
 import { DocumentMetadataDto } from '../dto/document-metadata.dto';
 import { Document } from '../schemas/document.schema';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { Roles } from 'src/auth/roles.decorator';
-import { UserRole } from 'src/schemas/user.schema';
-import { RolesGuard } from 'src/auth/roles.guard';
-
 
 @ApiTags('documents')
 @Controller('documents')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(UserRole.ADMIN, UserRole.USER)
+@UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class DocumentController {
   private readonly logger = new Logger(DocumentController.name);
@@ -53,8 +48,6 @@ export class DocumentController {
   @Post()
   @UseInterceptors(FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.USER)
   @ApiOperation({
     summary: 'Upload and create a new document',
     description: 'Uploads a file and creates a document record; file is sent to OCR service afterward',
